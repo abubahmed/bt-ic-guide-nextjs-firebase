@@ -11,7 +11,7 @@ const LoginForm = () => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
-  function handleSubmit(e) {
+  function handleSubmit(e: any) {
     e.preventDefault();
     console.log({ email, password });
   }

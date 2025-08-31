@@ -11,15 +11,12 @@ const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
 
-  const handleSignup = (e) => {
+  const handleSignup = (e: any) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
       return;
     }
-    setError("");
     console.log({ email, password, confirmPassword });
   };
 
@@ -81,9 +78,7 @@ const SignupForm = () => {
                 required
               />
             </div>
-
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
+            
             <Button type="submit" className="w-full">
               Create account
             </Button>
