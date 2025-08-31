@@ -14,15 +14,16 @@ export function onAuthStateChanged(callback: (authUser: User | null) => void) {
 }
 
 export async function signInWithGoogle() {
-  const provider = new GoogleAuthProvider();
   try {
+    const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     if (!result || !result.user) {
       throw new Error("Google sign-in failed.");
     }
-    return result.user;
+    return [result.user, true, ""];
   } catch (error) {
     console.error("Error signing in with Google", error);
+    return [null, false, (error as Error).message];
   }
 }
 
@@ -32,9 +33,10 @@ export async function signInWithEmail(email: string, password: string) {
     if (!result || !result.user) {
       throw new Error("Email sign-in failed.");
     }
-    return result.user;
+    return [result.user, true, ""];
   } catch (error) {
     console.error("Error signing in with email", error);
+    return [null, false, (error as Error).message];
   }
 }
 
@@ -44,9 +46,10 @@ export async function signUpWithEmail(email: string, password: string) {
     if (!result || !result.user) {
       throw new Error("Email sign-up failed, no user information available.");
     }
-    return result.user;
+    return [result.user, true, ""];
   } catch (error) {
     console.error("Error signing up with email", error);
+    return [null, false, (error as Error).message];
   }
 }
 
@@ -57,9 +60,9 @@ export function getCurrentUser() {
 export async function signOut() {
   try {
     await auth.signOut();
-    return true;
+    return [true, ""];
   } catch (error) {
     console.error("Error signing out", error);
-    return false;
+    return [false, (error as Error).message];
   }
 }

@@ -6,93 +6,86 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { signInWithGoogleAction, signUpWithEmailAction } from "@/actions/auth-actions";
 
 const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSignup = (e: any) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      return;
-    }
-    console.log({ email, password, confirmPassword });
-  };
-
   const handleGoogleSignup = () => {
     console.log("sign up with Google");
   };
 
   return (
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Sign up</CardTitle>
-          <CardDescription>Create your account or continue with Google</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button variant="outline" className="w-full" onClick={handleGoogleSignup}>
-            Sign up with Google
-          </Button>
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>Sign up</CardTitle>
+        <CardDescription>Create your account or continue with Google</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button variant="outline" className="w-full" type="submit">
+          Sign up with Google
+        </Button>
 
-          <div className="relative my-6">
-            <Separator />
-            <span className="absolute inset-0 flex items-center justify-center">
-              <span className="bg-white px-2 text-xs text-gray-500">Or continue with</span>
-            </span>
+        <div className="relative my-6">
+          <Separator />
+          <span className="absolute inset-0 flex items-center justify-center">
+            <span className="bg-white px-2 text-xs text-gray-500">Or continue with</span>
+          </span>
+        </div>
+
+        <form action={signUpWithEmailAction} className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="********"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="********"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Input
+              id="confirm-password"
+              type="password"
+              placeholder="********"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                placeholder="********"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-            
-            <Button type="submit" className="w-full">
-              Create account
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter>
-          <p className="text-sm text-gray-500 w-full text-center">
-            Already have an account?{" "}
-            <a className="underline underline-offset-4" href="/login">
-              Sign in
-            </a>
-          </p>
-        </CardFooter>
-      </Card>
+          <Button type="submit" className="w-full">
+            Create account
+          </Button>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <p className="text-sm text-gray-500 w-full text-center">
+          Already have an account?{" "}
+          <a className="underline underline-offset-4" href="/login">
+            Sign in
+          </a>
+        </p>
+      </CardFooter>
+    </Card>
   );
 };
 
