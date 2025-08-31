@@ -6,17 +6,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { signInWithGoogleAction, signUpWithEmailAction } from "@/actions/auth-actions";
+import { signInWithGoogleAction } from "@/actions/client/auth-actions";
+import { signUpWithEmailAction } from "@/actions/server/auth-actions";
 
 const SignupForm = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  const handleGoogleSignup = () => {
-    console.log("sign up with Google");
-  };
-
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
@@ -24,7 +17,7 @@ const SignupForm = () => {
         <CardDescription>Create your account or continue with Google</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button variant="outline" className="w-full" type="submit">
+        <Button variant="outline" className="w-full" type="submit" formAction={signInWithGoogleAction}>
           Sign up with Google
         </Button>
 
@@ -38,38 +31,17 @@ const SignupForm = () => {
         <form action={signUpWithEmailAction} className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <Input id="email" type="email" placeholder="you@example.com" name="email" required />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="********"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <Input id="password" type="password" placeholder="********" name="password" required />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="confirm-password">Confirm Password</Label>
-            <Input
-              id="confirm-password"
-              type="password"
-              placeholder="********"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            <Input id="confirm-password" type="password" placeholder="********" name="confirmPassword" required />
           </div>
 
           <Button type="submit" className="w-full">

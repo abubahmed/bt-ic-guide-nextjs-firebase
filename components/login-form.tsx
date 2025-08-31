@@ -6,20 +6,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { signInWithGoogleAction } from "@/actions/client/auth-actions";
+import { signInWithEmailAction } from "@/actions/server/auth-actions";
 
 const LoginForm = () => {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-
-  function handleSubmit(e: any) {
-    e.preventDefault();
-    console.log({ email, password });
-  }
-
-  function handleGoogleSignIn() {
-    console.log("sign in with Google");
-  }
-
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
@@ -27,9 +17,11 @@ const LoginForm = () => {
         <CardDescription>Use your email or continue with Google</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
-          Sign in with Google
-        </Button>
+        <form action={signInWithGoogleAction}>
+          <Button variant="outline" className="w-full" type="submit">
+            Sign in with Google
+          </Button>
+        </form>
 
         <div className="relative my-6">
           <Separator />
@@ -38,17 +30,10 @@ const LoginForm = () => {
           </span>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form action={signInWithEmailAction} className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <Input id="email" type="email" placeholder="you@example.com" name="email" required />
           </div>
 
           <div className="grid gap-2">
@@ -58,14 +43,7 @@ const LoginForm = () => {
                 Forgot password?
               </a>
             </div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="********"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <Input id="password" type="password" placeholder="********" name="password" required />
           </div>
 
           <Button type="submit" className="w-full">

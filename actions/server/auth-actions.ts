@@ -1,5 +1,8 @@
+"use server";
+
 import { signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } from "@/lib/firebase/auth";
-import { createSession, removeSession, getSession } from "./session-actions";
+import { createUserProfileIfNotExists } from "@/lib/firebase/users";
+import { createSession, removeSession, getSession } from "@/actions/server/session-actions";
 import { redirect } from "next/navigation";
 import { HOME_ROUTE, ROOT_ROUTE } from "@/constants";
 
@@ -13,6 +16,12 @@ const signInWithGoogleAction = async (formData: any) => {
   const [user, success, errorMessage] = (await signInWithGoogle()) as any[];
   if (!success || !user) {
     console.error("Google sign-in failed:", errorMessage);
+    return;
+  }
+
+  const [profile, profileSuccess, profileError] = await createUserProfileIfNotExists(user);
+  if (!profileSuccess) {
+    console.error("Failed to create or fetch user profile:", profileError);
     return;
   }
 
@@ -38,6 +47,12 @@ const signInWithEmailAction = async (formData: any) => {
   const [user, success, errorMessage] = (await signInWithEmail(email, password)) as any[];
   if (!success || !user) {
     console.error("Email sign-in failed:", errorMessage);
+    return;
+  }
+
+  const [profile, profileSuccess, profileError] = await createUserProfileIfNotExists(user);
+  if (!profileSuccess) {
+    console.error("Failed to create or fetch user profile:", profileError);
     return;
   }
 
@@ -70,6 +85,13 @@ const signUpWithEmailAction = async (formData: any) => {
     console.error("Email sign-up failed:", errorMessage);
     return;
   }
+
+  const [profile, profileSuccess, profileError] = await createUserProfileIfNotExists(user);
+  if (!profileSuccess) {
+    console.error("Failed to create or fetch user profile:", profileError);
+    return;
+  }
+
   await createSession(user.uid);
   redirect(HOME_ROUTE);
 };
