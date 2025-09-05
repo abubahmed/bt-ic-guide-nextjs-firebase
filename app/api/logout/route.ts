@@ -1,0 +1,29 @@
+import { NextResponse } from "next/server";
+import { adminAuth } from "@/lib/firebase/admin";
+import { cookies } from "next/headers";
+
+const COOKIE_NAME = "__Host-session";
+
+export async function POST() {
+  const session = (await cookies()).get(COOKIE_NAME)?.value;
+  if (session) {
+    try {
+      const decoded = await adminAuth.verifySessionCookie(session, false);
+      await adminAuth.revokeRefreshTokens(decoded.sub as string);
+    } catch (error) {
+      console.error("Error verifying or revoking session cookie:", error);
+    }
+  }
+
+  const res = NextResponse.json({ ok: true });
+  res.cookies.set({
+    name: COOKIE_NAME,
+    value: "",
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+  return res;
+}

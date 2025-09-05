@@ -6,7 +6,6 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged as _onAuthStateChanged,
 } from "firebase/auth";
-
 import { auth } from "@/lib/firebase/config";
 
 export function onAuthStateChanged(callback: (authUser: User | null) => void) {

@@ -1,10 +1,23 @@
 import Image from "next/image";
 import LoginForm from "@/components/login-form";
 import SignupForm from "@/components/signup-form";
+import { getSessionUser } from "@/actions/server/session-actions";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [user, setUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const userData = await getSessionUser();
+      setUser(userData);
+    }
+    fetchUser();
+  }, []);
+
   return (
     <div className="flex items-center justify-center min-h-screen font-sans p-8 sm:p-20">
+      <pre className="text-xs break-all">{JSON.stringify(user, null, 2)}</pre>
       {/* <LoginForm /> */}
       {/* <SignupForm /> */}
       {/* <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
