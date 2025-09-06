@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { adminAuth } from "@/lib/firebase/admin";
+import { auth } from "@/lib/firebase/server/config";
 import { SESSION_COOKIE_NAME } from "@/constants";
 
 export async function getSessionFromCookies(): Promise<string | null> {
@@ -10,7 +10,7 @@ export async function getSessionFromCookies(): Promise<string | null> {
 }
 
 export async function verifySessionCookie(cookie: string): Promise<any> {
-  return adminAuth.verifySessionCookie(cookie, true);
+  return auth.verifySessionCookie(cookie, true);
 }
 
 export async function getSessionUser(): Promise<any | null> {
@@ -19,7 +19,7 @@ export async function getSessionUser(): Promise<any | null> {
   try {
     const decoded = await verifySessionCookie(cookie);
     if (!decoded || !decoded.uid) return null;
-    const user = await adminAuth.getUser(decoded.uid);
+    const user = await auth.getUser(decoded.uid);
     return user;
   } catch (error) {
     console.error("Error verifying session cookie or fetching user:", error);

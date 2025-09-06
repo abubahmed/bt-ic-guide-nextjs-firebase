@@ -1,6 +1,6 @@
 "use client";
 
-import { signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } from "@/lib/firebase/auth";
+import { signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } from "@/lib/firebase/client/auth";
 import { createUserProfileIfNotExistsAction } from "@/actions/server/auth-actions";
 import { useRouter } from "next/navigation";
 import { HOME_ROUTE, ROOT_ROUTE } from "@/constants";

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { auth } from "@/lib/firebase/server/config";
 import { SESSION_COOKIE_NAME, SESSION_COOKIE_LIFESPAN } from "@/constants";
 
 export async function POST(req: Request) {
   try {
     const { idToken } = await req.json();
-    await adminAuth.verifyIdToken(idToken);
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, {
+    await auth.verifyIdToken(idToken);
+    const sessionCookie = await auth.createSessionCookie(idToken, {
       expiresIn: SESSION_COOKIE_LIFESPAN,
     });
 
