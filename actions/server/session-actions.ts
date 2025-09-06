@@ -1,3 +1,5 @@
+"use server";
+
 import { cookies } from "next/headers";
 import { adminAuth } from "@/lib/firebase/admin";
 import { SESSION_COOKIE_NAME } from "@/constants";

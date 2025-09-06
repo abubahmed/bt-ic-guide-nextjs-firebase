@@ -19,24 +19,23 @@ const createSessionAndProfile = async (user: any) => {
     console.error("Failed to create session:", error);
     return;
   }
-  const [profile, profileSuccess, profileError] = await createUserProfileIfNotExistsAction(idToken);
-  if (!profileSuccess) {
-    console.error("Failed to create or fetch user profile:", profileError);
-    return;
+
+  const profile = await createUserProfileIfNotExistsAction(idToken);
+  if (profile) {
+    console.error("Failed to create or fetch user profile");
   }
 };
 
-const signInWithGoogleAction = async () => {
-  const router = useRouter();
+export const signInWithGoogleAction = async (router: any) => {
   const sessionUser = await getSessionUser();
   if (sessionUser) {
     console.error("User is already signed in.");
     return;
   }
 
-  const [user, success, errorMessage] = (await signInWithGoogle()) as any[];
-  if (!success || !user) {
-    console.error("Google sign-in failed:", errorMessage);
+  const user = await signInWithGoogle();
+  if (!user) {
+    console.error("Google sign-in failed.");
     return;
   }
 
@@ -44,56 +43,21 @@ const signInWithGoogleAction = async () => {
   router.push(HOME_ROUTE);
 };
 
-const signInWithEmailAction = async (formData: any) => {
-  const router = useRouter();
-  const sessionUser = await getSessionUser();
-  if (sessionUser) {
-    console.error("User is already signed in.");
-    return;
-  }
-
-  const email = formData.get("email")?.toString() || "";
-  const password = formData.get("password")?.toString() || "";
-
+export const signInWithEmailAction = async ({ email, password }: { email: string; password: string }, router: any) => {
   if (!email || !password) {
     console.error("Email and password must be provided.");
     return;
   }
 
-  const [user, success, errorMessage] = (await signInWithEmail(email, password)) as any[];
-  if (!success || !user) {
-    console.error("Email sign-in failed:", errorMessage);
-    return;
-  }
-
-  await createSessionAndProfile(user);
-  router.push(HOME_ROUTE);
-};
-
-const signUpWithEmailAction = async (formData: any) => {
-  const router = useRouter();
   const sessionUser = await getSessionUser();
   if (sessionUser) {
     console.error("User is already signed in.");
     return;
   }
 
-  const email = formData.get("email")?.toString() || "";
-  const password = formData.get("password")?.toString() || "";
-  const confirmPassword = formData.get("confirmPassword")?.toString() || "";
-
-  if (!email || !password || !confirmPassword) {
-    console.error("Email, password, and confirm password must be provided.");
-    return;
-  }
-  if (password !== confirmPassword) {
-    console.error("Passwords do not match.");
-    return;
-  }
-
-  const [user, success, errorMessage] = (await signUpWithEmail(email, password)) as any[];
-  if (!success || !user) {
-    console.error("Email sign-up failed:", errorMessage);
+  const user = await signInWithEmail(email, password);
+  if (!user) {
+    console.error("Email sign-in failed.");
     return;
   }
 
@@ -101,8 +65,36 @@ const signUpWithEmailAction = async (formData: any) => {
   router.push(HOME_ROUTE);
 };
 
-const signOutAction = async () => {
-  const router = useRouter();
+export const signUpWithEmailAction = async (
+  { email, password, passwordConfirm }: { email: string; password: string; passwordConfirm: string },
+  router: any
+) => {
+  if (!email || !password || !passwordConfirm) {
+    console.error("Email, password, and confirm password must be provided.");
+    return;
+  }
+  if (password !== passwordConfirm) {
+    console.error("Passwords do not match.");
+    return;
+  }
+
+  const sessionUser = await getSessionUser();
+  if (sessionUser) {
+    console.error("User is already signed in.");
+    return;
+  }
+
+  const user = await signUpWithEmail(email, password);
+  if (!user) {
+    console.error("Email sign-up failed.");
+    return;
+  }
+
+  await createSessionAndProfile(user);
+  router.push(HOME_ROUTE);
+};
+
+export const signOutAction = async (router: any) => {
   try {
     await fetch("/api/logout", { method: "POST", credentials: "include" });
   } catch (error) {
@@ -111,5 +103,3 @@ const signOutAction = async () => {
   await signOut();
   router.push(ROOT_ROUTE);
 };
-
-export { signInWithGoogleAction, signInWithEmailAction, signUpWithEmailAction, signOutAction };

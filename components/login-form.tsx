@@ -7,8 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { signInWithEmailAction, signInWithGoogleAction } from "@/actions/client/auth-actions";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
+
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
@@ -16,11 +22,16 @@ const LoginForm = () => {
         <CardDescription>Use your email or continue with Google</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={signInWithGoogleAction}>
-          <Button variant="outline" className="w-full" type="submit">
-            Sign in with Google
-          </Button>
-        </form>
+        <Button
+          variant="outline"
+          className="w-full"
+          type="submit"
+          onClick={(e) => {
+            e.preventDefault();
+            signInWithGoogleAction(router);
+          }}>
+          Sign in with Google
+        </Button>
 
         <div className="relative my-6">
           <Separator />
@@ -29,10 +40,18 @@ const LoginForm = () => {
           </span>
         </div>
 
-        <form action={signInWithEmailAction} className="space-y-4">
+        <form className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" name="email" required />
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              name="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
 
           <div className="grid gap-2">
@@ -42,10 +61,24 @@ const LoginForm = () => {
                 Forgot password?
               </a>
             </div>
-            <Input id="password" type="password" placeholder="********" name="password" required />
+            <Input
+              id="password"
+              type="password"
+              placeholder="********"
+              name="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
 
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            onClick={(e) => {
+              e.preventDefault();
+              signInWithEmailAction({ email, password }, router);
+            }}>
             Sign in
           </Button>
         </form>

@@ -1,10 +1,16 @@
+"use client";
+
 import Image from "next/image";
 import LoginForm from "@/components/login-form";
 import SignupForm from "@/components/signup-form";
 import { getSessionUser } from "@/actions/server/session-actions";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { signOutAction } from "@/actions/client/auth-actions";
 
 export default function Home() {
+  const router = useRouter();
   const [user, setUser] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,8 +24,13 @@ export default function Home() {
   return (
     <div className="flex items-center justify-center min-h-screen font-sans p-8 sm:p-20">
       <pre className="text-xs break-all">{JSON.stringify(user, null, 2)}</pre>
-      {/* <LoginForm /> */}
-      {/* <SignupForm /> */}
+      <Button
+        onClick={(e) => {
+          e.preventDefault();
+          signOutAction(router);
+        }}>
+        Sign out
+      </Button>
       {/* <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <Image
           className="dark:invert"

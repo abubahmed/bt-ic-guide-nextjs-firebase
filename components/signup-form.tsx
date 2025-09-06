@@ -1,14 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { signUpWithEmailAction, signInWithGoogleAction } from "@/actions/client/auth-actions";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const SignupForm = () => {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
@@ -16,7 +22,14 @@ const SignupForm = () => {
         <CardDescription>Create your account or continue with Google</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button variant="outline" className="w-full" type="submit" formAction={signInWithGoogleAction}>
+        <Button
+          variant="outline"
+          className="w-full"
+          type="submit"
+          onClick={(e) => {
+            e.preventDefault();
+            signInWithGoogleAction(router);
+          }}>
           Sign up with Google
         </Button>
 
@@ -27,23 +40,53 @@ const SignupForm = () => {
           </span>
         </div>
 
-        <form action={signUpWithEmailAction} className="space-y-4">
+        <form className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" name="email" required />
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              name="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="********" name="password" required />
+            <Input
+              id="password"
+              type="password"
+              placeholder="********"
+              name="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="confirm-password">Confirm Password</Label>
-            <Input id="confirm-password" type="password" placeholder="********" name="confirmPassword" required />
+            <Input
+              id="confirm-password"
+              type="password"
+              placeholder="********"
+              name="confirmPassword"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
           </div>
 
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            onClick={(e) => {
+              e.preventDefault();
+              signUpWithEmailAction({ email, password, passwordConfirm: confirmPassword }, router);
+            }}>
             Create account
           </Button>
         </form>

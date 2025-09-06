@@ -7,20 +7,18 @@ export async function getUserProfile(uid: string) {
     const userDoc = doc(db, "users", uid);
     const userSnap = await getDoc(userDoc);
     if (userSnap.exists()) {
-      return [userSnap.data(), true, ""];
-    } else {
-      return [null, false, "User profile does not exist."];
+      return userSnap.data();
     }
+    console.error("No user profile found for UID:", uid);
   } catch (error) {
     console.error("Error fetching user profile", error);
-    return [null, false, (error as Error).message];
   }
 }
 
 export async function createUserProfileIfNotExists(user: any) {
-  const [userProfile, success, errorMessage] = await getUserProfile(user.uid);
-  if (success && userProfile) {
-    return [userProfile, true, ""];
+  const userProfile = await getUserProfile(user.uid);
+  if (userProfile) {
+    return userProfile;
   }
   try {
     const userDocRef = doc(db, "users", user.uid);
@@ -36,10 +34,10 @@ export async function createUserProfileIfNotExists(user: any) {
     };
     await setDoc(userDocRef, newUserProfile, { merge: true });
     const createdProfile = (await getDoc(userDocRef)).data();
-    return [createdProfile, true, ""];
+    return createdProfile;
   } catch (error) {
     console.error("Error creating user profile", error);
-    return [null, false, (error as Error).message];
+    return null;
   }
 }
 
@@ -49,10 +47,9 @@ export async function updateUserProfile(uid: string, updates: any) {
     updates.updatedAt = Timestamp.now();
     await updateDoc(userDocRef, updates);
     const updatedProfile = (await getDoc(userDocRef)).data();
-    return [updatedProfile, true, ""];
+    return updatedProfile;
   } catch (error) {
     console.error("Error updating user profile", error);
-    return [null, false, (error as Error).message];
   }
 }
 
@@ -60,9 +57,7 @@ export async function deleteUserProfile(uid: string) {
   try {
     const userDocRef = doc(db, "users", uid);
     await deleteDoc(userDocRef);
-    return [true, ""];
   } catch (error) {
     console.error("Error deleting user profile", error);
-    return [false, (error as Error).message];
   }
 }
