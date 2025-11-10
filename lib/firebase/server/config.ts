@@ -1,4 +1,4 @@
-import { initializeApp, credential, ServiceAccount } from "firebase-admin";
+import admin from "firebase-admin";
 import serviceAccount from "./serviceAccountKey.json";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
@@ -7,8 +7,8 @@ import { getApps } from "firebase-admin/app";
 
 const app =
   getApps()[0] ??
-  initializeApp({
-    credential: credential.cert(serviceAccount as ServiceAccount),
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount as any),
   });
 
 const auth = getAuth(app);

@@ -2,67 +2,55 @@
 
 import { signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } from "@/lib/firebase/client/auth";
 import { createUserProfileIfNotExistsAction } from "@/actions/server/auth-actions";
-import { useRouter } from "next/navigation";
 import { HOME_ROUTE, ROOT_ROUTE } from "@/constants";
 import { getSessionUser } from "@/actions/server/session-actions";
 
 const createSessionAndProfile = async (user: any) => {
   const idToken = await user.getIdToken(true);
-  try {
-    await fetch("/api/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken }),
-      credentials: "include",
-    });
-  } catch (error) {
-    console.error("Failed to create session:", error);
-    return;
-  }
-
-  const profile = await createUserProfileIfNotExistsAction(idToken);
-  if (profile) {
-    console.error("Failed to create or fetch user profile");
-  }
+  await fetch("/api/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken }),
+    credentials: "include",
+  });
+  await createUserProfileIfNotExistsAction(idToken);
 };
 
 export const signInWithGoogleAction = async (router: any) => {
-  const sessionUser = await getSessionUser();
-  if (sessionUser) {
-    console.error("User is already signed in.");
-    return;
-  }
+  try {
+    const sessionUser = await getSessionUser();
+    if (sessionUser) {
+      console.error("User is already signed in in signInWithGoogleAction.");
+      return;
+    }
 
-  const user = await signInWithGoogle();
-  if (!user) {
-    console.error("Google sign-in failed.");
-    return;
+    const user = await signInWithGoogle();
+    await createSessionAndProfile(user);
+    router.push(HOME_ROUTE);
+  } catch (error) {
+    console.error("Failed to sign in with Google in signInWithGoogleAction:", error);
   }
-
-  await createSessionAndProfile(user);
-  router.push(HOME_ROUTE);
 };
 
 export const signInWithEmailAction = async ({ email, password }: { email: string; password: string }, router: any) => {
   if (!email || !password) {
-    console.error("Email and password must be provided.");
+    console.error("Email and password must be provided in signInWithEmailAction.");
     return;
   }
 
-  const sessionUser = await getSessionUser();
-  if (sessionUser) {
-    console.error("User is already signed in.");
-    return;
-  }
+  try {
+    const sessionUser = await getSessionUser();
+    if (sessionUser) {
+      console.error("User is already signed in in signInWithEmailAction.");
+      return;
+    }
 
-  const user = await signInWithEmail(email, password);
-  if (!user) {
-    console.error("Email sign-in failed.");
-    return;
+    const user = await signInWithEmail(email, password);
+    await createSessionAndProfile(user);
+    router.push(HOME_ROUTE);
+  } catch (error) {
+    console.error("Failed to sign in with Email in signInWithEmailAction:", error);
   }
-
-  await createSessionAndProfile(user);
-  router.push(HOME_ROUTE);
 };
 
 export const signUpWithEmailAction = async (
@@ -70,36 +58,35 @@ export const signUpWithEmailAction = async (
   router: any
 ) => {
   if (!email || !password || !passwordConfirm) {
-    console.error("Email, password, and confirm password must be provided.");
+    console.error("Email, password, and confirm password must be provided in signUpWithEmailAction.");
     return;
   }
   if (password !== passwordConfirm) {
-    console.error("Passwords do not match.");
+    console.error("Passwords do not match in signUpWithEmailAction.");
     return;
   }
 
-  const sessionUser = await getSessionUser();
-  if (sessionUser) {
-    console.error("User is already signed in.");
-    return;
-  }
+  try {
+    const sessionUser = await getSessionUser();
+    if (sessionUser) {
+      console.error("User is already signed in in signUpWithEmailAction.");
+      return;
+    }
 
-  const user = await signUpWithEmail(email, password);
-  if (!user) {
-    console.error("Email sign-up failed.");
-    return;
+    const user = await signUpWithEmail(email, password);
+    await createSessionAndProfile(user);
+    router.push(HOME_ROUTE);
+  } catch (error) {
+    console.error("Failed to sign up with Email in signUpWithEmailAction:", error);
   }
-
-  await createSessionAndProfile(user);
-  router.push(HOME_ROUTE);
 };
 
 export const signOutAction = async (router: any) => {
   try {
     await fetch("/api/logout", { method: "POST", credentials: "include" });
+    await signOut();
+    router.push(ROOT_ROUTE);
   } catch (error) {
-    console.error("Failed to log out:", error);
+    console.error("Failed to log out in signOutAction:", error);
   }
-  await signOut();
-  router.push(ROOT_ROUTE);
 };

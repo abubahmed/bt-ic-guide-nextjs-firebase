@@ -13,31 +13,19 @@ export function onAuthStateChanged(callback: (authUser: User | null) => void) {
 }
 
 export async function signInWithGoogle() {
-  try {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    return result.user;
-  } catch (error) {
-    console.error("Error signing in with Google", error);
-  }
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+  return result.user;
 }
 
 export async function signInWithEmail(email: string, password: string) {
-  try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    return result.user;
-  } catch (error) {
-    console.error("Error signing in with email", error);
-  }
+  const result = await signInWithEmailAndPassword(auth, email, password);
+  return result.user;
 }
 
 export async function signUpWithEmail(email: string, password: string) {
-  try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    return result.user;
-  } catch (error) {
-    console.error("Error signing up with email", error);
-  }
+  const result = await createUserWithEmailAndPassword(auth, email, password);
+  return result.user;
 }
 
 export function getCurrentUser() {
@@ -45,9 +33,5 @@ export function getCurrentUser() {
 }
 
 export async function signOut() {
-  try {
-    await auth.signOut();
-  } catch (error) {
-    console.error("Error signing out", error);
-  }
+  await auth.signOut();
 }

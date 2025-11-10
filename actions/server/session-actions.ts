@@ -16,13 +16,7 @@ export async function verifySessionCookie(cookie: string): Promise<any> {
 export async function getSessionUser(): Promise<any | null> {
   const cookie = await getSessionFromCookies();
   if (!cookie) return null;
-  try {
-    const decoded = await verifySessionCookie(cookie);
-    if (!decoded || !decoded.uid) return null;
-    const user = await auth.getUser(decoded.uid);
-    return user;
-  } catch (error) {
-    console.error("Error verifying session cookie or fetching user:", error);
-    return null;
-  }
+  const decoded = await verifySessionCookie(cookie);
+  const user = await auth.getUser(decoded.uid);
+  return JSON.parse(JSON.stringify(user));
 }
