@@ -7,10 +7,12 @@ import { Label } from "@/components/ui/label";
 import { signInWithGoogleAction, signInWithEmailAction } from "@/actions/client/auth-actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   return (
@@ -30,10 +32,10 @@ export default function LoginPage() {
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder="Enter your email address"
               autoComplete="email"
               required
-              className="h-11 rounded-xl border border-sky-100 bg-white text-sky-800 placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
+              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -51,10 +53,10 @@ export default function LoginPage() {
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="Enter your password"
               autoComplete="current-password"
               required
-              className="h-11 rounded-xl border border-sky-100 bg-white text-sky-800 placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
+              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -63,20 +65,24 @@ export default function LoginPage() {
           <Button
             type="submit"
             className="h-11 w-full rounded-xl bg-sky-500 text-sm font-semibold text-white transition hover:bg-sky-400"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              signInWithEmailAction({ email, password }, router);
+              setLoading(true);
+              await signInWithEmailAction({ email, password }, router);
+              setLoading(false);
             }}>
-            Sign in
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
           </Button>
 
           <Button
             type="button"
             variant="outline"
             className="h-11 w-full rounded-xl border border-sky-200 text-sm font-semibold text-sky-600 hover:bg-sky-50"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              signInWithGoogleAction(router);
+              setLoading(true);
+              await signInWithGoogleAction(router);
+              setLoading(false);
             }}>
             <svg aria-hidden="true" viewBox="0 0 24 24" className="mr-2 h-5 w-5">
               <path
@@ -96,14 +102,20 @@ export default function LoginPage() {
                 fill="#EA4335"
               />
             </svg>
-            Continue with Google
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue with Google"}
           </Button>
         </form>
 
         <footer className="space-y-2 text-center text-sm text-sky-500">
           <p>
-            Don’t have access?{" "}
-            <Link href="/auth/sign-up" className="font-semibold text-sky-600 hover:text-sky-700">
+            Don't have an account?{" "}
+            <Link href="/auth/signup" className="font-semibold text-sky-600 hover:text-sky-700">
+              Sign up
+            </Link>
+          </p>
+          <p>
+            Don't have access?{" "}
+            <Link href="/auth/invite-request" className="font-semibold text-sky-600 hover:text-sky-700">
               Request an invite
             </Link>
           </p>

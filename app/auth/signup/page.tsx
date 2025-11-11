@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { signUpWithEmailAction, signInWithGoogleAction } from "@/actions/client/auth-actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   return (
@@ -31,10 +33,10 @@ export default function SignUpPage() {
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder="Enter your email address"
               autoComplete="email"
               required
-              className="h-11 rounded-xl border border-sky-100 bg-white text-sky-800 placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
+              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -47,10 +49,10 @@ export default function SignUpPage() {
             <Input
               id="password"
               type="password"
-              placeholder="Create a password"
+              placeholder="Create your password"
               autoComplete="new-password"
               required
-              className="h-11 rounded-xl border border-sky-100 bg-white text-sky-800 placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
+              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -62,11 +64,11 @@ export default function SignUpPage() {
             </Label>
             <Input
               id="confirm-password"
+              placeholder="Re-enter your password"
               type="password"
-              placeholder="Re-enter password"
               autoComplete="new-password"
               required
-              className="h-11 rounded-xl border border-sky-100 bg-white text-sky-800 placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
+              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
@@ -75,20 +77,24 @@ export default function SignUpPage() {
           <Button
             type="submit"
             className="h-11 w-full rounded-xl bg-sky-500 text-sm font-semibold text-white transition hover:bg-sky-400"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              signUpWithEmailAction({ email, password, passwordConfirm: confirmPassword }, router);
+              setLoading(true);
+              await signUpWithEmailAction({ email, password, passwordConfirm: confirmPassword }, router);
+              setLoading(false);
             }}>
-            Sign up
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign up"}
           </Button>
 
           <Button
             type="button"
             variant="outline"
             className="h-11 w-full rounded-xl border border-sky-200 text-sm font-semibold text-sky-600 hover:bg-sky-50"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              signInWithGoogleAction(router);
+              setLoading(true);
+              await signInWithGoogleAction(router);
+              setLoading(false);
             }}>
             <svg aria-hidden="true" viewBox="0 0 24 24" className="mr-2 h-5 w-5">
               <path
@@ -108,7 +114,7 @@ export default function SignUpPage() {
                 fill="#EA4335"
               />
             </svg>
-            Continue with Google
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue with Google"}
           </Button>
         </form>
 
@@ -117,6 +123,12 @@ export default function SignUpPage() {
             Already have an account?{" "}
             <Link href="/auth/login" className="font-semibold text-sky-600 hover:text-sky-700">
               Sign in
+            </Link>
+          </p>
+          <p>
+            Don’t have access?{" "}
+            <Link href="/auth/invite-request" className="font-semibold text-sky-600 hover:text-sky-700">
+              Request an invite
             </Link>
           </p>
           <p>

@@ -13,7 +13,7 @@ const createSessionAndProfile = async (user: any) => {
     body: JSON.stringify({ idToken }),
     credentials: "include",
   });
-  await createUserProfileIfNotExistsAction(idToken);
+  await createUserProfileIfNotExistsAction();
 };
 
 export const signInWithGoogleAction = async (router: any) => {
