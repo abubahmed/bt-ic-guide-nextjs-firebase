@@ -23,7 +23,10 @@ export default function RequestInvitePage() {
         <header className="space-y-2 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">BT&nbsp;IC</p>
           <h1 className="text-3xl font-semibold text-sky-800">Request an invite</h1>
-          <p className="text-sm text-sky-600">Tell us a little about yourself so we can confirm your event access.</p>
+          <p className="text-sm text-sky-600">
+            Invited to the event but having trouble accessing the portal? Tell us a little about yourself so we can
+            confirm your event access.
+          </p>
         </header>
 
         <form className="space-y-5">
@@ -98,15 +101,9 @@ export default function RequestInvitePage() {
 
         <footer className="space-y-2 text-center text-sm text-sky-500">
           <p>
-            Already have an account?{" "}
+            Resolved your issue?{" "}
             <Link href="/auth/login" className="font-semibold text-sky-600 hover:text-sky-700">
-              Sign in
-            </Link>
-          </p>
-          <p>
-            Staff access?{" "}
-            <Link href="/staff/auth/login" className="font-semibold text-sky-600 hover:text-sky-700">
-              Go to staff portal
+              Attendee login page
             </Link>
           </p>
         </footer>
