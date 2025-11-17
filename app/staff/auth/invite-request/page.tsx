@@ -31,7 +31,7 @@ export default function StaffAccessHelpPage() {
 
         <form className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="staff-full-name" className="text-sm font-medium text-slate-200">
+            <Label htmlFor="staff-full-nnpame" className="text-sm font-medium text-slate-200">
               Full name
             </Label>
             <Input
