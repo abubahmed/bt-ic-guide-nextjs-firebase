@@ -12,7 +12,7 @@ export async function getUserProfile(uid: string) {
   }
 }
 
-export async function createUserProfileIfNotExists(user: any) {
+export async function createUserProfile(user: any) {
   const userProfile = await getUserProfile(user.uid);
   if (userProfile) {
     return userProfile;
@@ -27,6 +27,7 @@ export async function createUserProfileIfNotExists(user: any) {
     providerId: user.providerId || "",
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
+    emailVerified: user.emailVerified || false,
   };
   await userDocRef.set(newUserProfile);
   const createdProfile = await userDocRef.get().then((doc) => doc.data());

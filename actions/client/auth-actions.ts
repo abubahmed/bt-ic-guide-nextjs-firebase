@@ -1,11 +1,12 @@
 "use client";
 
 import { signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } from "@/lib/firebase/client/auth";
-import { createUserProfileIfNotExistsAction } from "@/actions/server/auth-actions";
-import { HOME_ROUTE, ROOT_ROUTE } from "@/constants";
+import { createProfileAndGetVerifiedStatus, createVerifiedProfileAction } from "@/actions/server/auth-actions";
+import { HOME_ROUTE, ROOT_ROUTE, VERIFY_EMAIL_ROUTE } from "@/constants";
 import { getSessionUser } from "@/actions/server/session-actions";
+import { sendEmailVerification } from "firebase/auth";
 
-const createSessionAndProfile = async (user: any) => {
+const createSession = async (user: any) => {
   const idToken = await user.getIdToken(true);
   await fetch("/api/session", {
     method: "POST",
@@ -13,7 +14,6 @@ const createSessionAndProfile = async (user: any) => {
     body: JSON.stringify({ idToken }),
     credentials: "include",
   });
-  await createUserProfileIfNotExistsAction();
 };
 
 export const signInWithGoogleAction = async (router: any) => {
@@ -25,7 +25,8 @@ export const signInWithGoogleAction = async (router: any) => {
     }
 
     const user = await signInWithGoogle();
-    await createSessionAndProfile(user);
+    await createSession(user);
+    await createVerifiedProfileAction();
     router.push(HOME_ROUTE);
   } catch (error) {
     console.error("Failed to sign in with Google in signInWithGoogleAction:", error);
@@ -46,8 +47,23 @@ export const signInWithEmailAction = async ({ email, password }: { email: string
     }
 
     const user = await signInWithEmail(email, password);
-    await createSessionAndProfile(user);
-    router.push(HOME_ROUTE);
+    const userData = {
+      uid: user.uid,
+      displayName: user.displayName || null,
+      email: user.email || null,
+      photoURL: user.photoURL || null,
+      phoneNumber: user.phoneNumber || null,
+      providerId: user.providerId || null,
+    };
+
+    const verified = await createProfileAndGetVerifiedStatus(userData as any);
+    if (verified) {
+      createSession(user);
+      router.push(HOME_ROUTE);
+    } else {
+      await sendEmailVerification(user);
+      router.push(VERIFY_EMAIL_ROUTE);
+    }
   } catch (error) {
     console.error("Failed to sign in with Email in signInWithEmailAction:", error);
   }
@@ -74,8 +90,23 @@ export const signUpWithEmailAction = async (
     }
 
     const user = await signUpWithEmail(email, password);
-    await createSessionAndProfile(user);
-    router.push(HOME_ROUTE);
+    const userData = {
+      uid: user.uid,
+      displayName: user.displayName || null,
+      email: user.email || null,
+      photoURL: user.photoURL || null,
+      phoneNumber: user.phoneNumber || null,
+      providerId: user.providerId || null,
+    };
+
+    const verified = await createProfileAndGetVerifiedStatus(userData as any);
+    if (verified) {
+      createSession(user);
+      router.push(HOME_ROUTE);
+    } else {
+      await sendEmailVerification(user);
+      router.push(VERIFY_EMAIL_ROUTE);
+    }
   } catch (error) {
     console.error("Failed to sign up with Email in signUpWithEmailAction:", error);
   }

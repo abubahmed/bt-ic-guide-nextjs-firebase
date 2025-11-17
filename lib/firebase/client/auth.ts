@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   onAuthStateChanged as _onAuthStateChanged,
+  sendEmailVerification as _sendEmailVerification,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase/client/config";
 
@@ -34,4 +35,8 @@ export function getCurrentUser() {
 
 export async function signOut() {
   await auth.signOut();
+}
+
+export async function sendEmailVerification(user: User) {
+  await _sendEmailVerification(user);
 }
