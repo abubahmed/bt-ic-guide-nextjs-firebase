@@ -6,6 +6,7 @@ import { AttendeeInvite, StaffInvite } from "@/types/types";
 const INVITES_COLLECTION = "invites";
 
 export async function createInvite(invite: AttendeeInvite | StaffInvite, type: "ATTENDEE" | "STAFF") {
+  console.log("Creating invite in createInvite:", invite, type);
   const inviteDocRef = db.collection(INVITES_COLLECTION).doc();
   let newInvite: any;
   if (type === "ATTENDEE") {

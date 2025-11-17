@@ -3,7 +3,6 @@ interface AttendeeInvite {
   fullName: string;
   affiliation: string;
   notes: string;
-  status: string;
 }
 
 interface StaffInvite {
@@ -11,7 +10,6 @@ interface StaffInvite {
   fullName: string;
   team: string;
   notes: string;
-  status: string;
 }
 
 export type { AttendeeInvite, StaffInvite };

@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { createInviteActionClient } from "@/actions/client/invite-actions";
 
 import AuthInput from "@/components/custom/auth-input";
+import { AttendeeInvite } from "@/types/types";
 
 export default function RequestInvitePage() {
   const router = useRouter();
@@ -96,7 +97,14 @@ export default function RequestInvitePage() {
             onClick={async (e) => {
               e.preventDefault();
               setLoading(true);
-              await createInviteActionClient({ fullName, email, affiliation, notes, status: "PENDING" });
+              const invite: AttendeeInvite = {
+                fullName,
+                email,
+                affiliation,
+                notes,
+              };
+              await createInviteActionClient(invite as AttendeeInvite, "ATTENDEE");
+              router.push("/auth/login?ticket=created");
               setLoading(false);
             }}
             className="h-11 w-full rounded-xl bg-sky-500 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-sky-300">

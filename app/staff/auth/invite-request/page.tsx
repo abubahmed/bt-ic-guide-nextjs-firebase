@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 import AuthInput from "@/components/custom/auth-input";
+import { createInviteActionClient } from "@/actions/client/invite-actions";
+import { StaffInvite } from "@/types/types";
 
 export default function StaffAccessHelpPage() {
   const router = useRouter();
@@ -55,8 +57,6 @@ export default function StaffAccessHelpPage() {
               placeholder="Enter your Princeton email address"
               autoComplete="email"
               staff={true}
-              type="email"
-              autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
@@ -97,8 +97,15 @@ export default function StaffAccessHelpPage() {
             onClick={async (e) => {
               e.preventDefault();
               setLoading(true);
+              const invite: StaffInvite = {
+                fullName,
+                princetonEmail: email,
+                team,
+                notes: issue,
+              };
+              await createInviteActionClient(invite as StaffInvite, "STAFF");
+            //   router.push("/staff/auth/login?ticket=created");
               setLoading(false);
-              router.push("/staff/auth/login?ticket=created");
             }}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send request"}
           </Button>
