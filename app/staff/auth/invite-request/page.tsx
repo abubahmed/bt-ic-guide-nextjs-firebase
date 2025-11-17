@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+import AuthInput from "@/components/custom/auth-input";
 
 export default function StaffAccessHelpPage() {
   const router = useRouter();
@@ -34,11 +35,12 @@ export default function StaffAccessHelpPage() {
             <Label htmlFor="staff-full-nnpame" className="text-sm font-medium text-slate-200">
               Full name
             </Label>
-            <Input
+            <AuthInput
               id="staff-full-name"
               placeholder="Enter your full name"
-              required
-              className="h-11 rounded-2xl border border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500 focus:border-sky-400 focus-visible:ring-sky-400/40"
+              staff={true}
+              type="text"
+              autoComplete="name"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
             />
@@ -48,13 +50,14 @@ export default function StaffAccessHelpPage() {
             <Label htmlFor="staff-email" className="text-sm font-medium text-slate-200">
               Princeton email
             </Label>
-            <Input
+            <AuthInput
               id="staff-email"
               type="email"
               placeholder="Enter your Princeton email address"
               autoComplete="email"
-              required
-              className="h-11 rounded-2xl border border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500 focus:border-sky-400 focus-visible:ring-sky-400/40"
+              staff={true}
+              type="email"
+              autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
@@ -64,10 +67,12 @@ export default function StaffAccessHelpPage() {
             <Label htmlFor="staff-team" className="text-sm font-medium text-slate-200">
               Team / role
             </Label>
-            <Input
+            <AuthInput
               id="staff-team"
               placeholder="e.g. Operations, Technology, Marketing"
-              className="h-11 rounded-2xl border border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500 focus:border-sky-400 focus-visible:ring-sky-400/40"
+              staff={true}
+              type="text"
+              autoComplete="organization"
               value={team}
               onChange={(event) => setTeam(event.target.value)}
             />
@@ -81,7 +86,7 @@ export default function StaffAccessHelpPage() {
               id="staff-issue"
               rows={4}
               placeholder="Share any error messages, steps to reproduce, or context we would find helpful."
-              className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
+              className="resize-none w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40"
               value={issue}
               onChange={(event) => setIssue(event.target.value)}
             />

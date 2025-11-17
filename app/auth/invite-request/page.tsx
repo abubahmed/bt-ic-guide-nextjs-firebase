@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { createInviteActionClient } from "@/actions/client/invite-actions";
+
+import AuthInput from "@/components/custom/auth-input";
 
 export default function RequestInvitePage() {
   const router = useRouter();
@@ -34,11 +35,12 @@ export default function RequestInvitePage() {
             <Label htmlFor="full-name" className="text-sm font-medium text-sky-800">
               Full name
             </Label>
-            <Input
+            <AuthInput
               id="full-name"
               placeholder="Enter your full name"
-              required
-              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
+              staff={false}
+              type="text"
+              autoComplete="name"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
             />
@@ -48,13 +50,14 @@ export default function RequestInvitePage() {
             <Label htmlFor="email" className="text-sm font-medium text-sky-800">
               Email
             </Label>
-            <Input
+            <AuthInput
               id="email"
               type="email"
               placeholder="Enter your email address"
               autoComplete="email"
-              required
-              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
+              staff={false}
+              type="email"
+              autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
@@ -64,10 +67,12 @@ export default function RequestInvitePage() {
             <Label htmlFor="affiliation" className="text-sm font-medium text-sky-800">
               Organization / affiliation
             </Label>
-            <Input
+            <AuthInput
               id="affiliation"
               placeholder="Enter your organization or affiliation"
-              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
+              staff={false}
+              type="text"
+              autoComplete="organization"
               value={affiliation}
               onChange={(event) => setAffiliation(event.target.value)}
             />
@@ -81,7 +86,7 @@ export default function RequestInvitePage() {
               id="notes"
               rows={4}
               placeholder="Share context about your role, application, or timeline"
-              className="w-full rounded-2xl border border-sky-100 bg-white px-4 py-3 text-sm text-black placeholder:text-black focus:border-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+              className="resize-none w-full rounded-2xl border border-sky-100 bg-white px-4 py-3 text-sm text-black placeholder:text-sky-700 focus:border-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
             />

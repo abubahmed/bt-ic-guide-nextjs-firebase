@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithGoogleAction, signInWithEmailAction } from "@/actions/client/auth-actions";
 import { useRouter } from "next/navigation";
@@ -10,6 +9,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import GoogleButton from "@/components/custom/google-button";
+import AuthInput from "@/components/custom/auth-input";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -34,13 +34,12 @@ export default function LoginPage() {
             <Label htmlFor="email" className="text-sm font-medium text-sky-800">
               Email
             </Label>
-            <Input
+            <AuthInput
               id="email"
               type="email"
               placeholder="Enter your email address"
               autoComplete="email"
-              required
-              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-black focus:border-sky-300 focus-visible:ring-sky-400"
+              staff={false}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -55,13 +54,12 @@ export default function LoginPage() {
                 Forgot?
               </Link>
             </div>
-            <Input
+            <AuthInput
               id="password"
               type="password"
               placeholder="Enter your password"
               autoComplete="current-password"
-              required
-              className="h-11 rounded-xl border border-sky-100 bg-white text-black placeholder:text-sky-700 focus:border-sky-300 focus-visible:ring-sky-400"
+              staff={false}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
