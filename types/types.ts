@@ -1,4 +1,4 @@
-interface Invite {
+interface AttendeeInvite {
   email: string;
   fullName: string;
   affiliation: string;
@@ -6,4 +6,12 @@ interface Invite {
   status: string;
 }
 
-export type { Invite };
+interface StaffInvite {
+  princetonEmail: string;
+  fullName: string;
+  team: string;
+  notes: string;
+  status: string;
+}
+
+export type { AttendeeInvite, StaffInvite };

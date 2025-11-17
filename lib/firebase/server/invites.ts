@@ -1,22 +1,36 @@
 import { db } from "@/lib/firebase/server/config";
 import { Timestamp } from "firebase-admin/firestore";
 import { serialize } from "@/util/firebase";
-import { Invite } from "@/types/types";
+import { AttendeeInvite, StaffInvite } from "@/types/types";
 
 const INVITES_COLLECTION = "invites";
 
-export async function createInvite(invite: Invite) {
+export async function createInvite(invite: AttendeeInvite | StaffInvite, type: "ATTENDEE" | "STAFF") {
   const inviteDocRef = db.collection(INVITES_COLLECTION).doc();
-  const newInvite = {
-    id: inviteDocRef.id,
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    email: invite.email,
-    fullName: invite.fullName,
-    affiliation: invite.affiliation,
-    notes: invite.notes,
-    status: "PENDING" as const,
-  };
+  let newInvite: any;
+  if (type === "ATTENDEE") {
+    newInvite = {
+      id: inviteDocRef.id,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+      email: (invite as AttendeeInvite).email,
+      fullName: invite.fullName,
+      affiliation: (invite as AttendeeInvite).affiliation,
+      notes: (invite as AttendeeInvite).notes,
+      status: "PENDING" as const,
+    };
+  } else if (type === "STAFF") {
+    newInvite = {
+      id: inviteDocRef.id,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+      princetonEmail: (invite as StaffInvite).princetonEmail,
+      fullName: (invite as StaffInvite).fullName,
+      team: (invite as StaffInvite).team,
+      notes: (invite as StaffInvite).notes,
+      status: "PENDING" as const,
+    };
+  }
   await inviteDocRef.set(newInvite);
   const createdInvite = await inviteDocRef.get().then((doc) => doc.data());
   return serialize(createdInvite);
