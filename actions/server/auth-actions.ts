@@ -2,40 +2,45 @@
 
 import { createUserProfile, getUserProfile } from "@/lib/firebase/server/users";
 import { getSessionUser } from "@/actions/server/session-actions";
+import { auth } from "@/lib/firebase/server/config";
 
-export async function createVerifiedProfileAction() {
+export const SESSION_COOKIE_LIFESPAN = 14 * 24 * 60 * 60 * 1000;
+
+export async function signInWithGoogleActionServer(idToken: string) {
+  if (!idToken) {
+    console.error("ID token must be provided in signInWithGoogle.");
+    return;
+  }
   const sessionUser = await getSessionUser();
-  if (!sessionUser) {
-    throw new Error("Session user is not found in createVerifiedProfileAction.");
+  if (sessionUser) {
+    console.error("User is already signed in.");
+    return;
   }
-
-  const userData = {
-    uid: sessionUser.uid,
-    displayName: sessionUser.displayName || null,
-    email: sessionUser.email || null,
-    photoURL: sessionUser.photoURL || null,
-    phoneNumber: sessionUser.phoneNumber || null,
-    providerId: sessionUser.providerId || null,
-    emailVerified: true,
-  };
-  await createUserProfile(userData as any);
+  const decodedToken = await auth.verifyIdToken(idToken);
+  const sessionCookie = await auth.createSessionCookie(idToken, {
+    expiresIn: SESSION_COOKIE_LIFESPAN,
+  });
+  const user = await auth.getUser(decodedToken.uid);
+  await createUserProfile(user);
+  return { sessionCookie };
 }
 
-export async function createProfileAndGetVerifiedStatus(user: any) {
-  const userProfile = (await getUserProfile(user.uid)) || null;
-  if (userProfile) {
-    return userProfile.emailVerified || false;
+export async function signUpWithEmailActionServer(idToken: string) {
+  if (!idToken) {
+    console.error("ID token must be provided in signInWithEmailAction.");
+    return;
   }
-
-  const userData = {
-    uid: user.uid,
-    displayName: user.displayName || null,
-    email: user.email,
-    photoURL: user.photoURL || null,
-    phoneNumber: user.phoneNumber || null,
-    providerId: user.providerId || null,
-    emailVerified: false,
-  };
-  await createUserProfile(userData as any);
-  return false;
+  const sessionUser = await getSessionUser();
+  if (sessionUser) {
+    console.error("User is already signed in.");
+    return;
+  }
+  const decodedToken = await auth.verifyIdToken(idToken);
+  const sessionCookie = await auth.createSessionCookie(idToken, {
+    expiresIn: SESSION_COOKIE_LIFESPAN,
+  });
+  const user = await auth.getUser(decodedToken.uid);
+  await createUserProfile(user);
+  return { sessionCookie };
 }
+

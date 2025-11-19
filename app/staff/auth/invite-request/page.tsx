@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 import AuthInput from "@/components/custom/auth-input";
-import { createInviteActionClient } from "@/actions/client/invite-actions";
+import { createInvite } from "@/actions/server/invite-actions";
 import { StaffInvite } from "@/types/types";
 
 export default function StaffAccessHelpPage() {
@@ -104,7 +104,7 @@ export default function StaffAccessHelpPage() {
                 notes: issue,
               };
               await createInviteActionClient(invite as StaffInvite, "STAFF");
-            //   router.push("/staff/auth/login?ticket=created");
+              //   router.push("/staff/auth/login?ticket=created");
               setLoading(false);
             }}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send request"}
