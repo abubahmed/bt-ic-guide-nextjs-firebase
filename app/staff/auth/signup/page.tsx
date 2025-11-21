@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signUpWithEmailAction, signInWithGoogleAction } from "@/actions/client/auth-actions";
+import { signUpWithEmailActionClient, signInWithGoogleActionClient } from "@/actions/client/auth-actions";
 
 import GoogleButton from "@/components/custom/google-button";
 
@@ -86,7 +86,7 @@ export default function StaffSignUpPage() {
             onClick={async (e) => {
               e.preventDefault();
               setLoading(true);
-              await signUpWithEmailAction({ email, password, passwordConfirm: confirmPassword }, router);
+              await signUpWithEmailActionClient({ email, password, passwordConfirm: confirmPassword }, router);
               setLoading(false);
             }}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign up"}
@@ -96,7 +96,7 @@ export default function StaffSignUpPage() {
             router={router}
             loading={loading}
             setLoading={setLoading}
-            signInWithGoogleAction={signInWithGoogleAction}
+            signInWithGoogleAction={signInWithGoogleActionClient}
           />
         </form>
 

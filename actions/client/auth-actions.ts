@@ -20,15 +20,14 @@ import {
   signUpWithEmailActionServer,
   signInWithEmailActionServer,
 } from "@/actions/server/auth-actions";
-import { NextRouter } from "next/router";
 
 /*
 Perform Google OAuth sign in flow on client side. Checks if user is already signed in, signs in with Google OAuth and requests backend to complete Google OAuth sign in flow.
 
-@param router: NextRouter
+@param router: any
 @returns { void }
 */
-export const signInWithGoogleActionClient = async (router: NextRouter) => {
+export const signInWithGoogleActionClient = async (router: any) => {
   try {
     // check if user is already signed in
     const sessionUser = await getSessionUser();
@@ -60,12 +59,12 @@ export const signInWithGoogleActionClient = async (router: NextRouter) => {
 Perform email sign up flow on client side. Checks if user is already signed in, signs up with email and password and requests backend to complete email sign up flow.
 
 @param { email: string; password: string; passwordConfirm: string }
-@param router: NextRouter
+@param router: any
 @returns { void }
 */
 export const signUpWithEmailActionClient = async (
   { email, password, passwordConfirm }: { email: string; password: string; passwordConfirm: string },
-  router: NextRouter
+  router: any
 ) => {
   if (!email || !password || !passwordConfirm) {
     console.error("Email and password must be provided in signUpWithEmailActionClient.");
@@ -112,12 +111,12 @@ export const signUpWithEmailActionClient = async (
 Perform email sign in flow on client side. Checks if user is already signed in, signs in with email and password and requests backend to complete email sign in flow.
 
 @param { email: string; password: string }
-@param router: NextRouter
+@param router: any
 @returns { void }
 */
 export const signInWithEmailActionClient = async (
   { email, password }: { email: string; password: string },
-  router: NextRouter
+  router: any
 ) => {
   if (!email || !password) {
     console.error("Email and password must be provided in signInWithEmailActionClient.");
@@ -159,10 +158,10 @@ export const signInWithEmailActionClient = async (
 /*
 Perform sign out flow on client and server side. Signs out and redirects to root page.
 
-@param router: NextRouter
+@param router: any
 @returns { void }
 */
-export const signOutActionClient = async (router: NextRouter) => {
+export const signOutActionClient = async (router: any) => {
   try {
     await fetch("/api/logout", { method: "POST", credentials: "include" });
     await signOut();

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 import AuthInput from "@/components/custom/auth-input";
-import { createInvite } from "@/actions/server/invite-actions";
+import { createInviteActionClient } from "@/actions/client/invite-actions";
 import { StaffInvite } from "@/types/types";
 
 export default function StaffAccessHelpPage() {
@@ -97,14 +97,13 @@ export default function StaffAccessHelpPage() {
             onClick={async (e) => {
               e.preventDefault();
               setLoading(true);
-              const invite: StaffInvite = {
+              const invite = {
                 fullName,
                 princetonEmail: email,
                 team,
                 notes: issue,
               };
-              await createInviteActionClient(invite as StaffInvite, "STAFF");
-              //   router.push("/staff/auth/login?ticket=created");
+              await createInviteActionClient(invite, "STAFF");
               setLoading(false);
             }}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send request"}

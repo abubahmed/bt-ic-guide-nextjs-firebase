@@ -1,9 +1,23 @@
+/**
+ * @file invite-actions.ts
+ * @description Server-side invite actions for Firebase Firestore.
+ * @module actions/server/invite-actions
+ */
+
 "use server";
 
-import { createInvite as createInviteFirebase } from "@/lib/firebase/server/invites";
+import { createInvite } from "@/lib/firebase/server/invites";
 import { AttendeeInvite, StaffInvite } from "@/types/types";
 
-export const createInvite = async (invite: AttendeeInvite | StaffInvite, type: "ATTENDEE" | "STAFF") => {
+/*
+Create an invite for an attendee or staff member. Creates invite in Firebase Firestore.
+
+@param invite: AttendeeInvite | StaffInvite
+@param type: "ATTENDEE" | "STAFF"
+@returns { void }
+*/
+
+export const createInviteActionServer = async (invite: AttendeeInvite | StaffInvite, type: "ATTENDEE" | "STAFF") => {
   if (!invite || !type) {
     console.error("Invite and type must be provided.");
     return;
@@ -20,6 +34,5 @@ export const createInvite = async (invite: AttendeeInvite | StaffInvite, type: "
     }
   }
 
-  console.log("Creating invite:", invite, type);
-  return await createInviteFirebase(invite, type);
+  return await createInvite(invite, type);
 };

@@ -53,9 +53,7 @@ export default function RequestInvitePage() {
             </Label>
             <AuthInput
               id="email"
-              type="email"
               placeholder="Enter your email address"
-              autoComplete="email"
               staff={false}
               type="email"
               autoComplete="email"
@@ -97,14 +95,13 @@ export default function RequestInvitePage() {
             onClick={async (e) => {
               e.preventDefault();
               setLoading(true);
-              const invite: AttendeeInvite = {
+              const invite = {
                 fullName,
                 email,
                 affiliation,
                 notes,
               };
-              await createInviteActionClient(invite as AttendeeInvite, "ATTENDEE");
-              router.push("/auth/login?ticket=created");
+              await createInviteActionClient(invite, "ATTENDEE");
               setLoading(false);
             }}
             className="h-11 w-full rounded-xl bg-sky-500 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-sky-300">
