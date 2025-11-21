@@ -9,8 +9,8 @@
 import { createUserProfile } from "@/lib/firebase/server/users";
 import { getSessionUser } from "@/actions/server/session-actions";
 import { auth } from "@/lib/firebase/server/config";
-
-export const SESSION_COOKIE_LIFESPAN = 14 * 24 * 60 * 60 * 1000;
+import { cookies } from "next/headers";
+import { SESSION_COOKIE_NAME, SESSION_COOKIE_LIFESPAN } from "@/constants";
 
 /*
 Complete Google OAuth sign in flow on server side. Checks if user is already signed in, creates session cookie and user profile.
@@ -35,6 +35,15 @@ export async function signInWithGoogleActionServer(idToken: string) {
   const decodedToken = await auth.verifyIdToken(idToken);
   const sessionCookie = await auth.createSessionCookie(idToken, {
     expiresIn: SESSION_COOKIE_LIFESPAN,
+  });
+  (await cookies()).set({
+    name: SESSION_COOKIE_NAME,
+    value: sessionCookie,
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    maxAge: SESSION_COOKIE_LIFESPAN / 1000,
+    path: "/",
   });
 
   // create user profile
@@ -74,6 +83,17 @@ export async function signUpWithEmailActionServer(idToken: string) {
   const sessionCookie = await auth.createSessionCookie(idToken, {
     expiresIn: SESSION_COOKIE_LIFESPAN,
   });
+  (await cookies()).set({
+    name: SESSION_COOKIE_NAME,
+    value: sessionCookie,
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    maxAge: SESSION_COOKIE_LIFESPAN / 1000,
+    path: "/",
+  });
+
+  // create user profile
   await createUserProfile(user);
   return sessionCookie;
 }
@@ -105,10 +125,21 @@ export async function signInWithEmailActionServer(idToken: string) {
     return;
   }
 
-  // create session cookie and create user profile
+  // create session cookie
   const sessionCookie = await auth.createSessionCookie(idToken, {
     expiresIn: SESSION_COOKIE_LIFESPAN,
   });
+  (await cookies()).set({
+    name: SESSION_COOKIE_NAME,
+    value: sessionCookie,
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    maxAge: SESSION_COOKIE_LIFESPAN / 1000,
+    path: "/",
+  });
+
+  // create user profile
   await createUserProfile(user);
   return sessionCookie;
 }

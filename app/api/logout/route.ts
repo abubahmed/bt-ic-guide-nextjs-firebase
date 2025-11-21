@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/firebase/server/config";
 import { cookies } from "next/headers";
-
-const COOKIE_NAME = "__Host-session";
+import { SESSION_COOKIE_NAME } from "@/constants";
 
 export async function POST() {
-  const session = (await cookies()).get(COOKIE_NAME)?.value;
+  const session = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
   if (session) {
     try {
       const decoded = await auth.verifySessionCookie(session, false);
@@ -17,7 +16,7 @@ export async function POST() {
 
   const res = NextResponse.json({ ok: true });
   res.cookies.set({
-    name: COOKIE_NAME,
+    name: SESSION_COOKIE_NAME,
     value: "",
     httpOnly: true,
     secure: true,

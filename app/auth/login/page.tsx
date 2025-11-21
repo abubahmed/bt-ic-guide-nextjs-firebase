@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { signInWithGoogleAction, signInWithEmailAction } from "@/actions/client/auth-actions";
+import { signInWithGoogleActionClient, signInWithEmailActionClient } from "@/actions/client/auth-actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -71,7 +71,7 @@ export default function LoginPage() {
             onClick={async (e) => {
               e.preventDefault();
               setLoading(true);
-              await signInWithEmailAction({ email, password }, router);
+              await signInWithEmailActionClient({ email, password }, router);
               setLoading(false);
             }}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
@@ -81,7 +81,7 @@ export default function LoginPage() {
             router={router}
             loading={loading}
             setLoading={setLoading}
-            signInWithGoogleAction={signInWithGoogleAction}
+            signInWithGoogleAction={signInWithGoogleActionClient}
           />
         </form>
 
