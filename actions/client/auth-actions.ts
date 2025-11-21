@@ -44,6 +44,7 @@ export const signInWithGoogleActionClient = async (router: any) => {
     const result = await signInWithGoogleActionServer(idToken);
     if (!result) {
       console.error("Failed to complete sign in with Google in signInWithGoogleActionClient.");
+      await signOut();
       return;
     }
 
@@ -51,6 +52,7 @@ export const signInWithGoogleActionClient = async (router: any) => {
     router.push(HOME_ROUTE);
   } catch (error) {
     console.error("Failed to sign in with Google in signInWithGoogleActionClient:", error);
+    await signOut();
     return;
   }
 };
@@ -89,6 +91,7 @@ export const signUpWithEmailActionClient = async (
     if (!user.emailVerified) {
       console.error("Email is not verified in signUpWithEmailActionClient.");
       await sendEmailVerification(user);
+      await signOut();
       return;
     }
 
@@ -97,6 +100,7 @@ export const signUpWithEmailActionClient = async (
     const result = await signUpWithEmailActionServer(idToken);
     if (!result) {
       console.error("Failed to complete sign up with email in signUpWithEmailActionClient.");
+      await signOut();
       return;
     }
 
@@ -104,6 +108,7 @@ export const signUpWithEmailActionClient = async (
     router.push(HOME_ROUTE);
   } catch (error) {
     console.error("Failed to sign up with email in signUpWithEmailActionClient:", error);
+    await signOut();
   }
 };
 
@@ -137,6 +142,7 @@ export const signInWithEmailActionClient = async (
     if (!user.emailVerified) {
       console.error("Email is not verified in signInWithEmailActionClient.");
       await sendEmailVerification(user);
+      await signOut();
       return;
     }
 
@@ -145,6 +151,7 @@ export const signInWithEmailActionClient = async (
     const result = await signInWithEmailActionServer(idToken);
     if (!result) {
       console.error("Failed to complete sign in with email in signInWithEmailActionClient.");
+      await signOut();
       return;
     }
 
@@ -152,6 +159,7 @@ export const signInWithEmailActionClient = async (
     router.push(HOME_ROUTE);
   } catch (error) {
     console.error("Failed to sign in with email in signInWithEmailActionClient:", error);
+    await signOut();
   }
 };
 

@@ -1,29 +1,21 @@
 "use client";
-
-import { getSessionUser } from "@/actions/server/session-actions";
-import { useEffect, useState } from "react";
-import UserProfile from "@/components/user-profile";
+import { signOutActionClient } from "@/actions/client/auth-actions";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  const [user, setUser] = useState<any | null>(null);
+  const router = useRouter();
 
-  useEffect(() => {
-    async function fetchUser() {
-      const userData = await getSessionUser();
-      setUser(userData);
-    }
-    fetchUser();
-  }, []);
+  const handleSignOut = async () => {
+    await signOutActionClient(router);
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen font-sans p-8 sm:p-20">
-      {user ? (
-        <UserProfile user={user} />
-      ) : (
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Not signed in</h1>
-        </div>
-      )}
+      <div className="text-center">
+        <h1 className="text-2xl font-bold mb-4">Home page</h1>
+        <Button onClick={handleSignOut}>Sign out</Button>
+      </div>
     </div>
   );
 }
