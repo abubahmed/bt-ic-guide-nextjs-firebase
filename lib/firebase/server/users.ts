@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase/server/config";
 import { Timestamp } from "firebase-admin/firestore";
-import { serialize } from "@/util/firebase";
+import { serialize } from "@/util/firebase/server";
 
 const USERS_COLLECTION = "users";
 
