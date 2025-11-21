@@ -15,11 +15,7 @@ import {
 } from "@/lib/firebase/client/auth";
 import { HOME_ROUTE, ROOT_ROUTE } from "@/constants";
 import { getSessionUser } from "@/actions/server/session-actions";
-import {
-  signInWithGoogleActionServer,
-  signUpWithEmailActionServer,
-  signInWithEmailActionServer,
-} from "@/actions/server/auth-actions";
+import { signInWithGoogleActionServer, signInWithEmailActionServer } from "@/actions/server/auth-actions";
 
 /*
 Perform Google OAuth sign in flow on client side. Checks if user is already signed in, signs in with Google OAuth and requests backend to complete Google OAuth sign in flow.
@@ -58,7 +54,7 @@ export const signInWithGoogleActionClient = async (router: any) => {
 };
 
 /*
-Perform email sign up flow on client side. Checks if user is already signed in, signs up with email and password and requests backend to complete email sign up flow.
+Perform email sign up flow on client side. Checks if user is already signed in, signs up with email and password and sends email verification email.
 
 @param { email: string; password: string; passwordConfirm: string }
 @param router: any
@@ -87,25 +83,7 @@ export const signUpWithEmailActionClient = async (
 
     // sign up with email and password, send email verification if not verified
     const user = await signUpWithEmail(email, password);
-    await user.reload();
-    if (!user.emailVerified) {
-      console.error("Email is not verified in signUpWithEmailActionClient.");
-      await sendEmailVerification(user);
-      await signOut();
-      return;
-    }
-
-    // get idToken and request backend to complete email sign up flow
-    const idToken = await user.getIdToken(true);
-    const result = await signUpWithEmailActionServer(idToken);
-    if (!result) {
-      console.error("Failed to complete sign up with email in signUpWithEmailActionClient.");
-      await signOut();
-      return;
-    }
-
-    // redirect to home page
-    router.push(HOME_ROUTE);
+    await sendEmailVerification(user);
   } catch (error) {
     console.error("Failed to sign up with email in signUpWithEmailActionClient:", error);
     await signOut();

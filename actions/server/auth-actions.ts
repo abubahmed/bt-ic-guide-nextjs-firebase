@@ -58,52 +58,6 @@ Complete email sign in flow on server side. Checks if user is already signed in,
 @param idToken: string
 @returns { sessionCookie: string }
 */
-export async function signUpWithEmailActionServer(idToken: string) {
-  if (!idToken) {
-    console.error("ID token must be provided in signUpWithEmailActionServer.");
-    return;
-  }
-
-  // check if user is already signed in
-  const sessionUser = await getSessionUser();
-  if (sessionUser) {
-    console.error("User is already signed in in signUpWithEmailActionServer.");
-    return;
-  }
-
-  // verify idToken and return if email is not verified
-  const decodedToken = await auth.verifyIdToken(idToken);
-  const user = await auth.getUser(decodedToken.uid);
-  if (!user.emailVerified) {
-    console.error("Email is not verified in signUpWithEmailActionServer.");
-    return;
-  }
-
-  // create session cookie and create user profile
-  const sessionCookie = await auth.createSessionCookie(idToken, {
-    expiresIn: SESSION_COOKIE_LIFESPAN,
-  });
-  (await cookies()).set({
-    name: SESSION_COOKIE_NAME,
-    value: sessionCookie,
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    maxAge: SESSION_COOKIE_LIFESPAN / 1000,
-    path: "/",
-  });
-
-  // create user profile
-  await createUserProfile(user);
-  return sessionCookie;
-}
-
-/*
-Complete email sign in flow on server side. Checks if user is already signed in, verifies idToken and returns if email is not verified. Otherwise, creates session cookie and user profile.
-
-@param idToken: string
-@returns { sessionCookie: string }
-*/
 export async function signInWithEmailActionServer(idToken: string) {
   if (!idToken) {
     console.error("ID token must be provided in signInWithEmailActionServer.");
