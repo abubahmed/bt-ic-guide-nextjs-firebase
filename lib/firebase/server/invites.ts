@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase/server/config";
 import { Timestamp } from "firebase-admin/firestore";
-import { serialize } from "@/util/firebase";
+import { serialize } from "@/util/firebase/server";
 import { AttendeeInvite, StaffInvite } from "@/types/types";
 
 const INVITES_COLLECTION = "invites";
