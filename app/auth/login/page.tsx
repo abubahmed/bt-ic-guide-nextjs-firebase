@@ -11,6 +11,12 @@ import { Loader2 } from "lucide-react";
 import GoogleButton from "@/components/custom/google-button";
 import AuthInput from "@/components/custom/auth-input";
 
+const visitorNav = [
+  { href: "/", label: "Home" },
+  { href: "/auth/signup", label: "Apply" },
+  { href: "/auth/invite-request", label: "Support" },
+];
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,24 +26,36 @@ export default function LoginPage() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="flex min-h-svh flex-col bg-sky-50/60">
-      <header className="border-b border-sky-100/80 bg-white/70 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-4">
-          <div>
-            <p className="text-[0.6rem] font-semibold uppercase tracking-[0.4em] text-sky-500">Business Today</p>
-            <p className="text-sm font-semibold text-sky-800">Attendee Portal</p>
+    <div className="flex min-h-svh flex-col bg-slate-50/70">
+      <header className="border-b border-slate-900/10 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-4 lg:flex-nowrap">
+          <div className="flex items-center gap-3">
+            <div className="rounded-2xl border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-sm font-semibold text-sky-800">
+              BTIC Ops
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Business Today</p>
+              <p className="text-sm text-slate-600">Attendee portal</p>
+            </div>
           </div>
-          <nav className="flex items-center gap-4 text-xs font-semibold uppercase tracking-[0.25em] text-sky-500">
-            <Link href="/" className="hover:text-sky-700">
-              Home
-            </Link>
-            <Link href="/auth/signup" className="hover:text-sky-700">
-              Apply
-            </Link>
-            <Link href="/auth/invite-request" className="hover:text-sky-700">
-              Support
-            </Link>
+          <nav className="flex flex-1 items-center justify-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-500">
+            {visitorNav.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-full border border-transparent px-4 py-1.5 transition hover:border-sky-400/40 hover:text-sky-600">
+                {link.label}
+              </Link>
+            ))}
           </nav>
+          <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white/70 px-3 py-2">
+            <p className="text-xs text-slate-500">
+              Need staff access?{" "}
+              <Link href="/staff/auth/login" className="font-semibold text-sky-600 hover:text-sky-700">
+                Staff sign-in
+              </Link>
+            </p>
+          </div>
         </div>
       </header>
       <main className="flex flex-1 items-center justify-center px-6 py-12">
@@ -129,17 +147,17 @@ export default function LoginPage() {
           </footer>
         </div>
       </main>
-      <footer className="border-t border-sky-100/80 bg-white/80">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 px-6 py-4 text-xs text-sky-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {currentYear} Business Today International Conference</p>
-          <div className="flex gap-4 uppercase tracking-[0.3em]">
-            <Link href="/about" className="hover:text-sky-700">
+      <footer className="border-t border-slate-900/10 bg-white/80">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-6 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {currentYear} Business Today · Attendee Operations</p>
+          <div className="flex flex-wrap items-center gap-4 text-[0.6rem] font-semibold uppercase tracking-[0.3em]">
+            <Link href="/about" className="transition hover:text-sky-600">
               About
             </Link>
-            <Link href="/faq" className="hover:text-sky-700">
+            <Link href="/faq" className="transition hover:text-sky-600">
               FAQ
             </Link>
-            <Link href="/contact" className="hover:text-sky-700">
+            <Link href="/contact" className="transition hover:text-sky-600">
               Contact
             </Link>
           </div>
