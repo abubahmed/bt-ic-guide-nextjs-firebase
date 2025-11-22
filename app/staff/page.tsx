@@ -15,7 +15,6 @@ import {
   QrCode,
   Share2,
   ShieldCheck,
-  UploadCloud,
   Users,
 } from "lucide-react";
 
@@ -27,7 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const stats = [
   {
-    label: "Attendees synced",
+    label: "Users synced",
     value: "268",
     meta: "Spreadsheet import • 4 min ago",
     icon: FileSpreadsheet,
@@ -41,7 +40,7 @@ const stats = [
     accent: "from-emerald-400/20 via-emerald-500/10 to-transparent",
   },
   {
-    label: "Live help requests",
+    label: "Help requests",
     value: "5",
     meta: "2 escalated to leadership",
     icon: LifeBuoy,
@@ -52,45 +51,39 @@ const stats = [
 const quickActions = [
   {
     slug: "schedules",
-    label: "Personal schedules",
-    description: "Upload CSV agendas or edit a single team timeline.",
+    label: "Manage personal schedules",
+    description: "Upload CSV schedules or manually edit schedules.",
     icon: CalendarClock,
   },
   {
     slug: "announcements",
-    label: "Announcements & reminders",
+    label: "Manage announcements & reminders",
     description: "Compose push/email nudges or schedule reminders.",
     icon: Megaphone,
   },
   {
     slug: "help",
-    label: "Help desk queue",
-    description: "Triage attendee requests and dispatch on-site support.",
+    label: "Open help desk queue",
+    description: "Triage help requests and dispatch on-site support.",
     icon: LifeBuoy,
   },
   {
     slug: "rooms",
-    label: "Room assignments & QR badges",
-    description: "Map rooms, level numbers, and badge-based access.",
+    label: "Manage room assignments & QR badges",
+    description: "Manage room assignments and distribute QR badges.",
     icon: QrCode,
   },
   {
     slug: "resources",
-    label: "BT resource library",
-    description: "Slides, FAQ, forms, and Business Today history.",
+    label: "Manage resource library",
+    description: "Slides, FAQ, forms, merchandise, and more.",
     icon: ClipboardList,
   },
   {
     slug: "roles",
-    label: "People & access control",
-    description: "Invite Princeton emails, update roles, revoke access.",
+    label: "Manage people & access control",
+    description: "Invite attendees/staffers, update roles, revoke access, etc.",
     icon: ShieldCheck,
-  },
-  {
-    slug: "imports",
-    label: "Data imports & manual inputs",
-    description: "Track spreadsheet uploads powering every module.",
-    icon: UploadCloud,
   },
 ];
 
@@ -275,27 +268,6 @@ const resourceLibraryItems = [
   },
 ];
 
-const importStatuses = [
-  {
-    label: "Attendee roster spreadsheet",
-    status: "Synced 4 min ago",
-    detail: "268 attendees • 3 unmatched emails pending role assignment.",
-    icon: FileSpreadsheet,
-  },
-  {
-    label: "Schedule CSV drop",
-    status: "Awaiting validation",
-    detail: "Upload per-person timelines to refresh dropdown list.",
-    icon: UploadCloud,
-  },
-  {
-    label: "Room + floor maps",
-    status: "Last manual edit 09:40",
-    detail: "MapPin overlays staged for catering + ADA routing.",
-    icon: MapPin,
-  },
-];
-
 const accessControls = [
   {
     title: "Staff & speaker bios",
@@ -329,21 +301,23 @@ export default function StaffDashboardPage() {
             </div>
           </div>
           <nav className="hidden items-center gap-1 text-sm text-slate-400 md:flex">
-            {["schedules", "announcements", "rooms", "resources", "roles", "imports"].map((slug) => (
+            {quickActions.map((action) => (
               <button
-                key={slug}
-                data-nav={slug}
-                className="rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] transition hover:text-sky-300">
-                {actionLabels[slug]}
+                key={action.slug}
+                data-nav={action.slug}
+                className="rounded-full px-4 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.25em] transition hover:text-sky-300">
+                {action.label}
               </button>
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="rounded-2xl border-slate-800 bg-slate-900/70 text-xs font-semibold uppercase tracking-[0.25em] text-slate-200">
+            <Button
+              variant="outline"
+              className="rounded-2xl border-slate-800 bg-slate-900/70 text-xs font-semibold uppercase tracking-[0.25em] text-slate-200">
               Invite staffer
             </Button>
             <Avatar className="size-10 border border-slate-800 bg-slate-900">
-              <AvatarFallback className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-300">BT</AvatarFallback>
+              <AvatarFallback className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-300">BT</AvatarFallback>
             </Avatar>
           </div>
         </div>
@@ -367,7 +341,9 @@ export default function StaffDashboardPage() {
               <Button className="rounded-2xl bg-sky-500 px-6 text-sm font-semibold text-white hover:bg-sky-400">
                 New announcement
               </Button>
-              <Button variant="outline" className="rounded-2xl border-slate-700 bg-slate-900/50 text-slate-100 hover:bg-slate-900">
+              <Button
+                variant="outline"
+                className="rounded-2xl border-slate-700 bg-slate-900/50 text-slate-100 hover:bg-slate-900">
                 Design schedule
               </Button>
             </div>
@@ -378,7 +354,9 @@ export default function StaffDashboardPage() {
               return (
                 <Card key={stat.label} className="border-slate-800 bg-slate-900/70 text-slate-100">
                   <CardContent className="relative rounded-2xl border border-slate-800/80 bg-slate-950/40 p-6">
-                    <span className={`pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.accent} opacity-70`} />
+                    <span
+                      className={`pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.accent} opacity-70`}
+                    />
                     <div className="relative flex items-start justify-between">
                       <div>
                         <p className="text-sm uppercase tracking-[0.35em] text-slate-500">{stat.label}</p>
@@ -434,7 +412,7 @@ export default function StaffDashboardPage() {
                 <div>
                   <CardTitle className="text-2xl text-white">Personal timelines</CardTitle>
                   <CardDescription className="text-slate-400">
-                    Select any attendee, staffer, or team to preview their agenda before pushing updates.
+                    Select any attendee, staffer, or team to preview their schedule and/or make updates.
                   </CardDescription>
                 </div>
                 <Select value={scheduleKey} onValueChange={(value) => setScheduleKey(value as ScheduleKey)}>
@@ -479,7 +457,7 @@ export default function StaffDashboardPage() {
                 <CardTitle className="text-xl text-white">{actionLabels.announcements}</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
-                Stage urgent nudges, compose from scratch, or schedule occasional reminders to auto-send later.
+                Stage occasional reminders, compose announcements, or send team-specific messages.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
@@ -494,7 +472,9 @@ export default function StaffDashboardPage() {
                       <div>
                         <p className="text-sm font-semibold text-white">{announcement.title}</p>
                         <p className="text-sm text-slate-400">{announcement.detail}</p>
-                        <Badge className="mt-3 rounded-full bg-slate-800/60 text-xs text-slate-300">{announcement.channel}</Badge>
+                        <Badge className="mt-3 rounded-full bg-slate-800/60 text-xs text-slate-300">
+                          {announcement.channel}
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -538,7 +518,9 @@ export default function StaffDashboardPage() {
                 <div key={request.team} className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="text-sm font-semibold text-white">{request.team}</p>
-                    <Badge className="rounded-full bg-slate-800/70 text-xs text-slate-200">{request.priority} priority</Badge>
+                    <Badge className="rounded-full bg-slate-800/70 text-xs text-slate-200">
+                      {request.priority} priority
+                    </Badge>
                     <span className="text-xs text-slate-500">{request.minutes}</span>
                   </div>
                   <p className="mt-2 text-sm text-slate-300">{request.message}</p>
@@ -642,41 +624,6 @@ export default function StaffDashboardPage() {
                   Update roles & access
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-
-        </section>
-
-        <section className="grid gap-6">
-          <Card data-action="imports" className="border-slate-800 bg-slate-900/60 text-slate-100">
-            <CardHeader className="border-b border-slate-800/70 pb-6">
-              <div className="flex items-center gap-3">
-                <UploadCloud className="h-5 w-5 text-indigo-300" />
-                <CardTitle className="text-xl text-white">{actionLabels.imports}</CardTitle>
-              </div>
-              <CardDescription className="text-slate-400">
-                Every data source flows from spreadsheets or direct entry—track the latest imports and validations before they power the UI.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
-              {importStatuses.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.label} className="flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/45 p-4">
-                    <span className="rounded-2xl border border-slate-800 bg-slate-900/60 p-2 text-sky-400">
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold text-white">{item.label}</p>
-                      <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{item.status}</p>
-                      <p className="text-sm text-slate-400">{item.detail}</p>
-                    </div>
-                  </div>
-                );
-              })}
-              <Button className="w-full rounded-2xl border border-slate-700 bg-slate-950/60 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
-                View import history
-              </Button>
             </CardContent>
           </Card>
         </section>
