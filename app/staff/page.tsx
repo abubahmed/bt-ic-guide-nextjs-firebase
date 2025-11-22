@@ -19,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -316,6 +317,37 @@ export default function StaffDashboardPage() {
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
+      <header className="sticky top-0 z-20 border-b border-slate-900/70 bg-slate-950/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 lg:px-0">
+          <div className="flex items-center gap-3">
+            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-sky-300">
+              BT&nbsp;IC
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-white">Admin Ops Console</p>
+              <p className="text-xs text-slate-400">Business Today International Conference</p>
+            </div>
+          </div>
+          <nav className="hidden items-center gap-1 text-sm text-slate-400 md:flex">
+            {["schedules", "announcements", "rooms", "resources", "roles", "imports"].map((slug) => (
+              <button
+                key={slug}
+                data-nav={slug}
+                className="rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] transition hover:text-sky-300">
+                {actionLabels[slug]}
+              </button>
+            ))}
+          </nav>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="rounded-2xl border-slate-800 bg-slate-900/70 text-xs font-semibold uppercase tracking-[0.25em] text-slate-200">
+              Invite staffer
+            </Button>
+            <Avatar className="size-10 border border-slate-800 bg-slate-900">
+              <AvatarFallback className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-300">BT</AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+      </header>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
         <section className="rounded-[32px] border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/70 to-slate-950 p-8 shadow-[0px_30px_80px_rgba(2,6,23,0.7)]">
           <div className="flex flex-wrap items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
