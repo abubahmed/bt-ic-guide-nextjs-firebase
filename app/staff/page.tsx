@@ -1,8 +1,29 @@
-import { ArrowUpRight, BarChart3, BellRing, Bot, BusFront, CalendarClock, CalendarPlus, ClipboardList, FileSpreadsheet, Gift, LifeBuoy, MapPin, Megaphone, MessageSquare, PlusCircle, QrCode, Share2, Users } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import {
+  ArrowUpRight,
+  BellRing,
+  BusFront,
+  CalendarClock,
+  ClipboardList,
+  FileSpreadsheet,
+  LifeBuoy,
+  MapPin,
+  Megaphone,
+  MessageSquare,
+  PlusCircle,
+  QrCode,
+  Share2,
+  ShieldCheck,
+  UploadCloud,
+  Users,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const stats = [
   {
@@ -30,23 +51,23 @@ const stats = [
 
 const quickActions = [
   {
-    label: "Create conference",
-    description: "Spin up venues, floors, badge colors, and rooms.",
-    icon: CalendarPlus,
-  },
-  {
     label: "Add staffer / attendee",
-    description: "Invite via Princeton email + verification code.",
+    description: "Invite via approved email lists + verification code.",
     icon: PlusCircle,
   },
   {
-    label: "Build schedule",
-    description: "Drag sessions, speakers, rooms, and livestream links.",
+    label: "Manage roles & permissions",
+    description: "Upgrade or revoke access per email without re-invite.",
+    icon: ShieldCheck,
+  },
+  {
+    label: "Coordinate schedules",
+    description: "Upload CSV agendas or edit a single team timeline.",
     icon: CalendarClock,
   },
   {
     label: "Broadcast announcement",
-    description: "Push reminders to app, SMS, and inbox at once.",
+    description: "Compose from scratch or duplicate templates quickly.",
     icon: Megaphone,
   },
   {
@@ -55,38 +76,90 @@ const quickActions = [
     icon: MapPin,
   },
   {
-    label: "Resource library",
-    description: "Slides, FAQ, surveys, reimbursements, swag forms.",
+    label: "Resource & data library",
+    description: "Slides, FAQ, reimbursements, forms, and imports.",
     icon: ClipboardList,
   },
 ];
 
-const schedule = [
-  {
-    time: "08:30",
-    title: "Leadership stand-up",
-    location: "Ops HQ · Room 214",
-    detail: "Confirm overnight help tickets + floor map updates.",
+const scheduleViews = {
+  phoenix: {
+    label: "Team Phoenix · Ops HQ",
+    sessions: [
+      {
+        time: "08:30",
+        title: "Leadership stand-up",
+        location: "Ops HQ · Room 214",
+        detail: "Confirm overnight help tickets + floor map updates.",
+      },
+      {
+        time: "11:00",
+        title: "Networking concierge brief",
+        location: "Atrium · Level 1",
+        detail: "Assign staff rotations pulled from uploaded roster.",
+      },
+      {
+        time: "15:30",
+        title: "Post-keynote recap",
+        location: "Command Pod",
+        detail: "Log announcements to re-send as reminders.",
+      },
+    ],
   },
-  {
-    time: "10:15",
-    title: "Accessibility walkthrough",
-    location: "Main Hall · Level 2",
-    detail: "Pair with facilities to validate signage + beacons.",
+  brenda: {
+    label: "Brenda Lee · Accessibility lead",
+    sessions: [
+      {
+        time: "09:15",
+        title: "ADA route validation",
+        location: "Main Hall · Level 2",
+        detail: "Walk attendee Brenda's custom schedule import.",
+      },
+      {
+        time: "13:00",
+        title: "Speaker tech check",
+        location: "Innovation Stage",
+        detail: "Upload slides for visibility + attach to session.",
+      },
+      {
+        time: "17:10",
+        title: "Help desk sync",
+        location: "Ops HQ",
+        detail: "Resolve outstanding wheelchair escort requests.",
+      },
+    ],
   },
-  {
-    time: "13:00",
-    title: "Speaker tech check",
-    location: "Innovation Stage",
-    detail: "Upload slides for visibility + attach to app session.",
+  avpod: {
+    label: "AV Admin Pod",
+    sessions: [
+      {
+        time: "07:45",
+        title: "Room sweep + QR scanner test",
+        location: "Expo Theater",
+        detail: "Validate attendee access by role + QR code.",
+      },
+      {
+        time: "12:20",
+        title: "Slide upload window",
+        location: "Innovation Stage",
+        detail: "Parse CSV schedule rows to attach deck URLs.",
+      },
+      {
+        time: "18:00",
+        title: "Evening recap",
+        location: "Broadcast Booth",
+        detail: "Prep template reminders for next morning.",
+      },
+    ],
   },
-  {
-    time: "16:45",
-    title: "Live poll + merch drop",
-    location: "Expo Theater",
-    detail: "Schedule push notification + swag giveaway form.",
-  },
-];
+};
+
+type ScheduleKey = keyof typeof scheduleViews;
+
+const scheduleOptions: { id: ScheduleKey; label: string }[] = Object.entries(scheduleViews).map(([key, value]) => ({
+  id: key as ScheduleKey,
+  label: value.label,
+}));
 
 const announcements = [
   {
@@ -137,6 +210,11 @@ const resourceLinks = [
     icon: QrCode,
   },
   {
+    label: "Schedule uploads (.csv)",
+    description: "Parse personalized agendas directly from spreadsheets.",
+    icon: CalendarClock,
+  },
+  {
     label: "Transportation & meal reimbursements",
     description: "Track submissions, approvals, and payout status.",
     icon: BusFront,
@@ -153,45 +231,46 @@ const resourceLinks = [
   },
 ];
 
-const accessControls = [
+const importStatuses = [
   {
-    title: "Staff & speaker bios",
-    detail: "Profile photos, about-me blurbs, and contact channels.",
+    label: "Attendee roster spreadsheet",
+    status: "Synced 4 min ago",
+    detail: "268 attendees • 3 unmatched emails pending role assignment.",
+    icon: FileSpreadsheet,
   },
   {
-    title: "Attendee permissions",
-    detail: "Room, session, networking, and poll eligibility.",
+    label: "Schedule CSV drop",
+    status: "Awaiting validation",
+    detail: "Upload per-person timelines to refresh dropdown list.",
+    icon: UploadCloud,
   },
   {
-    title: "Verification queue",
-    detail: "Approve Princeton email sign-ups + resend codes.",
+    label: "Room + floor maps",
+    status: "Last manual edit 09:40",
+    detail: "MapPin overlays staged for catering + ADA routing.",
+    icon: MapPin,
   },
 ];
 
-const communityTiles = [
+const accessControls = [
   {
-    title: "Live polls & pulse checks",
-    detail: "Launch polls mid-session and mirror results on stage displays.",
-    icon: BarChart3,
+    title: "Staff & speaker bios",
+    detail: "Profile photos, about-me blurbs, and contact channels pulled from import sheets.",
   },
   {
-    title: "Open speaker slides",
-    detail: "Autofill accessibility mode for remote + low-visibility seats.",
-    icon: Gift,
+    title: "Role + permission matrix",
+    detail: "Update or revoke access per email; unmatched emails stay locked out.",
   },
   {
-    title: "Networking space",
-    detail: "Attendees, staffers, and speakers share socials + intros.",
-    icon: Users,
-  },
-  {
-    title: "Post-event wrap + socials",
-    detail: "Push thank-you notes, highlight reels, and LinkedIn prompts.",
-    icon: Megaphone,
+    title: "Verification queue",
+    detail: "Approve Princeton email sign-ups + resend codes if spreadsheet entry exists.",
   },
 ];
 
 export default function StaffDashboardPage() {
+  const [scheduleKey, setScheduleKey] = useState<ScheduleKey>("phoenix");
+  const currentSchedule = scheduleViews[scheduleKey];
+
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
@@ -205,8 +284,8 @@ export default function StaffDashboardPage() {
             <div>
               <h1 className="text-3xl font-semibold text-white md:text-4xl">Staffer home base</h1>
               <p className="mt-3 max-w-2xl text-base text-slate-400">
-                Coordinate the entire conference from one sleek dashboard—create conferences, map venues, seed schedules, answer
-                help requests, and keep every attendee in sync with push notifications and AI copilots.
+                Coordinate the entire conference from one sleek dashboard—every artifact comes from spreadsheets or manual inputs,
+                so you decide who can view, edit, or broadcast across attendee and staff experiences.
               </p>
             </div>
             <div className="flex gap-3">
@@ -224,9 +303,7 @@ export default function StaffDashboardPage() {
               return (
                 <Card key={stat.label} className="border-slate-800 bg-slate-900/70 text-slate-100">
                   <CardContent className="relative rounded-2xl border border-slate-800/80 bg-slate-950/40 p-6">
-                    <span
-                      className={`pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.accent} opacity-70`}
-                    />
+                    <span className={`pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.accent} opacity-70`} />
                     <div className="relative flex items-start justify-between">
                       <div>
                         <p className="text-sm uppercase tracking-[0.35em] text-slate-500">{stat.label}</p>
@@ -245,12 +322,12 @@ export default function StaffDashboardPage() {
         </section>
 
         <section className="grid gap-4 md:grid-cols-2">
-            {quickActions.map((action) => {
+          {quickActions.map((action) => {
             const Icon = action.icon;
             return (
               <button
                 key={action.label}
-                  className="group flex items-center gap-4 rounded-3xl border border-slate-800/60 bg-slate-900/40 p-5 text-left transition hover:-translate-y-0.5 hover:border-sky-500/50 hover:bg-slate-900/80"
+                className="group flex items-center gap-4 rounded-3xl border border-slate-800/60 bg-slate-900/40 p-5 text-left transition hover:-translate-y-0.5 hover:border-sky-500/50 hover:bg-slate-900/80"
                 type="button">
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/60 text-sky-400">
                   <Icon className="h-5 w-5" />
@@ -267,22 +344,40 @@ export default function StaffDashboardPage() {
 
         <section className="grid gap-6 lg:grid-cols-[1.75fr_1fr]">
           <Card className="border-slate-800 bg-slate-900/60 text-slate-100">
-            <CardHeader className="flex flex-col gap-2 border-b border-slate-800/70 pb-6">
+            <CardHeader className="flex flex-col gap-4 border-b border-slate-800/70 pb-6">
               <div className="flex items-center gap-3">
-                <Badge variant="outline" className="rounded-full border-slate-700 bg-slate-950/40 text-xs uppercase tracking-[0.35em] text-slate-400">
-                  Schedule
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-slate-700 bg-slate-950/40 text-xs uppercase tracking-[0.35em] text-slate-400">
+                  Schedules
                 </Badge>
-                <p className="text-xs text-slate-500">Personalized + fully editable</p>
+                <p className="text-xs text-slate-500">Imported from spreadsheets or manual entries</p>
               </div>
-              <CardTitle className="text-2xl text-white">Today&apos;s control room</CardTitle>
-              <CardDescription className="text-slate-400">
-                Drag-and-drop sessions, attach locations, and mirror updates to attendee timelines instantly.
-              </CardDescription>
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <CardTitle className="text-2xl text-white">Personal timelines</CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Select any attendee, staffer, or team to preview their agenda before pushing updates.
+                  </CardDescription>
+                </div>
+                <Select value={scheduleKey} onValueChange={(value) => setScheduleKey(value as ScheduleKey)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Choose schedule" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {scheduleOptions.map((option) => (
+                      <SelectItem key={option.id} value={option.id}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
-              {schedule.map((slot) => (
+              {currentSchedule.sessions.map((slot) => (
                 <div
-                  key={slot.title}
+                  key={`${slot.title}-${slot.time}`}
                   className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 transition hover:border-sky-500/50">
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="text-lg font-semibold text-white">{slot.time}</p>
@@ -295,7 +390,7 @@ export default function StaffDashboardPage() {
             </CardContent>
             <CardContent className="border-t border-slate-800/70 pt-6">
               <Button className="w-full rounded-2xl border border-sky-500/40 bg-slate-950/60 text-sm font-semibold text-sky-200 hover:bg-slate-900">
-                Customize schedule + attach slides
+                Open {currentSchedule.label} workspace
               </Button>
             </CardContent>
           </Card>
@@ -307,7 +402,7 @@ export default function StaffDashboardPage() {
                 <CardTitle className="text-xl text-white">Announcements & reminders</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
-                Stage urgent nudges, send push notifications, or queue leader messages.
+                Stage urgent nudges, compose from scratch, or schedule occasional reminders to auto-send later.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
@@ -330,9 +425,14 @@ export default function StaffDashboardPage() {
               })}
             </CardContent>
             <CardContent className="border-t border-slate-800/70 pt-6">
-              <Button className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
-                Schedule reminder
-              </Button>
+              <div className="grid gap-3">
+                <Button className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+                  Compose from scratch
+                </Button>
+                <Button className="w-full rounded-2xl border border-slate-700 bg-slate-950/60 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+                  Schedule reminder window
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </section>
@@ -342,10 +442,10 @@ export default function StaffDashboardPage() {
             <CardHeader className="border-b border-slate-800/70 pb-6">
               <div className="flex items-center gap-3">
                 <LifeBuoy className="h-5 w-5 text-rose-400" />
-                <CardTitle className="text-xl text-white">Help requests & AI support</CardTitle>
+                <CardTitle className="text-xl text-white">Help requests</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
-                Answer attendee questions, escalate to leaders, or let the LLM copilot draft replies.
+                Answer attendee questions, escalate to leaders, or dispatch on-site support right from the queue.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
@@ -359,22 +459,6 @@ export default function StaffDashboardPage() {
                   <p className="mt-2 text-sm text-slate-300">{request.message}</p>
                 </div>
               ))}
-              <div className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950/80 p-4">
-                <div className="flex items-center gap-3">
-                  <Bot className="h-5 w-5 text-sky-300" />
-                  <p className="text-sm font-semibold text-white">LLM concierge</p>
-                  <Badge className="rounded-full bg-slate-800/60 text-xs text-slate-300">37 prompts today</Badge>
-                </div>
-                <p className="mt-3 text-sm text-slate-400">
-                  “Draft a courteous response for Brenda in Row D needing wheelchair escort + attach updated floor map.”
-                </p>
-                <p className="mt-2 text-sm text-slate-300">
-                  Suggested reply pre-filled with precise turn-by-turn directions and a link to the ADA route overlay.
-                </p>
-                <Button className="mt-4 w-full rounded-2xl border border-sky-500/40 bg-slate-950/60 text-sm font-semibold text-sky-200 hover:bg-slate-900">
-                  Open AI copilot
-                </Button>
-              </div>
             </CardContent>
           </Card>
 
@@ -385,7 +469,7 @@ export default function StaffDashboardPage() {
                 <CardTitle className="text-xl text-white">Resources & logistics</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
-                Keep maps, QR badges, forms, and miscellaneous resources a tap away for staffers and attendees.
+                Keep maps, QR badges, schedules, and miscellaneous resources a tap away for staffers and attendees.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
@@ -418,7 +502,7 @@ export default function StaffDashboardPage() {
                 <CardTitle className="text-xl text-white">People & access control</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
-                Manage admins, staffers, speakers, and attendees—email verification remains the source of truth.
+                Manage admins, staffers, speakers, and attendees—email verification plus spreadsheet presence remain the source of truth.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
@@ -433,7 +517,7 @@ export default function StaffDashboardPage() {
                   Invite staffer
                 </Button>
                 <Button className="flex-1 rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
-                  Review approvals
+                  Update roles & access
                 </Button>
               </div>
             </CardContent>
@@ -442,30 +526,31 @@ export default function StaffDashboardPage() {
           <Card className="border-slate-800 bg-slate-900/60 text-slate-100">
             <CardHeader className="border-b border-slate-800/70 pb-6">
               <div className="flex items-center gap-3">
-                <Share2 className="h-5 w-5 text-indigo-300" />
-                <CardTitle className="text-xl text-white">Engagement & community</CardTitle>
+                <UploadCloud className="h-5 w-5 text-indigo-300" />
+                <CardTitle className="text-xl text-white">Data uploads & manual inputs</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
-                Boost visibility with live polls, networking, speaker resources, and post-event gratitude.
+                Every data source flows from spreadsheets or direct entry—track the latest imports and validations before they power the UI.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 pt-6">
-              {communityTiles.map((tile) => {
-                const Icon = tile.icon;
+            <CardContent className="space-y-4 pt-6">
+              {importStatuses.map((item) => {
+                const Icon = item.icon;
                 return (
-                  <div key={tile.title} className="flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/45 p-4">
+                  <div key={item.label} className="flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/45 p-4">
                     <span className="rounded-2xl border border-slate-800 bg-slate-900/60 p-2 text-sky-400">
                       <Icon className="h-4 w-4" />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-white">{tile.title}</p>
-                      <p className="text-sm text-slate-400">{tile.detail}</p>
+                      <p className="text-sm font-semibold text-white">{item.label}</p>
+                      <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{item.status}</p>
+                      <p className="text-sm text-slate-400">{item.detail}</p>
                     </div>
                   </div>
                 );
               })}
-              <Button className="w-full rounded-2xl border border-slate-800 bg-slate-950/60 text-sm font-semibold text-slate-200 hover:border-sky-500/40 hover:text-white">
-                Launch engagement playbook
+              <Button className="w-full rounded-2xl border border-slate-700 bg-slate-950/60 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+                View import history
               </Button>
             </CardContent>
           </Card>
