@@ -59,7 +59,7 @@ export default function LoginPage() {
         </div>
       </header>
       <main className="flex flex-1 items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md space-y-8 rounded-3xl border border-sky-100 bg-white p-10 shadow-sm">
+        <div className="w-full max-w-lg space-y-8 rounded-3xl border border-sky-100 bg-white p-10 shadow-sm sm:p-12">
           <header className="space-y-2 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">BT&nbsp;IC</p>
             <h1 className="text-3xl font-semibold text-sky-800">Welcome back</h1>
