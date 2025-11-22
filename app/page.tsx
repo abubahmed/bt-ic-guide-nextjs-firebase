@@ -25,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const stats = [
   {
-    label: "Attendees synced",
+    label: "Users synced",
     value: "268",
     meta: "Spreadsheet import • 4 min ago",
     icon: FileSpreadsheet,
@@ -39,7 +39,7 @@ const stats = [
     accent: "from-emerald-400/20 via-emerald-500/10 to-transparent",
   },
   {
-    label: "Live help requests",
+    label: "Help requests",
     value: "5",
     meta: "2 escalated to leadership",
     icon: LifeBuoy,
@@ -50,38 +50,38 @@ const stats = [
 const quickActions = [
   {
     slug: "schedules",
-    label: "Personal schedules",
-    description: "Upload CSV agendas or edit a single team timeline.",
+    label: "Manage personal schedules",
+    description: "Upload CSV schedules or manually edit schedules.",
     icon: CalendarClock,
   },
   {
     slug: "announcements",
-    label: "Announcements & reminders",
+    label: "Manage announcements & reminders",
     description: "Compose push/email nudges or schedule reminders.",
     icon: Megaphone,
   },
   {
     slug: "help",
-    label: "Help desk queue",
-    description: "Triage attendee requests and dispatch on-site support.",
+    label: "Open help desk queue",
+    description: "Triage help requests and dispatch on-site support.",
     icon: LifeBuoy,
   },
   {
     slug: "rooms",
-    label: "Room assignments & QR badges",
-    description: "Map rooms, level numbers, and badge-based access.",
+    label: "Manage room assignments & QR badges",
+    description: "Manage room assignments and distribute QR badges.",
     icon: QrCode,
   },
   {
     slug: "resources",
-    label: "BT resource library",
-    description: "Slides, FAQ, forms, and Business Today history.",
+    label: "Manage resource library",
+    description: "Slides, FAQ, forms, merchandise, and more.",
     icon: ClipboardList,
   },
   {
     slug: "roles",
-    label: "People & access control",
-    description: "Invite Princeton emails, update roles, revoke access.",
+    label: "Manage people & access control",
+    description: "Invite attendees/staffers, update roles, revoke access, etc.",
     icon: ShieldCheck,
   },
 ];
@@ -378,7 +378,7 @@ export default function StaffDashboardPage() {
                 <div>
                   <CardTitle className="text-2xl text-white">Personal timelines</CardTitle>
                   <CardDescription className="text-slate-400">
-                    Select any attendee, staffer, or team to preview their agenda before pushing updates.
+                    Select any attendee, staffer, or team to preview their schedule and/or make updates.
                   </CardDescription>
                 </div>
                 <Select value={scheduleKey} onValueChange={(value) => setScheduleKey(value as ScheduleKey)}>
@@ -423,7 +423,7 @@ export default function StaffDashboardPage() {
                 <CardTitle className="text-xl text-white">{actionLabels.announcements}</CardTitle>
               </div>
               <CardDescription className="text-slate-400">
-                Stage urgent nudges, compose from scratch, or schedule occasional reminders to auto-send later.
+                Stage occasional reminders, compose announcements, or send team-specific messages.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
