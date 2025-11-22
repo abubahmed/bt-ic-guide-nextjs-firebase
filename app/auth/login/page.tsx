@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { signInWithGoogleActionClient, signInWithEmailActionClient } from "@/actions/client/auth-actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -58,93 +59,116 @@ export default function LoginPage() {
           </div>
         </div>
       </header>
-      <main className="flex flex-1 items-center justify-center px-6 py-12">
-        <div className="w-full max-w-lg space-y-8 rounded-3xl border border-sky-100 bg-white p-10 shadow-sm sm:p-12">
-          <header className="space-y-2 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">BT&nbsp;IC</p>
-            <h1 className="text-3xl font-semibold text-sky-800">Welcome back</h1>
-            <p className="text-sm text-sky-600">Sign in with your event credentials to continue as an attendee.</p>
-            <p className="text-sm text-sky-600">
-              If you have not already registered using the email you used to apply for the event, please do so first.
-            </p>
-          </header>
+      <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
+        <div className="relative w-full max-w-3xl">
+          <div className="absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] bg-gradient-to-br from-sky-200/70 via-white to-white blur-3xl" />
+          <div className="relative grid gap-8 rounded-[32px] border border-sky-100/70 bg-white/95 p-6 shadow-[0_25px_90px_rgba(14,28,56,0.18)] backdrop-blur-lg sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
+            <section className="space-y-6">
+              <header className="space-y-3">
+                <Badge className="rounded-full bg-sky-100 text-[0.6rem] uppercase tracking-[0.4em] text-sky-600">
+                  Attendee
+                </Badge>
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-semibold text-sky-900">Welcome back</h1>
+                  <p className="text-sm text-sky-600">
+                    Use your confirmed attendee email to stay synced with live schedules, reminders, and announcements.
+                  </p>
+                </div>
+              </header>
 
-          <form className="space-y-5" action="#" method="post">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-sky-800">
-                Email
-              </Label>
-              <AuthInput
-                id="email"
-                type="email"
-                placeholder="Enter your email address"
-                autoComplete="email"
-                staff={false}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+              <form className="space-y-5" action="#" method="post">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium text-sky-800">
+                    Email
+                  </Label>
+                  <AuthInput
+                    id="email"
+                    type="email"
+                    placeholder="name@businesstoday.org"
+                    autoComplete="email"
+                    staff={false}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <Label htmlFor="password" className="font-medium text-sky-800">
+                      Password
+                    </Label>
+                    <Link href="/auth/forgot-password" className="text-sky-500 hover:text-sky-600">
+                      Forgot?
+                    </Link>
+                  </div>
+                  <AuthInput
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    staff={false}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="h-11 w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white transition hover:bg-sky-400"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    setLoading(true);
+                    await signInWithEmailActionClient({ email, password }, router);
+                    setLoading(false);
+                  }}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
+                </Button>
+              </form>
+
+              <GoogleButton
+                router={router}
+                loading={loading}
+                setLoading={setLoading}
+                signInWithGoogleAction={signInWithGoogleActionClient}
               />
-            </div>
+            </section>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <Label htmlFor="password" className="font-medium text-sky-800">
-                  Password
-                </Label>
-                <Link href="/auth/forgot-password" className="text-sky-500 hover:text-sky-600">
-                  Forgot?
-                </Link>
+            <aside className="space-y-5 rounded-[24px] border border-sky-50 bg-gradient-to-b from-white to-sky-50/60 p-6 text-sm text-sky-600">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">Need help?</p>
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
+                  <p className="font-semibold text-sky-800">No invite yet?</p>
+                  <p>
+                    Make sure your email is in our approved spreadsheet. Otherwise, submit a quick{" "}
+                    <Link href="/auth/invite-request" className="font-semibold text-sky-600 hover:text-sky-700">
+                      request for approval
+                    </Link>
+                    .
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
+                  <p className="font-semibold text-sky-800">First-timer?</p>
+                  <p>
+                    Create your attendee profile through the{" "}
+                    <Link href="/auth/signup" className="font-semibold text-sky-600 hover:text-sky-700">
+                      sign-up flow
+                    </Link>
+                    . Use the same email you submitted in your application.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
+                  <p className="font-semibold text-sky-800">Switching to staff?</p>
+                  <p>
+                    Head to the{" "}
+                    <Link href="/staff/auth/login" className="font-semibold text-sky-600 hover:text-sky-700">
+                      staff portal
+                    </Link>{" "}
+                    and use your admin invite.
+                  </p>
+                </div>
               </div>
-              <AuthInput
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                autoComplete="current-password"
-                staff={false}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="h-11 w-full rounded-xl bg-sky-500 text-sm font-semibold text-white transition hover:bg-sky-400"
-              onClick={async (e) => {
-                e.preventDefault();
-                setLoading(true);
-                await signInWithEmailActionClient({ email, password }, router);
-                setLoading(false);
-              }}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
-            </Button>
-
-            <GoogleButton
-              router={router}
-              loading={loading}
-              setLoading={setLoading}
-              signInWithGoogleAction={signInWithGoogleActionClient}
-            />
-          </form>
-
-          <footer className="space-y-2 text-center text-sm text-sky-500">
-            <p>
-              Not registered with your attendee email?{" "}
-              <Link href="/auth/signup" className="font-semibold text-sky-600 hover:text-sky-700">
-                Attendee sign-up page
-              </Link>
-            </p>
-            <p>
-              Trouble accessing the attendee portal?{" "}
-              <Link href="/auth/invite-request" className="font-semibold text-sky-600 hover:text-sky-700">
-                Request approval
-              </Link>
-            </p>
-            <p>
-              Signing in as a staff member?{" "}
-              <Link href="/staff/auth/login" className="font-semibold text-sky-600 hover:text-sky-700">
-                Staff login page
-              </Link>
-            </p>
-          </footer>
+            </aside>
+          </div>
         </div>
       </main>
       <footer className="border-t border-slate-900/10 bg-white/80">
