@@ -6,11 +6,12 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { signInWithEmailActionClient, signInWithGoogleActionClient } from "@/actions/client/auth-actions";
 
 import GoogleButton from "@/components/custom/google-button";
+import AuthInput from "@/components/custom/auth-input";
 
 export default function StaffLoginPage() {
   const [email, setEmail] = useState("");
@@ -19,97 +20,123 @@ export default function StaffLoginPage() {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-slate-950 px-6 py-16 text-slate-100">
-      <div className="w-full max-w-md space-y-8 rounded-[32px] border border-slate-800 bg-slate-900/90 p-10 shadow-[0px_20px_45px_rgba(3,7,18,0.65)]">
-        <header className="space-y-2 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-400">BT&nbsp;IC</p>
-          <h1 className="text-3xl font-semibold text-white">Welcome back</h1>
-          <p className="text-sm text-slate-400">
-            Sign in as a staff member with your event credentials If you have not already registered using your
-            Princeton email address, please do so first.
-          </p>
-        </header>
+    <div className="flex min-h-svh flex-col bg-slate-950">
+      <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
+        <div className="relative w-full max-w-3xl">
+          <div className="absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] bg-gradient-to-br from-slate-900 via-slate-800/80 to-slate-900 blur-3xl" />
+          <div className="relative grid gap-8 rounded-[32px] border border-slate-800/80 bg-slate-900/95 p-6 text-slate-100 shadow-[0_25px_90px_rgba(2,6,23,0.8)] backdrop-blur-xl sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
+            <section className="space-y-6">
+              <header className="space-y-3">
+                <Badge className="rounded-full bg-slate-800 text-[0.6rem] uppercase tracking-[0.4em] text-sky-300">
+                  Staff
+                </Badge>
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-semibold text-white">Welcome back, crew</h1>
+                  <p className="text-sm text-slate-300">
+                    Use your staff email and admin invite credentials to access programming tools, live updates, and
+                    on-site checklists.
+                  </p>
+                </div>
+              </header>
 
-        <form className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="staff-email" className="text-sm font-medium text-slate-200">
-              Email
-            </Label>
-            <Input
-              id="staff-email"
-              type="email"
-              placeholder="name@btic.io"
-              autoComplete="email"
-              required
-              className="h-11 rounded-2xl border border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500 focus:border-sky-400 focus-visible:ring-sky-400/40"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+              <form className="space-y-5" action="#" method="post">
+                <div className="space-y-2">
+                  <Label htmlFor="staff-email" className="text-sm font-medium text-slate-100">
+                    Email
+                  </Label>
+                  <AuthInput
+                    id="staff-email"
+                    type="email"
+                    placeholder="name@btic.io"
+                    autoComplete="email"
+                    staff
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <Label htmlFor="staff-password" className="font-medium text-slate-100">
+                      Password
+                    </Label>
+                    <Link href="/auth/forgot-password" className="text-sky-300 hover:text-white">
+                      Forgot?
+                    </Link>
+                  </div>
+                  <AuthInput
+                    id="staff-password"
+                    type="password"
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    staff
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="h-11 w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white transition hover:bg-sky-400"
+                  disabled={loading}
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    setLoading(true);
+                    await signInWithEmailActionClient({ email, password }, router);
+                    setLoading(false);
+                  }}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
+                </Button>
+              </form>
+
+              <div className="space-y-3">
+                <GoogleButton
+                  router={router}
+                  loading={loading}
+                  setLoading={setLoading}
+                  signInWithGoogleAction={signInWithGoogleActionClient}
+                />
+              </div>
+            </section>
+
+            <aside className="space-y-5 rounded-[24px] border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-900/70 p-6 text-sm text-slate-100">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Need help?</p>
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
+                  <p className="font-semibold text-white">Attendee portal?</p>
+                  <p>
+                    Just helping with check-in? Hop over to the{" "}
+                    <Link href="/auth/login" className="font-semibold text-sky-300 hover:text-white">
+                      attendee login
+                    </Link>{" "}
+                    instead.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
+                  <p className="font-semibold text-white">Missing invite?</p>
+                  <p>
+                    Request or resend your admin access through a{" "}
+                    <Link href="/staff/auth/invite-request" className="font-semibold text-sky-300 hover:text-white">
+                      staff invite
+                    </Link>
+                    .
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
+                  <p className="font-semibold text-white">Staff onboarding</p>
+                  <p>
+                    Activate your role and confirm access via the{" "}
+                    <Link href="/staff/auth/signup" className="font-semibold text-sky-300 hover:text-white">
+                      staff onboarding flow
+                    </Link>
+                    .
+                  </p>
+                </div>
+              </div>
+            </aside>
           </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <Label htmlFor="staff-password" className="font-medium text-slate-200">
-                Password
-              </Label>
-              <Link href="/auth/forgot-password" className="text-sky-400 hover:text-sky-300">
-                Forgot?
-              </Link>
-            </div>
-            <Input
-              id="staff-password"
-              type="password"
-              placeholder="Enter your password"
-              autoComplete="current-password"
-              required
-              className="h-11 rounded-2xl border border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500 focus:border-sky-400 focus-visible:ring-sky-400/40"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <Button
-            type="submit"
-            className="h-11 w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white transition hover:bg-sky-400"
-            disabled={loading}
-            onClick={async (e) => {
-              e.preventDefault();
-              setLoading(true);
-              await signInWithEmailActionClient({ email, password }, router);
-              setLoading(false);
-            }}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
-          </Button>
-
-          <GoogleButton
-            router={router}
-            loading={loading}
-            setLoading={setLoading}
-            signInWithGoogleAction={signInWithGoogleActionClient}
-          />
-        </form>
-
-        <footer className="space-y-2 text-center text-sm text-slate-400">
-          <p>
-            Not registered with staff email?{" "}
-            <Link href="/staff/auth/signup" className="font-semibold text-sky-400 hover:text-sky-300">
-              Staff sign-up
-            </Link>
-          </p>
-          <p>
-            Trouble accessing staff portal?{" "}
-            <Link href="/staff/auth/invite-request" className="font-semibold text-sky-400 hover:text-sky-300">
-              Request approval
-            </Link>
-          </p>
-          <p>
-            Signing in as attendee?{" "}
-            <Link href="/auth/login" className="font-semibold text-sky-400 hover:text-sky-300">
-              Attendee login
-            </Link>
-          </p>
-        </footer>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

@@ -112,7 +112,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${workSans.variable} antialiased`}>
+    <html lang="en" className={`${sora.variable} antialiased`}>
       <body>{children}</body>
     </html>
   );
