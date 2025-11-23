@@ -18,10 +18,13 @@ import {
   Users,
 } from "lucide-react";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { signOutActionClient } from "@/actions/client/auth-actions";
+import { useRouter } from "next/navigation";
 
 const stats = [
   {
@@ -282,12 +285,76 @@ const accessControls = [
   },
 ];
 
+const primaryNav = [
+  { slug: "schedules", label: "Schedules" },
+  { slug: "help", label: "Help Desk" },
+  { slug: "roles", label: "Access" },
+];
+
+const staffProfile = {
+  name: "Maya Chen",
+  email: "maya.chen@businesstoday.org",
+};
+
 export default function StaffDashboardPage() {
+  const router = useRouter();
   const [scheduleKey, setScheduleKey] = useState<ScheduleKey>("phoenix");
   const currentSchedule = scheduleViews[scheduleKey];
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
+      <header className="sticky top-0 z-20 border-b border-slate-900/70 bg-slate-950/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 lg:flex-nowrap lg:px-0">
+          <div className="flex items-center gap-3">
+            <div className="rounded-2xl border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-sm font-semibold text-white">
+              BTIC Ops
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Business Today</p>
+              <p className="text-sm text-slate-300">Annual International Conference</p>
+            </div>
+          </div>
+          <nav className="flex flex-1 items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+            {primaryNav.map((link) => (
+              <button
+                key={link.slug}
+                data-nav={link.slug}
+                className="rounded-full border border-transparent px-4 py-1.5 transition hover:border-sky-500/40 hover:text-sky-300">
+                {link.label}
+              </button>
+            ))}
+          </nav>
+          <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/60 px-3 py-2">
+            <Avatar className="size-10 border border-slate-800 bg-slate-900">
+              <AvatarFallback className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-300">
+                {staffProfile.name
+                  .split(" ")
+                  .map((part) => part[0])
+                  .join("")
+                  .slice(0, 2)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-sm">
+              <p className="font-semibold text-white">{staffProfile.name}</p>
+              <p className="text-xs text-slate-400">{staffProfile.email}</p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 rounded-xl border-slate-700 bg-transparent text-[0.65rem] uppercase tracking-[0.25em] text-slate-200">
+                Switch
+              </Button>
+              <Button
+                onClick={async () => await signOutActionClient(router)}
+                size="sm"
+                className="h-7 rounded-xl bg-slate-100 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-slate-900">
+                Log out
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
         <section className="rounded-[32px] border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/70 to-slate-950 p-8 shadow-[0px_30px_80px_rgba(2,6,23,0.7)]">
           <div className="flex flex-wrap items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
@@ -297,21 +364,10 @@ export default function StaffDashboardPage() {
           </div>
           <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold text-white md:text-4xl">Staffer home base</h1>
+              <h1 className="text-3xl font-semibold text-white md:text-4xl">Lead Staffer Dashboard</h1>
               <p className="mt-3 max-w-2xl text-base text-slate-400">
-                Coordinate the Business Today Annual International Conference—from Princeton campus arrivals to Midtown
-                venue breakouts—with a dashboard that mirrors your spreadsheets, manual inputs, and QR-secured spaces.
+                Business Today International Conference Operations Dashboard
               </p>
-            </div>
-            <div className="flex gap-3">
-              <Button className="rounded-2xl bg-sky-500 px-6 text-sm font-semibold text-white hover:bg-sky-400">
-                New announcement
-              </Button>
-              <Button
-                variant="outline"
-                className="rounded-2xl border-slate-700 bg-slate-900/50 text-slate-100 hover:bg-slate-900">
-                Design schedule
-              </Button>
             </div>
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -599,6 +655,18 @@ export default function StaffDashboardPage() {
           </Card>
         </section>
       </div>
+      <footer className="border-t border-slate-900/60 bg-slate-950/90">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between lg:px-0">
+          <p className="text-[0.75rem] text-slate-400">
+            © 2025 Business Today · Annual International Conference Operations
+          </p>
+          <div className="flex flex-wrap items-center gap-4 text-[0.65rem] font-semibold uppercase tracking-[0.3em]">
+            <button className="transition hover:text-sky-300">Support</button>
+            <button className="transition hover:text-sky-300">Ops Playbook</button>
+            <button className="transition hover:text-sky-300">Privacy</button>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

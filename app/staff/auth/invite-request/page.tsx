@@ -26,8 +26,7 @@ export default function StaffAccessHelpPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-400">BT&nbsp;IC Staff</p>
           <h1 className="text-3xl font-semibold text-white">Request staff assistance</h1>
           <p className="text-sm text-slate-400">
-            Already part of the team but having trouble accessing the portal? Tell us what’s happening and we’ll get you
-            unstuck.
+            Part of the team but having trouble accessing the portal? Help us confirm your staff access.
           </p>
         </header>
 

@@ -24,9 +24,9 @@ export default function StaffLoginPage() {
         <header className="space-y-2 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-400">BT&nbsp;IC</p>
           <h1 className="text-3xl font-semibold text-white">Welcome back</h1>
-          <p className="text-sm text-slate-400">Sign in with your staff credentials to continue as a staff member.</p>
           <p className="text-sm text-slate-400">
-            If you have not already registered using your Princeton email address, please do so first.
+            Sign in as a staff member with your event credentials If you have not already registered using your
+            Princeton email address, please do so first.
           </p>
         </header>
 
@@ -91,21 +91,21 @@ export default function StaffLoginPage() {
 
         <footer className="space-y-2 text-center text-sm text-slate-400">
           <p>
-            Need to register with your staff email?{" "}
+            Not registered with staff email?{" "}
             <Link href="/staff/auth/signup" className="font-semibold text-sky-400 hover:text-sky-300">
-              Staff sign-up page
+              Staff sign-up
             </Link>
           </p>
           <p>
-            Trouble accessing the staff portal?{" "}
+            Trouble accessing staff portal?{" "}
             <Link href="/staff/auth/invite-request" className="font-semibold text-sky-400 hover:text-sky-300">
               Request approval
             </Link>
           </p>
           <p>
-            Signing in as an attendee?{" "}
+            Signing in as attendee?{" "}
             <Link href="/auth/login" className="font-semibold text-sky-400 hover:text-sky-300">
-              Attendee login page
+              Attendee login
             </Link>
           </p>
         </footer>

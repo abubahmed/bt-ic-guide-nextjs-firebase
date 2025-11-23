@@ -26,8 +26,7 @@ export default function RequestInvitePage() {
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">BT&nbsp;IC</p>
           <h1 className="text-3xl font-semibold text-sky-800">Request an invite</h1>
           <p className="text-sm text-sky-600">
-            Invited to the event but having trouble accessing the portal? Tell us a little about yourself so we can
-            confirm your event access.
+            Invited to the event but having trouble accessing the portal? Help us confirm your event access.
           </p>
         </header>
 

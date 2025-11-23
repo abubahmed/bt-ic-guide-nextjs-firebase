@@ -25,9 +25,7 @@ export default function StaffSignUpPage() {
         <header className="space-y-2 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-400">BT&nbsp;IC</p>
           <h1 className="text-3xl font-semibold text-white">Join the staff portal</h1>
-          <p className="text-sm text-slate-400">
-            Register with the email you used to apply for the event to continue as a staff member.
-          </p>
+          <p className="text-sm text-slate-400">Register as a staff member with your staff email address.</p>
         </header>
 
         <form className="space-y-5">
@@ -102,21 +100,21 @@ export default function StaffSignUpPage() {
 
         <footer className="space-y-2 text-center text-sm text-slate-400">
           <p>
-            Already registered with your staff email?{" "}
+            Registered with staff email?{" "}
             <Link href="/staff/auth/login" className="font-semibold text-sky-400 hover:text-sky-300">
-              Staff login page
+              Staff login
             </Link>
           </p>
           <p>
-            Trouble accessing the staff portal?{" "}
+            Trouble accessing staff portal?{" "}
             <Link href="/staff/auth/invite-request" className="font-semibold text-sky-400 hover:text-sky-300">
               Request approval
             </Link>
           </p>
           <p>
-            Signing in as an attendee?{" "}
+            Signing in as attendee?{" "}
             <Link href="/auth/signup" className="font-semibold text-sky-400 hover:text-sky-300">
-              Attendee login page
+              Attendee login
             </Link>
           </p>
         </footer>

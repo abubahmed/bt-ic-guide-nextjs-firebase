@@ -24,9 +24,7 @@ export default function SignUpPage() {
         <header className="space-y-2 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">BT&nbsp;IC</p>
           <h1 className="text-3xl font-semibold text-sky-800">Create your account</h1>
-          <p className="text-sm text-sky-600">
-            Register with the email you used to apply for the event to continue as an attendee.
-          </p>
+          <p className="text-sm text-sky-600">Register as an attendee with your application email.</p>
         </header>
 
         <form className="space-y-5" action="#" method="post">
@@ -97,21 +95,21 @@ export default function SignUpPage() {
 
         <footer className="space-y-2 text-center text-sm text-sky-500">
           <p>
-            Already registered with your attendee email?{" "}
+            Registered with attendee email?{" "}
             <Link href="/auth/login" className="font-semibold text-sky-600 hover:text-sky-700">
-              Attendee login page
+              Attendee login
             </Link>
           </p>
           <p>
-            Trouble accessing the attendee portal?{" "}
+            Trouble accessing attendee portal?{" "}
             <Link href="/auth/invite-request" className="font-semibold text-sky-600 hover:text-sky-700">
               Request approval
             </Link>
           </p>
           <p>
-            Signing in as a staff member?{" "}
+            Signing in as staff member?{" "}
             <Link href="/staff/auth/login" className="font-semibold text-sky-600 hover:text-sky-700">
-              Staff login page
+              Staff login
             </Link>
           </p>
         </footer>
