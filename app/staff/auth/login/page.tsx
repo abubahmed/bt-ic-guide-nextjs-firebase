@@ -130,13 +130,13 @@ export default function StaffLoginPage() {
                   </p>
                 </div>
                 <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
-                  <p className="font-semibold text-white">Need training?</p>
+                  <p className="font-semibold text-white">Staff onboarding</p>
                   <p>
-                    Review our onboarding playbook in the{" "}
+                    Activate your role and confirm access via the{" "}
                     <Link href="/staff/auth/signup" className="font-semibold text-sky-300 hover:text-white">
-                      staff signup
-                    </Link>{" "}
-                    flow to confirm your role.
+                      staff onboarding flow
+                    </Link>
+                    .
                   </p>
                 </div>
               </div>
