@@ -116,33 +116,36 @@ export default function SignUpPage() {
             </section>
 
             <aside className="space-y-5 rounded-[24px] border border-sky-50 bg-gradient-to-b from-white to-sky-50/60 p-6 text-sm text-black">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-900">Before you begin</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-900">Quick actions</p>
               <div className="space-y-3">
                 <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
-                  <p className="font-semibold text-sky-700">Invite approved?</p>
+                  <p className="font-semibold text-sky-700">Already registered?</p>
                   <p>
-                    Double-check that your email appears on the attendee confirmation list. If not, submit a quick{" "}
-                    <Link href="/auth/invite-request" className="font-semibold text-black hover:text-sky-700">
-                      invite request
+                    Jump back to the attendee portal and keep planning your schedule by heading to{" "}
+                    <Link href="/auth/login" className="font-semibold text-black hover:text-sky-700">
+                      attendee login
                     </Link>
                     .
                   </p>
                 </div>
                 <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
-                  <p className="font-semibold text-sky-700">Need guidelines?</p>
+                  <p className="font-semibold text-sky-700">Staff member?</p>
                   <p>
-                    Use the same name and email from your application so we can connect travel, scheduling, and check-in
-                    info.
+                    Use your admin invite to access the{" "}
+                    <Link href="/staff/auth/login" className="font-semibold text-black hover:text-sky-700">
+                      staff portal
+                    </Link>{" "}
+                    and manage programming.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
-                  <p className="font-semibold text-sky-700">Joining staff?</p>
+                  <p className="font-semibold text-sky-700">Need access?</p>
                   <p>
-                    Head to the{" "}
-                    <Link href="/staff/auth/signup" className="font-semibold text-black hover:text-sky-700">
-                      staff onboarding
+                    Waiting on approval or missing an invite? Submit a quick{" "}
+                    <Link href="/auth/invite-request" className="font-semibold text-black hover:text-sky-700">
+                      invite request
                     </Link>{" "}
-                    to activate your admin credentials.
+                    and our team will review it.
                   </p>
                 </div>
               </div>
