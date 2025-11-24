@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Download, Edit3, Filter, History, Trash2, UploadCloud } from "lucide-react";
+import { Edit3, Filter, History, Trash2, UploadCloud } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,10 +29,30 @@ const teamLookup = teams.reduce<Record<string, string>>((acc, team) => {
 
 const people = [
   { id: "alex-chen", label: "Alex Chen", team: "operations", role: "Ops hub lead" },
+  { id: "brianna-lee", label: "Brianna Lee", team: "operations", role: "Site logistics" },
+  { id: "carter-simmons", label: "Carter Simmons", team: "operations", role: "Stage direction" },
+  { id: "dahlia-ortiz", label: "Dahlia Ortiz", team: "operations", role: "Equipment flow" },
+  { id: "ethan-brooks", label: "Ethan Brooks", team: "operations", role: "Ops comms" },
   { id: "maya-patel", label: "Maya Patel", team: "programming", role: "Panel wrangler" },
+  { id: "noor-kamal", label: "Noor Kamal", team: "programming", role: "Speaker concierge" },
+  { id: "owen-blake", label: "Owen Blake", team: "programming", role: "Content editor" },
+  { id: "priya-iyer", label: "Priya Iyer", team: "programming", role: "Studio coordinator" },
+  { id: "quincy-hale", label: "Quincy Hale", team: "programming", role: "Backstage ops" },
   { id: "leo-carter", label: "Leo Carter", team: "hospitality", role: "VIP liaison" },
+  { id: "sara-ng", label: "Sara Ng", team: "hospitality", role: "Suite management" },
+  { id: "tariq-farouq", label: "Tariq Farouq", team: "hospitality", role: "Guest transport" },
+  { id: "ivy-lam", label: "Ivy Lam", team: "hospitality", role: "Culinary liaison" },
+  { id: "jamie-bowen", label: "Jamie Bowen", team: "hospitality", role: "Evening host" },
   { id: "diana-park", label: "Diana Park", team: "security", role: "Access control" },
+  { id: "kofi-diaz", label: "Kofi Diaz", team: "security", role: "Perimeter lead" },
+  { id: "lara-cho", label: "Lara Cho", team: "security", role: "Badge command" },
+  { id: "miles-porter", label: "Miles Porter", team: "security", role: "Escort detail" },
+  { id: "nina-vasquez", label: "Nina Vasquez", team: "security", role: "Night shift lead" },
   { id: "luca-ramirez", label: "Luca Ramirez", team: "logistics", role: "Transport chief" },
+  { id: "opal-reed", label: "Opal Reed", team: "logistics", role: "Fleet ops" },
+  { id: "paxton-ryu", label: "Paxton Ryu", team: "logistics", role: "Warehouse manager" },
+  { id: "renee-yang", label: "Renee Yang", team: "logistics", role: "Inventory control" },
+  { id: "samir-holt", label: "Samir Holt", team: "logistics", role: "Freight coordinator" },
 ];
 
 type GridSlot = {
@@ -43,11 +63,9 @@ type GridSlot = {
 };
 
 const gridDays = [
-  { id: "day0", label: "Wed · Day 0" },
-  { id: "day1", label: "Thu · Day 1" },
-  { id: "day2", label: "Fri · Day 2" },
-  { id: "day3", label: "Sat · Day 3" },
-  { id: "day4", label: "Sun · Day 4" },
+  { id: "day0", label: "Fri · Day 1" },
+  { id: "day1", label: "Sat · Day 2" },
+  { id: "day2", label: "Sun · Day 3" },
 ] as const;
 
 type DayKey = (typeof gridDays)[number]["id"];
@@ -64,6 +82,7 @@ const timeBlocks = [
 
 const locationAnchors = ["Command deck", "Main ballroom", "Ops loft"] as const;
 const sourceCycle: GridSlot["source"][] = ["upload", "manual", "hold"];
+const PAGE_SIZE = 10;
 
 const gridAssignments: Record<string, Record<DayKey, GridSlot[]>> = people.reduce((acc, person) => {
   const personAssignments = gridDays.reduce((dayAcc, day, dayIndex) => {
@@ -149,6 +168,7 @@ export default function StaffSchedulesPage() {
   const [gridTeamFilter, setGridTeamFilter] = useState<string>("all");
   const [gridPersonFilter, setGridPersonFilter] = useState<string>("all");
   const [gridDayFilter, setGridDayFilter] = useState<DayScope>("all");
+  const [gridPage, setGridPage] = useState(0);
 
   useEffect(() => {
     const fallbackTeam = uploadTeam || teams[0]?.id || "";
@@ -190,8 +210,19 @@ export default function StaffSchedulesPage() {
     return peopleByTeam.filter((person) => person.id === gridPersonFilter);
   }, [peopleByTeam, gridPersonFilter]);
 
+  useEffect(() => {
+    setGridPage(0);
+  }, [gridTeamFilter, gridPersonFilter, gridDayFilter]);
+
   const visibleDays = gridDayFilter === "all" ? gridDays : gridDays.filter((day) => day.id === gridDayFilter);
-  const latestUploads = historyEntries.filter((entry) => entry.intent === "upload").slice(0, 3);
+  useEffect(() => {
+    const maxPageIndex = Math.max(0, Math.ceil(visiblePeople.length / PAGE_SIZE) - 1);
+    setGridPage((prev) => Math.min(prev, maxPageIndex));
+  }, [visiblePeople.length]);
+  const pageCount = Math.max(1, Math.ceil(visiblePeople.length / PAGE_SIZE));
+  const paginatedPeople = visiblePeople.slice(gridPage * PAGE_SIZE, gridPage * PAGE_SIZE + PAGE_SIZE);
+  const pageStart = visiblePeople.length === 0 ? 0 : gridPage * PAGE_SIZE + 1;
+  const pageEnd = Math.min(visiblePeople.length, (gridPage + 1) * PAGE_SIZE);
   const downloadDayLabel =
     downloadDay === "all" ? "All days" : gridDays.find((day) => day.id === downloadDay)?.label ?? "Selected day";
 
@@ -214,18 +245,6 @@ export default function StaffSchedulesPage() {
                   shifts before pushing updates to the master spreadsheet.
                 </p>
               </div>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Button className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
-                <Download className="mr-2 h-4 w-4" />
-                Upload kit
-              </Button>
-              <Button
-                variant="outline"
-                className="rounded-2xl border-slate-700 bg-slate-950/60 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
-                <History className="mr-2 h-4 w-4" />
-                Audit trail
-              </Button>
             </div>
           </div>
           <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
@@ -281,54 +300,88 @@ export default function StaffSchedulesPage() {
               </Select>
             </div>
             <div className="mt-4">
-              <Table className="text-sm text-slate-200 border-collapse [&_td]:align-top">
-                <TableHeader>
-                  <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-                    <TableHead className="min-w-[200px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
-                      Staffer · Team
-                    </TableHead>
-                    {visibleDays.map((day) => (
-                      <TableHead
-                        key={day.id}
-                        className="border border-slate-800/60 bg-slate-950/60 text-center text-slate-400">
-                        {day.label}
+              {paginatedPeople.length > 0 ? (
+                <Table className="text-sm text-slate-200 border-collapse [&_td]:align-top">
+                  <TableHeader>
+                    <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
+                      <TableHead className="min-w-[200px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
+                        Staffer · Team
                       </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {visiblePeople.map((person) => (
-                    <TableRow key={person.id} className="border border-slate-800/60">
-                      <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
-                        <div>
-                          <p className="font-semibold text-white">{person.label}</p>
-                          <p className="text-xs text-slate-500">
-                            {teamLookup[person.team]} • {person.role}
-                          </p>
-                        </div>
-                      </TableCell>
-                      {visibleDays.map((day) => {
-                        const slots = gridAssignments[person.id]?.[day.id] ?? [];
-                        return (
-                          <TableCell
-                            key={`${person.id}-${day.id}`}
-                            className="border border-slate-800/60 align-top p-0">
-                            <div className="divide-y divide-slate-800/60 text-xs">
-                              {slots.map((slot, slotIndex) => (
-                                <div key={`${person.id}-${day.id}-${slotIndex}`} className="p-3">
-                                  <p className="text-sm font-medium text-white">{slot.title}</p>
-                                  <p className="text-xs text-slate-400">{slot.time}</p>
-                                  <p className="text-xs text-slate-500">{slot.location}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </TableCell>
-                        );
-                      })}
+                      {visibleDays.map((day) => (
+                        <TableHead
+                          key={day.id}
+                          className="border border-slate-800/60 bg-slate-950/60 text-center text-slate-400">
+                          {day.label}
+                        </TableHead>
+                      ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedPeople.map((person) => (
+                      <TableRow key={person.id} className="border border-slate-800/60">
+                        <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
+                          <div>
+                            <p className="font-semibold text-white">{person.label}</p>
+                            <p className="text-xs text-slate-500">
+                              {teamLookup[person.team]} • {person.role}
+                            </p>
+                          </div>
+                        </TableCell>
+                        {visibleDays.map((day) => {
+                          const slots = gridAssignments[person.id]?.[day.id] ?? [];
+                          return (
+                            <TableCell
+                              key={`${person.id}-${day.id}`}
+                              className="border border-slate-800/60 align-top p-0">
+                              <div className="divide-y divide-slate-800/60 text-xs">
+                                {slots.map((slot, slotIndex) => (
+                                  <div key={`${person.id}-${day.id}-${slotIndex}`} className="p-3">
+                                    <p className="text-sm font-medium text-white">{slot.title}</p>
+                                    <p className="text-xs text-slate-400">{slot.time}</p>
+                                    <p className="text-xs text-slate-500">{slot.location}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="mt-8 rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
+                  No schedules match the current filters.
+                </div>
+              )}
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+                <p>
+                  {visiblePeople.length === 0
+                    ? "No staffers to display."
+                    : `Showing ${pageStart}–${pageEnd} of ${visiblePeople.length} staffers`}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={gridPage === 0}
+                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                    onClick={() => setGridPage((prev) => Math.max(0, prev - 1))}>
+                    Previous
+                  </Button>
+                  <span className="text-sm text-slate-300">
+                    Page {visiblePeople.length === 0 ? 0 : gridPage + 1} / {visiblePeople.length === 0 ? 0 : pageCount}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={gridPage >= pageCount - 1 || visiblePeople.length === 0}
+                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                    onClick={() => setGridPage((prev) => Math.min(pageCount - 1, prev + 1))}>
+                    Next
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -471,11 +524,6 @@ export default function StaffSchedulesPage() {
                   </TabsTrigger>
                 </TabsList>
                 <div className="mt-6 space-y-4">
-                  <TabsContent value="all">
-                    <p className="text-sm text-slate-300">
-                      Export includes every scheduled team and staffer for {downloadDayLabel}.
-                    </p>
-                  </TabsContent>
                   <TabsContent value="team" className="space-y-3">
                     <div className="space-y-2">
                       <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
