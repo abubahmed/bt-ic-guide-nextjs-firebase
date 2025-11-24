@@ -1,58 +1,52 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { createInviteActionClient } from "@/actions/client/invite-actions";
-import { getTheme } from "@/lib/theme";
 
 import AuthInput from "@/components/custom/auth-input";
 import { AttendeeInvite } from "@/types/types";
 
 export default function RequestInvitePage() {
-  const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [affiliation, setAffiliation] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
-  const theme = getTheme("attendee");
-  const cardBase = "relative grid gap-8 rounded-[32px] p-6 sm:p-10 lg:grid-cols-[1.1fr_0.9fr]";
-  const cardSkin = `border ${theme.colors.borderStrong} ${theme.colors.surface} ${theme.colors.textBase} ${theme.effects.shadowSurface} ${theme.effects.blur}`;
-  const badgeClass = `rounded-full ${theme.colors.badgeBg} text-[0.6rem] uppercase tracking-[0.4em] ${theme.colors.badgeText}`;
-  const asideContainer = `space-y-5 rounded-[24px] border ${theme.colors.borderMuted} ${theme.colors.surfaceAlt} p-6 text-sm ${theme.colors.textBase}`;
-  const asideCard = `rounded-2xl border ${theme.colors.borderContrast} ${theme.colors.surfaceMuted} px-4 py-3`;
 
   return (
-    <div className={`flex min-h-svh flex-col ${theme.colors.page}`}>
+    <div className="flex min-h-svh flex-col bg-sky-100/40">
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
         <div className="relative w-full max-w-3xl">
-          <div className={`absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] blur-3xl ${theme.colors.overlay}`} />
-          <div className={`${cardBase} ${cardSkin}`}>
+          <div className="absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] bg-gradient-to-br from-sky-200/70 via-white to-white blur-3xl" />
+          <div className="relative grid gap-8 rounded-[32px] border border-sky-100/70 bg-white/95 p-6 text-black shadow-[0_25px_90px_rgba(14,28,56,0.18)] backdrop-blur-lg sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
             <section className="space-y-6">
               <header className="space-y-3">
-                <Badge className={badgeClass}>{theme.label}</Badge>
+                <Badge className="rounded-full bg-sky-100 text-[0.6rem] uppercase tracking-[0.4em] text-sky-900">
+                  Attendee
+                </Badge>
                 <div className="space-y-2">
-                  <h1 className={`text-3xl font-semibold ${theme.colors.textPrimary}`}>Request an invite</h1>
-                  <p className={`text-sm ${theme.colors.textSecondary}`}>
-                    Need access to the attendee portal? Share your details and we’ll review your status with the events team.
+                  <h1 className="text-3xl font-semibold text-sky-900">Request an invite</h1>
+                  <p className="text-sm text-black">
+                    Need access to the attendee portal? Share your details and we’ll review your status with the events
+                    team.
                   </p>
                 </div>
               </header>
 
               <form className="space-y-5" action="#" method="post">
                 <div className="space-y-2">
-                  <Label htmlFor="full-name" className={`text-sm font-medium ${theme.colors.textLabel}`}>
+                  <Label htmlFor="full-name" className="text-sm font-medium text-black">
                     Full name
                   </Label>
                   <AuthInput
                     id="full-name"
                     placeholder="Enter your full name"
-                    theme={theme.id}
+                    staff={false}
                     type="text"
                     autoComplete="name"
                     value={fullName}
@@ -61,13 +55,13 @@ export default function RequestInvitePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className={`text-sm font-medium ${theme.colors.textLabel}`}>
+                  <Label htmlFor="email" className="text-sm font-medium text-black">
                     Email
                   </Label>
                   <AuthInput
                     id="email"
                     placeholder="name@businesstoday.org"
-                    theme={theme.id}
+                    staff={false}
                     type="email"
                     autoComplete="email"
                     value={email}
@@ -76,13 +70,13 @@ export default function RequestInvitePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="affiliation" className={`text-sm font-medium ${theme.colors.textLabel}`}>
+                  <Label htmlFor="affiliation" className="text-sm font-medium text-black">
                     Organization / affiliation
                   </Label>
                   <AuthInput
                     id="affiliation"
                     placeholder="Enter your organization or affiliation"
-                    theme={theme.id}
+                    staff={false}
                     type="text"
                     autoComplete="organization"
                     value={affiliation}
@@ -91,14 +85,14 @@ export default function RequestInvitePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes" className={`text-sm font-medium ${theme.colors.textLabel}`}>
+                  <Label htmlFor="notes" className="text-sm font-medium text-black">
                     Anything else we should know?
                   </Label>
                   <textarea
                     id="notes"
                     rows={4}
                     placeholder="Share context about your role, application, or timeline"
-                    className={theme.fields.textarea}
+                    className="w-full resize-none rounded-2xl border border-sky-100 bg-white px-4 py-3 text-sm text-black placeholder:text-sky-700 focus:border-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
                     value={notes}
                     onChange={(event) => setNotes(event.target.value)}
                   />
@@ -123,13 +117,13 @@ export default function RequestInvitePage() {
               </form>
             </section>
 
-            <aside className={asideContainer}>
-              <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.colors.textMuted}`}>Need help?</p>
-              <div className={asideCard}>
-                <p className={`font-semibold ${theme.colors.textPrimary}`}>Ready to sign in?</p>
+            <aside className="space-y-5 rounded-[24px] border border-sky-50 bg-gradient-to-b from-white to-sky-50/60 p-6 text-sm text-black">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-900">Need help?</p>
+              <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
+                <p className="font-semibold text-sky-700">Ready to sign in?</p>
                 <p>
                   Already approved and just need to log back in? Head over to the{" "}
-                  <Link href="/auth/login" className={`font-semibold ${theme.colors.accent}`}>
+                  <Link href="/auth/login" className="font-semibold text-black hover:text-sky-700">
                     attendee login
                   </Link>{" "}
                   page.

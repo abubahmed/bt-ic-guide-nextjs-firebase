@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { signUpWithEmailActionClient, signInWithGoogleActionClient } from "@/actions/client/auth-actions";
-import { getTheme } from "@/lib/theme";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -19,27 +18,21 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const theme = getTheme("attendee");
-  const cardBase = "relative grid gap-8 rounded-[32px] p-6 sm:p-10 lg:grid-cols-[1.1fr_0.9fr]";
-  const cardSkin = `border ${theme.colors.borderStrong} ${theme.colors.surface} ${theme.colors.textBase} ${theme.effects.shadowSurface} ${theme.effects.blur}`;
-  const badgeClass = `rounded-full ${theme.colors.badgeBg} text-[0.6rem] uppercase tracking-[0.4em] ${theme.colors.badgeText}`;
-  const asideContainer = `space-y-5 rounded-[24px] border ${theme.colors.borderMuted} ${theme.colors.surfaceAlt} p-6 text-sm ${theme.colors.textBase}`;
-  const asideCard = `rounded-2xl border ${theme.colors.borderContrast} ${theme.colors.surfaceMuted} px-4 py-3`;
 
   return (
-    <div className={`flex min-h-svh flex-col ${theme.colors.page}`}>
+    <div className="flex min-h-svh flex-col bg-sky-100/40">
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
         <div className="relative w-full max-w-3xl">
-          <div
-            className={`absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] blur-3xl ${theme.colors.overlay}`}
-          />
-          <div className={`${cardBase} ${cardSkin}`}>
+          <div className="absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] bg-gradient-to-br from-sky-200/70 via-white to-white blur-3xl" />
+          <div className="relative grid gap-8 rounded-[32px] border border-sky-100/70 bg-white/95 p-6 shadow-[0_25px_90px_rgba(14,28,56,0.18)] backdrop-blur-lg sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
             <section className="space-y-6">
               <header className="space-y-3">
-                <Badge className={badgeClass}>{theme.label}</Badge>
+                <Badge className="rounded-full bg-sky-100 text-[0.6rem] uppercase tracking-[0.4em] text-sky-900">
+                  Attendee
+                </Badge>
                 <div className="space-y-2">
-                  <h1 className={`text-3xl font-semibold ${theme.colors.textPrimary}`}>Create your profile</h1>
-                  <p className={`text-sm ${theme.colors.textSecondary}`}>
+                  <h1 className="text-3xl font-semibold text-sky-900">Create your profile</h1>
+                  <p className="text-sm text-black">
                     Use the same email you submitted with your application so we can sync your schedule, reminders, and
                     approvals.
                   </p>
@@ -48,7 +41,7 @@ export default function SignUpPage() {
 
               <form className="space-y-5" action="#" method="post">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className={`text-sm font-medium ${theme.colors.textLabel}`}>
+                  <Label htmlFor="email" className="text-sm font-medium text-black">
                     Email
                   </Label>
                   <AuthInput
@@ -56,14 +49,14 @@ export default function SignUpPage() {
                     type="email"
                     placeholder="name@businesstoday.org"
                     autoComplete="email"
-                    theme={theme.id}
+                    staff={false}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className={`text-sm font-medium ${theme.colors.textLabel}`}>
+                  <Label htmlFor="password" className="text-sm font-medium text-black">
                     Password
                   </Label>
                   <AuthInput
@@ -71,14 +64,14 @@ export default function SignUpPage() {
                     type="password"
                     placeholder="Create a secure password"
                     autoComplete="new-password"
-                    theme={theme.id}
+                    staff={false}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password" className={`text-sm font-medium ${theme.colors.textLabel}`}>
+                  <Label htmlFor="confirm-password" className="text-sm font-medium text-black">
                     Confirm password
                   </Label>
                   <AuthInput
@@ -86,7 +79,7 @@ export default function SignUpPage() {
                     type="password"
                     placeholder="Re-enter your password"
                     autoComplete="new-password"
-                    theme={theme.id}
+                    staff={false}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
@@ -115,36 +108,34 @@ export default function SignUpPage() {
               </div>
             </section>
 
-            <aside className={asideContainer}>
-              <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.colors.textMuted}`}>
-                Need help?
-              </p>
+            <aside className="space-y-5 rounded-[24px] border border-sky-50 bg-gradient-to-b from-white to-sky-50/60 p-6 text-sm text-black">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-900">Need help?</p>
               <div className="space-y-3">
-                <div className={asideCard}>
-                  <p className={`font-semibold ${theme.colors.textPrimary}`}>Already registered?</p>
+                <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
+                  <p className="font-semibold text-sky-700">Already registered?</p>
                   <p>
                     Jump back to the attendee portal and keep planning your schedule by heading to{" "}
-                    <Link href="/auth/login" className={`font-semibold ${theme.colors.accent}`}>
+                    <Link href="/auth/login" className="font-semibold text-black hover:text-sky-700">
                       attendee login
                     </Link>
                     .
                   </p>
                 </div>
-                <div className={asideCard}>
-                  <p className={`font-semibold ${theme.colors.textPrimary}`}>Staff member?</p>
+                <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
+                  <p className="font-semibold text-sky-700">Staff member?</p>
                   <p>
                     Use your admin invite to access the{" "}
-                    <Link href="/staff/auth/login" className={`font-semibold ${theme.colors.accent}`}>
+                    <Link href="/staff/auth/login" className="font-semibold text-black hover:text-sky-700">
                       staff portal
                     </Link>{" "}
                     and manage programming.
                   </p>
                 </div>
-                <div className={asideCard}>
-                  <p className={`font-semibold ${theme.colors.textPrimary}`}>Need access?</p>
+                <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
+                  <p className="font-semibold text-sky-700">Need access?</p>
                   <p>
                     Waiting on approval or missing an invite? Submit a quick{" "}
-                    <Link href="/auth/invite-request" className={`font-semibold ${theme.colors.accent}`}>
+                    <Link href="/auth/invite-request" className="font-semibold text-black hover:text-sky-700">
                       invite request
                     </Link>{" "}
                     and our team will review it.
