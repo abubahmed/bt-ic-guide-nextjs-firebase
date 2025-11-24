@@ -38,13 +38,18 @@ import { useEffect, useMemo, useState } from "react";
    { id: "logistics", label: "Logistics" },
  ];
  
- const people = [
-   { id: "alex-chen", label: "Alex Chen", team: "operations" },
-   { id: "maya-patel", label: "Maya Patel", team: "programming" },
-   { id: "leo-carter", label: "Leo Carter", team: "hospitality" },
-   { id: "diana-park", label: "Diana Park", team: "security" },
-   { id: "luca-ramirez", label: "Luca Ramirez", team: "logistics" },
- ];
+const teamLookup = teams.reduce<Record<string, string>>((acc, team) => {
+  acc[team.id] = team.label;
+  return acc;
+}, {});
+
+const people = [
+  { id: "alex-chen", label: "Alex Chen", team: "operations", role: "Ops hub lead" },
+  { id: "maya-patel", label: "Maya Patel", team: "programming", role: "Panel wrangler" },
+  { id: "leo-carter", label: "Leo Carter", team: "hospitality", role: "VIP liaison" },
+  { id: "diana-park", label: "Diana Park", team: "security", role: "Access control" },
+  { id: "luca-ramirez", label: "Luca Ramirez", team: "logistics", role: "Transport chief" },
+];
  
  const scheduleRows = [
    {
@@ -134,6 +139,54 @@ import { useEffect, useMemo, useState } from "react";
    },
  ];
  
+type GridSlot = {
+  title: string;
+  time: string;
+  location: string;
+  source: "upload" | "manual" | "hold";
+};
+
+const gridDays = [
+  { id: "day0", label: "Thu · Day 0" },
+  { id: "day1", label: "Fri · Day 1" },
+  { id: "day2", label: "Sat · Day 2" },
+  { id: "day3", label: "Sun · Day 3" },
+];
+
+const gridAssignments: Record<string, Partial<Record<string, GridSlot>>> = {
+  "alex-chen": {
+    day0: { title: "Arrivals hub", time: "12:00 – 16:00", location: "JFK · Terminal 4", source: "upload" },
+    day1: { title: "Ops stand-up", time: "08:00 – 11:30", location: "Command HQ", source: "manual" },
+    day2: { title: "Sponsor tours", time: "10:00 – 14:00", location: "Ballroom A", source: "upload" },
+  },
+  "maya-patel": {
+    day0: { title: "Speaker concierge", time: "15:00 – 19:00", location: "Hotel lobby", source: "manual" },
+    day1: { title: "Panel briefing", time: "09:30 – 12:00", location: "Studio 3", source: "upload" },
+    day2: { title: "Content war-room", time: "13:00 – 17:00", location: "Green room", source: "manual" },
+    day3: { title: "Wrap + archive", time: "09:00 – 11:00", location: "Operations HQ", source: "manual" },
+  },
+  "leo-carter": {
+    day1: { title: "VIP escort", time: "10:00 – 13:00", location: "Tower suites", source: "upload" },
+    day2: { title: "Gala hosting", time: "18:00 – 23:00", location: "Main ballroom", source: "manual" },
+  },
+  "diana-park": {
+    day0: { title: "Badge control", time: "17:00 – 21:00", location: "Registration deck", source: "upload" },
+    day1: { title: "Access audit", time: "12:30 – 16:30", location: "Sky lobby", source: "manual" },
+    day3: { title: "Strike & exit", time: "10:00 – 14:00", location: "Loading dock", source: "upload" },
+  },
+  "luca-ramirez": {
+    day0: { title: "Fleet check", time: "08:00 – 11:00", location: "Garage B2", source: "manual" },
+    day2: { title: "Overnight logistics", time: "22:00 – 02:00", location: "Ops floor", source: "upload" },
+    day3: { title: "Sponsor departures", time: "05:30 – 09:30", location: "Ground transport", source: "manual" },
+  },
+};
+
+const gridSourceStyles: Record<GridSlot["source"], { badge: string; label: string }> = {
+  upload: { badge: "bg-sky-500/10 text-sky-200 border-sky-500/30", label: "Imported" },
+  manual: { badge: "bg-emerald-500/10 text-emerald-200 border-emerald-500/30", label: "Manual" },
+  hold: { badge: "bg-amber-500/10 text-amber-200 border-amber-500/30", label: "Hold" },
+};
+
 const intentStyles: Record<string, { badge: string; icon: JSX.Element; accent: string }> = {
   upload: {
     badge: "bg-emerald-500/10 text-emerald-300 border-emerald-500/40",
@@ -189,63 +242,123 @@ const intentStyles: Record<string, { badge: string; icon: JSX.Element; accent: s
      <main className="min-h-dvh bg-slate-950 text-slate-100">
        <StaffHeader />
        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <section className="rounded-[28px] border border-slate-800 bg-slate-950/70 px-6 py-8 shadow-[0px_20px_70px_rgba(2,6,23,0.5)]">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
                 <span>BTIC Staff Ops</span>
                 <span className="h-px w-8 bg-slate-800" />
-                <span>Schedule mission control</span>
+                <span>Inline schedule grid</span>
               </div>
               <div>
-                <h1 className="text-3xl font-semibold text-white">Manage every rota in one lane</h1>
-                <p className="mt-2 max-w-2xl text-base text-slate-400">
-                  Upload spreadsheets, hand-edit shifts, audit changes, and now export any slice of the schedule without
-                  leaving this console.
+                <h1 className="text-3xl font-semibold text-white">Live CSV-style workspace</h1>
+                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                  Review every team and day at a glance, then click into a cell to edit, swap locations, or delete shifts before
+                  pushing updates to the master spreadsheet.
                 </p>
               </div>
             </div>
-            <div className="grid flex-1 gap-6 sm:grid-cols-3">
-              {[
-                { label: "Teams synced", value: "27", meta: "On latest template" },
-                { label: "People scheduled", value: "312", meta: "Updated today" },
-                { label: "Conflicts flagged", value: "4", meta: "Awaiting review" },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-4 text-center text-slate-200">
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">{stat.label}</p>
-                  <p className="mt-3 text-2xl font-semibold text-white">{stat.value}</p>
-                  <p className="text-xs text-slate-500">{stat.meta}</p>
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
-              <Button className="flex-1 rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+            <div className="flex flex-wrap gap-3">
+              <Button className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
                 <Download className="mr-2 h-4 w-4" />
                 Upload kit
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 rounded-2xl border-slate-700 bg-slate-950/60 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+                className="rounded-2xl border-slate-700 bg-slate-950/60 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
                 <History className="mr-2 h-4 w-4" />
                 Audit trail
               </Button>
             </div>
           </div>
+          <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-[0.35em] text-slate-500">
+              <span>Grid mirrors the CSV template</span>
+              <span>Tip: double-click any cell to edit inline</span>
+            </div>
+            <div className="mt-4">
+              <Table className="text-sm text-slate-200 [&_td]:align-top">
+                <TableHeader>
+                  <TableRow className="border-slate-800 bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
+                    <TableHead className="min-w-[200px] text-slate-400">Staffer · Team</TableHead>
+                    {gridDays.map((day) => (
+                      <TableHead key={day.id} className="text-center text-slate-400">
+                        {day.label}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {people.map((person) => (
+                    <TableRow key={person.id} className="border-slate-800/70">
+                      <TableCell className="align-top">
+                        <div className="space-y-1">
+                          <p className="font-semibold text-white">{person.label}</p>
+                          <p className="text-xs text-slate-400">
+                            {teamLookup[person.team]} • {person.role}
+                          </p>
+                        </div>
+                      </TableCell>
+                      {gridDays.map((day) => {
+                        const slot = gridAssignments[person.id]?.[day.id];
+                        if (!slot) {
+                          return (
+                            <TableCell key={`${person.id}-${day.id}`}>
+                              <div className="flex min-h-[140px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-800/70 bg-slate-950/30 p-3 text-center">
+                                <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-500">Open slot</p>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="rounded-xl border-slate-700 bg-slate-950/60 text-xs font-semibold text-slate-100 hover:border-sky-500/60">
+                                  Add shift
+                                </Button>
+                              </div>
+                            </TableCell>
+                          );
+                        }
+                        const slotMeta = gridSourceStyles[slot.source];
+                        return (
+                          <TableCell key={`${person.id}-${day.id}`}>
+                            <div className="flex min-h-[140px] flex-col gap-2 rounded-2xl border border-slate-800 bg-slate-950/40 p-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <p className="text-sm font-semibold text-white">{slot.title}</p>
+                                  <p className="text-xs text-slate-400">{slot.time}</p>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 rounded-xl border-slate-700 bg-slate-950/60 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-slate-100 hover:border-sky-500/60">
+                                  Edit
+                                </Button>
+                              </div>
+                              <p className="text-xs text-slate-500">{slot.location}</p>
+                              <Badge className={`w-fit rounded-full border px-2 py-0.5 text-[0.65rem] ${slotMeta.badge}`}>
+                                {slotMeta.label}
+                              </Badge>
+                            </div>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </section>
 
-        <section className="rounded-[24px] border border-slate-800 bg-slate-950/70 p-6">
+        <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 lg:p-8">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
                 <span>Instant exports</span>
                 <span className="h-px w-8 bg-slate-800" />
-                <span>CSV / Spreadsheet</span>
+                <span>CSV · XLSX</span>
               </div>
               <h2 className="mt-2 text-2xl font-semibold text-white">Download exactly what you need</h2>
               <p className="text-slate-400">
-                Share a conference-wide file, focus on a team, or send a single staffer’s schedule in CSV or XLSX.
+                Share a conference-wide file, focus on a team, or send a single staffer’s schedule directly from this grid.
               </p>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-slate-300">
@@ -260,7 +373,7 @@ const intentStyles: Record<string, { badge: string; icon: JSX.Element; accent: s
             </div>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
               <Tabs value={downloadScope} onValueChange={(value) => setDownloadScope(value as typeof downloadScope)}>
                 <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
                   <TabsTrigger value="all" className="rounded-xl text-xs uppercase tracking-[0.2em]">
@@ -341,7 +454,7 @@ const intentStyles: Record<string, { badge: string; icon: JSX.Element; accent: s
                 </div>
               </Tabs>
             </div>
-            <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+            <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Format</Label>
                 <Select value={downloadFormat} onValueChange={(value) => setDownloadFormat(value as typeof downloadFormat)}>
