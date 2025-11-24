@@ -1,6 +1,6 @@
- "use client";
- 
- import { useMemo, useState } from "react";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
  import {
    CalendarRange,
    Download,
@@ -159,6 +159,20 @@ const intentStyles: Record<string, { badge: string; icon: JSX.Element; accent: s
    const [selectedPerson, setSelectedPerson] = useState(people[0]?.id ?? "");
    const [manualScope, setManualScope] = useState<"everyone" | "team" | "person">("team");
    const [selectedScheduleId, setSelectedScheduleId] = useState(scheduleRows[0]?.id ?? "");
+  const [downloadScope, setDownloadScope] = useState<"all" | "team" | "person">("all");
+  const [downloadTeam, setDownloadTeam] = useState(teams[0]?.id ?? "");
+  const [downloadPerson, setDownloadPerson] = useState(
+    people.find((person) => person.team === (teams[0]?.id ?? ""))?.id ?? "",
+  );
+  const [downloadFormat, setDownloadFormat] = useState<"csv" | "xlsx">("csv");
+
+  useEffect(() => {
+    const fallbackTeam = downloadTeam || teams[0]?.id || "";
+    const teamPeople = people.filter((person) => person.team === fallbackTeam);
+    if (!teamPeople.some((person) => person.id === downloadPerson)) {
+      setDownloadPerson(teamPeople[0]?.id ?? "");
+    }
+  }, [downloadTeam, downloadPerson]);
  
    const filteredSchedules = useMemo(() => {
      return scheduleRows.filter((row) => {
@@ -175,138 +189,186 @@ const intentStyles: Record<string, { badge: string; icon: JSX.Element; accent: s
      <main className="min-h-dvh bg-slate-950 text-slate-100">
        <StaffHeader />
        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <section className="grid gap-6 lg:grid-cols-[1.6fr_1.1fr]">
-          <div className="relative overflow-hidden rounded-[32px] border border-slate-800 bg-slate-950/80 p-8">
-            <span className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-sky-500/20 via-transparent to-transparent" />
-            <div className="relative flex flex-wrap items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-              <span>BTIC Ops · Live</span>
-              <span className="h-px w-8 bg-slate-800" />
-              <span>Schedule command module</span>
-            </div>
-            <div className="relative mt-6 flex flex-col gap-6">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/70 px-4 py-1 text-[0.65rem] uppercase tracking-[0.35em] text-slate-400">
-                  <span className="size-2 rounded-full bg-emerald-400" />
-                  Signal locked
-                </div>
-                <h1 className="text-3xl font-semibold text-white md:text-4xl">Personal schedule mission control</h1>
-                <p className="max-w-3xl text-base text-slate-400">
-                  Coordinate every rota in one place—stage bulk uploads, react to manual tweaks, broadcast adjustments,
-                  and keep compliance happy with a full audit trail.
+        <section className="rounded-[28px] border border-slate-800 bg-slate-950/70 px-6 py-8 shadow-[0px_20px_70px_rgba(2,6,23,0.5)]">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
+                <span>BTIC Staff Ops</span>
+                <span className="h-px w-8 bg-slate-800" />
+                <span>Schedule mission control</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-semibold text-white">Manage every rota in one lane</h1>
+                <p className="mt-2 max-w-2xl text-base text-slate-400">
+                  Upload spreadsheets, hand-edit shifts, audit changes, and now export any slice of the schedule without
+                  leaving this console.
                 </p>
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-3xl border border-slate-800/70 bg-slate-900/60 p-4">
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">What you can do</p>
-                  <ul className="mt-3 space-y-2 text-sm text-slate-300">
-                    <li>• Import master spreadsheets + scoped rotas</li>
-                    <li>• Handcraft or edit single shifts in seconds</li>
-                    <li>• Approve, archive, or roll back changes</li>
-                  </ul>
+            </div>
+            <div className="grid flex-1 gap-6 sm:grid-cols-3">
+              {[
+                { label: "Teams synced", value: "27", meta: "On latest template" },
+                { label: "People scheduled", value: "312", meta: "Updated today" },
+                { label: "Conflicts flagged", value: "4", meta: "Awaiting review" },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-2xl border border-slate-800/70 bg-slate-950/60 p-4 text-center text-slate-200">
+                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">{stat.label}</p>
+                  <p className="mt-3 text-2xl font-semibold text-white">{stat.value}</p>
+                  <p className="text-xs text-slate-500">{stat.meta}</p>
                 </div>
-                <div className="rounded-3xl border border-slate-800/70 bg-slate-900/60 p-4">
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Ops spotlight</p>
-                  <div className="mt-3 space-y-3 text-sm text-slate-300">
-                    <div className="flex items-center justify-between">
-                      <span>Pending approvals</span>
-                      <Badge className="rounded-full bg-amber-500/10 text-amber-300">8</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Conflicting shifts</span>
-                      <Badge className="rounded-full bg-rose-500/10 text-rose-300">4</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Manual edits today</span>
-                      <Badge className="rounded-full bg-sky-500/10 text-sky-200">23</Badge>
-                    </div>
-                  </div>
-                </div>
+              ))}
+            </div>
+            <div className="flex flex-shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
+              <Button className="flex-1 rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+                <Download className="mr-2 h-4 w-4" />
+                Upload kit
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 rounded-2xl border-slate-700 bg-slate-950/60 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+                <History className="mr-2 h-4 w-4" />
+                Audit trail
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[24px] border border-slate-800 bg-slate-950/70 p-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
+                <span>Instant exports</span>
+                <span className="h-px w-8 bg-slate-800" />
+                <span>CSV / Spreadsheet</span>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Button className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
-                  <Download className="mr-2 h-4 w-4" />
-                  Download upload kit
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-2xl border-slate-700 bg-slate-950/60 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
-                  <History className="mr-2 h-4 w-4" />
-                  Review audit history
-                </Button>
+              <h2 className="mt-2 text-2xl font-semibold text-white">Download exactly what you need</h2>
+              <p className="text-slate-400">
+                Share a conference-wide file, focus on a team, or send a single staffer’s schedule in CSV or XLSX.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-6 text-sm text-slate-300">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Last export</p>
+                <p className="font-semibold text-white">2 mins ago · CSV · Full roster</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Generated by</p>
+                <p className="font-semibold text-white">Jordan King</p>
               </div>
             </div>
           </div>
-          <div className="space-y-4">
-            <Card className="border-slate-800 bg-slate-900/70 text-slate-100">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <Badge className="rounded-full bg-slate-800/80 text-xs text-slate-200">Live updates</Badge>
-                  <span className="text-xs uppercase tracking-[0.3em] text-slate-500">Next 6 hrs</span>
-                </div>
-                <CardTitle className="text-lg text-white">Operational heartbeat</CardTitle>
-                <CardDescription className="text-slate-400">Track the next critical adjustments coming in.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {[
-                  {
-                    title: "Operations night shift upload",
-                    time: "In 12 min",
-                    detail: "CSV staged · 48 entries",
-                    type: "upload",
-                  },
-                  {
-                    title: "Hospitality VIP escort tweak",
-                    time: "In 45 min",
-                    detail: "Manual edit requested by Maya",
-                    type: "edit",
-                  },
-                  {
-                    title: "Badge control cleanup",
-                    time: "In 1 hr 20 min",
-                    detail: "Delete overlapping slots",
-                    type: "delete",
-                  },
-                ].map((item) => (
-                  <div key={item.title} className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <p className="font-semibold text-white">{item.title}</p>
-                      <span className="text-xs uppercase tracking-[0.3em] text-slate-500">{item.time}</span>
+          <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+              <Tabs value={downloadScope} onValueChange={(value) => setDownloadScope(value as typeof downloadScope)}>
+                <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+                  <TabsTrigger value="all" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    All teams
+                  </TabsTrigger>
+                  <TabsTrigger value="team" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    Team
+                  </TabsTrigger>
+                  <TabsTrigger value="person" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    Individual
+                  </TabsTrigger>
+                </TabsList>
+                <div className="mt-6 space-y-4">
+                  <TabsContent value="all">
+                    <p className="text-sm text-slate-300">
+                      You’re exporting the master conference schedule with every team and staffer included.
+                    </p>
+                  </TabsContent>
+                  <TabsContent value="team" className="space-y-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+                      <Select value={downloadTeam} onValueChange={setDownloadTeam}>
+                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                          <SelectValue placeholder="Choose team" />
+                        </SelectTrigger>
+                        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                          {teams.map((team) => (
+                            <SelectItem key={team.id} value={team.id}>
+                              {team.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <p className="text-xs text-slate-400">{item.detail}</p>
-                    <Badge className="mt-3 rounded-full bg-slate-800/60 text-xs capitalize text-slate-200">
-                      {item.type}
-                    </Badge>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-            <Card className="border-slate-800 bg-slate-900/70 text-slate-100">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <Badge className="rounded-full bg-slate-800/80 text-xs text-slate-200">Compliance</Badge>
-                  <CalendarRange className="h-4 w-4 text-sky-300" />
+                    <p className="text-xs text-slate-500">
+                      Includes only people attached to {teams.find((team) => team.id === downloadTeam)?.label}.
+                    </p>
+                  </TabsContent>
+                  <TabsContent value="person" className="space-y-3">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+                        <Select value={downloadTeam} onValueChange={setDownloadTeam}>
+                          <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                            <SelectValue placeholder="Team" />
+                          </SelectTrigger>
+                          <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                            {teams.map((team) => (
+                              <SelectItem key={team.id} value={team.id}>
+                                {team.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Staffer</Label>
+                        <Select value={downloadPerson} onValueChange={setDownloadPerson}>
+                          <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                            <SelectValue placeholder="Person" />
+                          </SelectTrigger>
+                          <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                            {people
+                              .filter((person) => person.team === downloadTeam)
+                              .map((person) => (
+                                <SelectItem key={person.id} value={person.id}>
+                                  {person.label}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Perfect for sending one schedule to {people.find((person) => person.id === downloadPerson)?.label ?? "a staffer"}.
+                    </p>
+                  </TabsContent>
                 </div>
-                <CardTitle className="text-lg text-white">Change governance</CardTitle>
-                <CardDescription className="text-slate-400">
-                  Who touched what, and which approvals are still in flight.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-slate-300">
-                <div className="flex items-center justify-between">
-                  <span>Approvers online</span>
-                  <Badge className="rounded-full bg-emerald-500/10 text-emerald-300">4</Badge>
+              </Tabs>
+            </div>
+            <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Format</Label>
+                <Select value={downloadFormat} onValueChange={(value) => setDownloadFormat(value as typeof downloadFormat)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Choose format" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    <SelectItem value="csv">CSV (spreadsheet ready)</SelectItem>
+                    <SelectItem value="xlsx">Excel spreadsheet (.xlsx)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Delivery</Label>
+                <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/40 p-3 text-sm text-slate-400">
+                  Send link to ops inbox & make available in downloads tray.
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>Awaiting review</span>
-                  <Badge className="rounded-full bg-amber-500/10 text-amber-300">8</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Auto-approved</span>
-                  <Badge className="rounded-full bg-sky-500/10 text-sky-200">19</Badge>
-                </div>
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Last sync · 32 seconds ago</p>
-              </CardContent>
-            </Card>
+              </div>
+              <Button className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+                Download {downloadFormat === "csv" ? "CSV" : "Spreadsheet"}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+                Schedule recurring export
+              </Button>
+            </div>
           </div>
         </section>
  
