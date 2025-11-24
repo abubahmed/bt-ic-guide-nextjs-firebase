@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Building2, Filter, History, Trash2, UploadCloud } from "lucide-react";
+import { Building2, Filter, UploadCloud } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import StaffFooter from "../(dashboard)/components/footer";
@@ -71,54 +70,6 @@ const roomAssignments = staff.reduce<Record<string, { room: string; floor: strin
   {},
 );
 
-const changeLog = [
-  {
-    id: "room-evt-1",
-    intent: "upload",
-    actor: "Quincy Hale",
-    action: "Uploaded master room roster",
-    detail: "rooms_master.csv · 96 rows",
-    timestamp: "Today · 08:12",
-  },
-  {
-    id: "room-evt-2",
-    intent: "edit",
-    actor: "Lara Cho",
-    action: "Reassigned badge team cluster",
-    detail: "Moved four staffers to level 9 corner suites",
-    timestamp: "Today · 07:48",
-  },
-  {
-    id: "room-evt-3",
-    intent: "delete",
-    actor: "Sara Ng",
-    action: "Removed duplicate VIP listing",
-    detail: "Room 1203 released for host committee",
-    timestamp: "Yesterday · 23:22",
-  },
-] as const;
-
-const intentStyles: Record<
-  (typeof changeLog)[number]["intent"],
-  { badge: string; icon: JSX.Element; accent: string }
-> = {
-  upload: {
-    badge: "bg-emerald-500/10 text-emerald-300 border-emerald-500/40",
-    icon: <UploadCloud className="h-4 w-4" />,
-    accent: "from-emerald-500/20 via-transparent to-transparent",
-  },
-  edit: {
-    badge: "bg-sky-500/10 text-sky-300 border-sky-500/40",
-    icon: <History className="h-4 w-4" />,
-    accent: "from-sky-500/20 via-transparent to-transparent",
-  },
-  delete: {
-    badge: "bg-rose-500/10 text-rose-300 border-rose-500/40",
-    icon: <Trash2 className="h-4 w-4" />,
-    accent: "from-rose-500/20 via-transparent to-transparent",
-  },
-};
-
 const PAGE_SIZE = 10;
 
 type UploadScope = "master" | "team" | "person";
@@ -138,18 +89,26 @@ export default function StaffRoomsPage() {
   const [exportFormat, setExportFormat] = useState<ExportFormat>("csv");
 
   useEffect(() => {
-    const candidates = staff.filter((person) => person.team === uploadTeam);
-    if (!candidates.some((person) => person.id === uploadPerson)) {
-      setUploadPerson(candidates[0]?.id ?? "");
+    const teamPeople = staff.filter((person) => person.team === uploadTeam);
+    if (!teamPeople.some((person) => person.id === uploadPerson)) {
+      setUploadPerson(teamPeople[0]?.id ?? "");
     }
   }, [uploadTeam, uploadPerson]);
 
   useEffect(() => {
-    const candidates = staff.filter((person) => person.team === exportTeam);
-    if (!candidates.some((person) => person.id === exportPerson)) {
-      setExportPerson(candidates[0]?.id ?? "");
+    const teamPeople = staff.filter((person) => person.team === exportTeam);
+    if (!teamPeople.some((person) => person.id === exportPerson)) {
+      setExportPerson(teamPeople[0]?.id ?? "");
     }
   }, [exportTeam, exportPerson]);
+
+  useEffect(() => {
+    if (filterPerson === "all") return;
+    const candidate = staff.find((person) => person.id === filterPerson);
+    if (!candidate || (filterTeam !== "all" && candidate.team !== filterTeam)) {
+      setFilterPerson("all");
+    }
+  }, [filterTeam, filterPerson]);
 
   const filteredPeople = useMemo(() => {
     if (filterTeam === "all") {
@@ -179,40 +138,48 @@ export default function StaffRoomsPage() {
   const pageStart = visiblePeople.length === 0 ? 0 : gridPage * PAGE_SIZE + 1;
   const pageEnd = Math.min(visiblePeople.length, (gridPage + 1) * PAGE_SIZE);
 
+  const uploadPersonLabel = staff.find((person) => person.id === uploadPerson)?.name ?? "selected staffer";
+  const exportPersonLabel = staff.find((person) => person.id === exportPerson)?.name ?? "selected staffer";
+  const uploadHeadline =
+    uploadScope === "master"
+      ? "Drop conference-wide room file"
+      : uploadScope === "team"
+        ? `Upload ${teamLookup[uploadTeam]} roster`
+        : `Upload rooming for ${uploadPersonLabel}`;
+  const uploadSubcopy =
+    uploadScope === "person"
+      ? "CSV/XLSX · Single staff allocation"
+      : "CSV/XLSX · Auto maps floors and notes";
+
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
       <StaffHeader />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-8 shadow-[0px_30px_80px_rgba(2,6,23,0.45)]">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-4">
+        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-3">
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
                 <span>BTIC Staff Ops</span>
                 <span className="h-px w-8 bg-slate-800" />
-                <span>Room inventory</span>
+                <span>Room roster console</span>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="rounded-2xl border border-sky-500/30 bg-sky-500/10 p-3 text-sky-200">
-                  <Building2 className="h-6 w-6" />
-                </span>
-                <div>
-                  <h1 className="text-3xl font-semibold text-white">Rooms & access workspace</h1>
-                  <p className="text-sm text-slate-400">
-                    Mirroring the schedules console—now focused on room assignments, uploads, exports, and audit trails.
-                  </p>
-                </div>
+              <div>
+                <h1 className="text-3xl font-semibold text-white">Live room intelligence workspace</h1>
+                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                  Same palette, typography, and grid rhythm as schedules—just tuned for room numbers, floors, and notes.
+                </p>
               </div>
             </div>
-            <div className="rounded-3xl border border-slate-800/80 bg-slate-950/40 px-6 py-4 text-center text-sm text-slate-400">
+            <div className="rounded-3xl border border-slate-800/70 bg-slate-950/50 px-6 py-4 text-center text-sm text-slate-400">
               <p className="text-4xl font-semibold text-white">{staff.length}</p>
               <p>active staffers</p>
-              <p className="text-xs text-slate-500">Auto-synced to nightly roster drop</p>
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Mirrors CSV template</p>
             </div>
           </div>
           <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
             <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.35em] text-slate-500">
-              <span>Compact grid</span>
-              <span>Aligned to CSV template</span>
+              <span>Grid mirrors template</span>
+              <span>Double-click row to copy</span>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/30 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
@@ -257,9 +224,7 @@ export default function StaffRoomsPage() {
                         Staffer · Team
                       </TableHead>
                       <TableHead className="border border-slate-800/60 text-slate-400">Room</TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400 text-center">Floor</TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Type</TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Notes</TableHead>
+                      <TableHead className="border border-slate-800/60 text-slate-400">Allocation detail</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -273,12 +238,14 @@ export default function StaffRoomsPage() {
                               {teamLookup[person.team]} • {person.role}
                             </p>
                           </TableCell>
-                          <TableCell className="border border-slate-800/60 p-3 font-mono text-base tracking-wide text-slate-100">
-                            {slot.room}
+                          <TableCell className="border border-slate-800/60 p-3">
+                            <p className="font-mono text-base tracking-wide text-slate-100">{slot.room}</p>
+                            <p className="text-xs text-slate-500">Floor {slot.floor}</p>
                           </TableCell>
-                          <TableCell className="border border-slate-800/60 p-3 text-center text-slate-200">{slot.floor}</TableCell>
-                          <TableCell className="border border-slate-800/60 p-3 text-slate-300">{slot.type}</TableCell>
-                          <TableCell className="border border-slate-800/60 p-3 text-slate-400">{slot.note}</TableCell>
+                          <TableCell className="border border-slate-800/60 p-3">
+                            <p className="text-sm font-medium text-white">{slot.type}</p>
+                            <p className="text-xs text-slate-500">{slot.note}</p>
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -321,31 +288,42 @@ export default function StaffRoomsPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.35)]">
+        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Spreadsheet staging</p>
-              <h2 className="mt-2 text-2xl font-semibold text-white">Upload master, team, or individual rooms</h2>
-              <p className="text-sm text-slate-400">Drop in the CSV template you trust—we will mirror it back here instantly.</p>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
+                <span>Spreadsheet staging</span>
+                <span className="h-px w-8 bg-slate-800" />
+                <span>Master · Team · Individual</span>
+              </div>
+              <div>
+                <h2 className="text-3xl font-semibold text-white">Upload every scenario from one surface</h2>
+                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                  Pick the scope, drop in CSV / XLSX, run validations, and the grid above mirrors it instantly—same as schedules.
+                </p>
+              </div>
             </div>
-            <Tabs value={uploadScope} onValueChange={(value) => setUploadScope(value as UploadScope)} className="self-start">
-              <TabsList className="rounded-full border border-slate-800 bg-slate-950/50">
-                <TabsTrigger value="master" className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.3em]">
-                  Master
-                </TabsTrigger>
-                <TabsTrigger value="team" className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.3em]">
-                  Team
-                </TabsTrigger>
-                <TabsTrigger value="person" className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.3em]">
-                  Individual
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
+            <div className="space-y-3">
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload scope</p>
+              <Tabs value={uploadScope} onValueChange={(value) => setUploadScope(value as UploadScope)}>
+                <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+                  <TabsTrigger value="master" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    Master
+                  </TabsTrigger>
+                  <TabsTrigger value="team" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    Team
+                  </TabsTrigger>
+                  <TabsTrigger value="person" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    Individual
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
             {uploadScope !== "master" && (
               <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team scope</Label>
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
                 <Select value={uploadTeam} onValueChange={setUploadTeam}>
                   <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                     <SelectValue placeholder="Choose team" />
@@ -362,10 +340,10 @@ export default function StaffRoomsPage() {
             )}
             {uploadScope === "person" && (
               <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Individual</Label>
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Staffer</Label>
                 <Select value={uploadPerson} onValueChange={setUploadPerson}>
                   <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Choose staffer" />
+                    <SelectValue placeholder="Select person" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
                     {staff
@@ -379,133 +357,149 @@ export default function StaffRoomsPage() {
                 </Select>
               </div>
             )}
-          </div>
-          <div className="mt-4 rounded-3xl border border-dashed border-slate-800 bg-slate-950/30 p-6 text-center text-slate-400">
-            <Label htmlFor="rooms-upload" className="cursor-pointer text-base text-white">
-              Drag & drop CSV or click to browse
-            </Label>
-            <p className="text-xs uppercase tracking-[0.35em] text-slate-500">rooms_template.csv</p>
-            <input id="rooms-upload" type="file" className="hidden" />
-          </div>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs text-slate-500">Accepted formats: CSV, XLSX · We validate columns before staging.</p>
-            <Button className="rounded-2xl bg-emerald-500/90 text-slate-950 hover:bg-emerald-400" size="lg">
-              Stage upload
-            </Button>
+            <label
+              htmlFor="rooms-upload"
+              className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
+              <UploadCloud className="h-8 w-8 text-sky-300" />
+              <div>
+                <p className="text-sm font-semibold text-white">{uploadHeadline}</p>
+                <p className="text-xs text-slate-500">{uploadSubcopy}</p>
+              </div>
+              <span className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-500">rooms_template.csv</span>
+              <input id="rooms-upload" type="file" className="hidden" accept=".csv,.xlsx" />
+            </label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button
+                variant="outline"
+                className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+                Run validations
+              </Button>
+              <Button className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+                Stage upload
+              </Button>
+            </div>
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.35)]">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-sky-400">Export schedules</p>
+              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
+                <span>Room exports</span>
+                <span className="h-px w-8 bg-slate-800" />
+                <span>CSV · XLSX</span>
+              </div>
               <h2 className="mt-2 text-2xl font-semibold text-white">Export structured room assignments</h2>
-              <p className="text-sm text-slate-400">Select the scope, pick a format, and ship it to your downstream systems.</p>
+              <p className="text-slate-400">Same control surface as schedules—just filtered for rooms, floors, and notes.</p>
             </div>
-            <Tabs value={exportScope} onValueChange={(value) => setExportScope(value as ExportScope)} className="self-start">
-              <TabsList className="rounded-full border border-slate-800 bg-slate-950/50">
-                <TabsTrigger value="all" className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.3em]">
-                  All staff
-                </TabsTrigger>
-                <TabsTrigger value="team" className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.3em]">
-                  Team
-                </TabsTrigger>
-                <TabsTrigger value="person" className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.3em]">
-                  Individual
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            {exportScope !== "all" && (
-              <div className="lg:col-span-1">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team scope</Label>
-                <Select value={exportTeam} onValueChange={setExportTeam}>
-                  <SelectTrigger className="mt-2 rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Choose team" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="flex flex-wrap gap-6 text-sm text-slate-300">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Most recent export</p>
+                <p className="font-semibold text-white">5 mins ago · CSV · Hospitality cluster</p>
               </div>
-            )}
-            {exportScope === "person" && (
-              <div className="lg:col-span-1">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Individual</Label>
-                <Select value={exportPerson} onValueChange={setExportPerson}>
-                  <SelectTrigger className="mt-2 rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Choose staffer" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {staff
-                      .filter((person) => person.team === exportTeam)
-                      .map((person) => (
-                        <SelectItem key={person.id} value={person.id}>
-                          {person.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Generated by</p>
+                <p className="font-semibold text-white">Nora Quinn</p>
               </div>
-            )}
-            <div className="lg:col-span-1">
-              <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Format</Label>
-              <Select value={exportFormat} onValueChange={(value) => setExportFormat(value as ExportFormat)}>
-                <SelectTrigger className="mt-2 rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                  <SelectValue placeholder="Choose format" />
-                </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                  <SelectItem value="csv">CSV</SelectItem>
-                  <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs text-slate-500">Exports include audit metadata and timestamps by default.</p>
-            <Button className="rounded-2xl bg-sky-500/90 text-slate-950 hover:bg-sky-400" size="lg">
-              Generate export
-            </Button>
-          </div>
-        </section>
-
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.3)]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Change log</p>
-              <h2 className="mt-2 text-2xl font-semibold text-white">Audit every room update</h2>
-            </div>
-            <Button variant="outline" className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100" size="sm">
-              View all entries
-            </Button>
-          </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {changeLog.map((entry) => {
-              const styles = intentStyles[entry.intent];
-              return (
-                <div key={entry.id} className="rounded-3xl border border-slate-800/70 bg-slate-950/50 p-4">
-                  <div className="flex items-center gap-2">
-                    <Badge className={`${styles.badge} border text-[0.65rem] uppercase tracking-[0.35em]`}>
-                      {entry.intent}
-                    </Badge>
-                    <span className="text-xs text-slate-500">{entry.timestamp}</span>
-                  </div>
-                  <div className={`mt-4 rounded-2xl border border-slate-800/60 bg-gradient-to-br ${styles.accent} p-4`}>
-                    <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                      {styles.icon}
-                      <span>{entry.action}</span>
+          <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+              <Tabs value={exportScope} onValueChange={(value) => setExportScope(value as ExportScope)}>
+                <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+                  <TabsTrigger value="all" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    All staff
+                  </TabsTrigger>
+                  <TabsTrigger value="team" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    Team
+                  </TabsTrigger>
+                  <TabsTrigger value="person" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    Individual
+                  </TabsTrigger>
+                </TabsList>
+                <div className="mt-6 space-y-4">
+                  <TabsContent value="all">
+                    <p className="text-sm text-slate-300">
+                      Export includes every staffer and room allocation in the current roster snapshot.
+                    </p>
+                  </TabsContent>
+                  <TabsContent value="team" className="space-y-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+                      <Select value={exportTeam} onValueChange={setExportTeam}>
+                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                          <SelectValue placeholder="Choose team" />
+                        </SelectTrigger>
+                        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                          {teams.map((team) => (
+                            <SelectItem key={team.id} value={team.id}>
+                              {team.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <p className="mt-2 text-sm text-slate-300">{entry.detail}</p>
-                    <p className="mt-1 text-xs text-slate-500">By {entry.actor}</p>
-                  </div>
+                    <p className="text-xs text-slate-500">
+                      Includes only personnel assigned to {teamLookup[exportTeam]}.
+                    </p>
+                  </TabsContent>
+                  <TabsContent value="person" className="space-y-3">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+                        <Select value={exportTeam} onValueChange={setExportTeam}>
+                          <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                            <SelectValue placeholder="Choose team" />
+                          </SelectTrigger>
+                          <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                            {teams.map((team) => (
+                              <SelectItem key={team.id} value={team.id}>
+                                {team.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Staffer</Label>
+                        <Select value={exportPerson} onValueChange={setExportPerson}>
+                          <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                            <SelectValue placeholder="Select person" />
+                          </SelectTrigger>
+                          <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                            {staff
+                              .filter((person) => person.team === exportTeam)
+                              .map((person) => (
+                                <SelectItem key={person.id} value={person.id}>
+                                  {person.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-500">Targets {exportPersonLabel} with full metadata.</p>
+                  </TabsContent>
                 </div>
-              );
-            })}
+              </Tabs>
+            </div>
+            <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Format</Label>
+                <Select value={exportFormat} onValueChange={(value) => setExportFormat(value as ExportFormat)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Choose format" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    <SelectItem value="csv">CSV (spreadsheet ready)</SelectItem>
+                    <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+                Generate {exportFormat === "csv" ? "CSV export" : "XLSX export"}
+              </Button>
+            </div>
           </div>
         </section>
       </div>
