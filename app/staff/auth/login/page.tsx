@@ -21,19 +21,23 @@ export default function StaffLoginPage() {
   const router = useRouter();
   const theme = getTheme("staff");
   const cardBase = "relative grid gap-8 rounded-[32px] p-6 sm:p-10 lg:grid-cols-[1.1fr_0.9fr]";
+  const cardSkin = `border ${theme.colors.borderStrong} ${theme.colors.surface} ${theme.colors.textBase} ${theme.effects.shadowSurface} ${theme.effects.blur}`;
+  const badgeClass = `rounded-full ${theme.colors.badgeBg} text-[0.6rem] uppercase tracking-[0.4em] ${theme.colors.badgeText}`;
+  const asideContainer = `space-y-5 rounded-[24px] border ${theme.colors.borderMuted} ${theme.colors.surfaceAlt} p-6 text-sm ${theme.colors.textBase}`;
+  const asideCard = `rounded-2xl border ${theme.colors.borderMuted} ${theme.colors.surfaceMuted} px-4 py-3`;
 
   return (
-    <div className={`flex min-h-svh flex-col ${theme.background.page}`}>
+    <div className={`flex min-h-svh flex-col ${theme.colors.page}`}>
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
         <div className="relative w-full max-w-3xl">
-          <div className={`absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] blur-3xl ${theme.background.glow}`} />
-          <div className={`${cardBase} ${theme.layout.card}`}>
+          <div className={`absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] blur-3xl ${theme.colors.overlay}`} />
+          <div className={`${cardBase} ${cardSkin}`}>
             <section className="space-y-6">
               <header className="space-y-3">
-                <Badge className={theme.badge}>{theme.label}</Badge>
+                <Badge className={badgeClass}>{theme.label}</Badge>
                 <div className="space-y-2">
-                  <h1 className={`text-3xl font-semibold ${theme.text.heading}`}>Welcome back, crew</h1>
-                  <p className={`text-sm ${theme.text.body}`}>
+                  <h1 className={`text-3xl font-semibold ${theme.colors.textPrimary}`}>Welcome back, crew</h1>
+                  <p className={`text-sm ${theme.colors.textSecondary}`}>
                     Use your staff email and admin invite credentials to access programming tools, live updates, and
                     on-site checklists.
                   </p>
@@ -42,7 +46,7 @@ export default function StaffLoginPage() {
 
               <form className="space-y-5" action="#" method="post">
                 <div className="space-y-2">
-                  <Label htmlFor="staff-email" className={`text-sm font-medium ${theme.text.label}`}>
+                  <Label htmlFor="staff-email" className={`text-sm font-medium ${theme.colors.textLabel}`}>
                     Email
                   </Label>
                   <AuthInput
@@ -58,10 +62,10 @@ export default function StaffLoginPage() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <Label htmlFor="staff-password" className={`font-medium ${theme.text.label}`}>
+                    <Label htmlFor="staff-password" className={`font-medium ${theme.colors.textLabel}`}>
                       Password
                     </Label>
-                    <Link href="/auth/forgot-password" className={theme.link}>
+                    <Link href="/auth/forgot-password" className={theme.colors.accent}>
                       Forgot?
                     </Link>
                   </div>
@@ -100,34 +104,34 @@ export default function StaffLoginPage() {
               </div>
             </section>
 
-            <aside className={`space-y-5 rounded-[24px] border p-6 text-sm ${theme.aside.container}`}>
-              <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.text.support}`}>Need help?</p>
+            <aside className={asideContainer}>
+              <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.colors.textMuted}`}>Need help?</p>
               <div className="space-y-3">
-                <div className={`rounded-2xl border px-4 py-3 ${theme.aside.card}`}>
-                  <p className={`font-semibold ${theme.aside.heading}`}>Attendee portal?</p>
+                <div className={asideCard}>
+                  <p className={`font-semibold ${theme.colors.textPrimary}`}>Attendee portal?</p>
                   <p>
                     Just helping with check-in? Hop over to the{" "}
-                    <Link href="/auth/login" className={`font-semibold ${theme.link}`}>
+                    <Link href="/auth/login" className={`font-semibold ${theme.colors.accent}`}>
                       attendee login
                     </Link>{" "}
                     instead.
                   </p>
                 </div>
-                <div className={`rounded-2xl border px-4 py-3 ${theme.aside.card}`}>
-                  <p className={`font-semibold ${theme.aside.heading}`}>Missing invite?</p>
+                <div className={asideCard}>
+                  <p className={`font-semibold ${theme.colors.textPrimary}`}>Missing invite?</p>
                   <p>
                     Request or resend your admin access through a{" "}
-                    <Link href="/staff/auth/invite-request" className={`font-semibold ${theme.link}`}>
+                    <Link href="/staff/auth/invite-request" className={`font-semibold ${theme.colors.accent}`}>
                       staff invite
                     </Link>
                     .
                   </p>
                 </div>
-                <div className={`rounded-2xl border px-4 py-3 ${theme.aside.card}`}>
-                  <p className={`font-semibold ${theme.aside.heading}`}>Staff onboarding</p>
+                <div className={asideCard}>
+                  <p className={`font-semibold ${theme.colors.textPrimary}`}>Staff onboarding</p>
                   <p>
                     Activate your role and confirm access via the{" "}
-                    <Link href="/staff/auth/signup" className={`font-semibold ${theme.link}`}>
+                    <Link href="/staff/auth/signup" className={`font-semibold ${theme.colors.accent}`}>
                       staff onboarding flow
                     </Link>
                     .

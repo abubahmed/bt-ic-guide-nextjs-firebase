@@ -20,7 +20,7 @@ export default function AuthInput({ id, type, placeholder, autoComplete, value, 
       type={type}
       placeholder={placeholder}
       autoComplete={autoComplete}
-      className={palette.form.input}
+      className={palette.fields.input}
       value={value}
       onChange={onChange}
     />

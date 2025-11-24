@@ -20,21 +20,22 @@ export default function RequestInvitePage() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const theme = getTheme("attendee");
+  const singleCard = `w-full max-w-md space-y-8 rounded-3xl border ${theme.colors.borderContrast} ${theme.colors.surfaceContrast} p-10 ${theme.effects.shadowContrast} ${theme.colors.textBase}`;
 
   return (
-    <div className={`flex min-h-svh items-center justify-center px-6 py-16 ${theme.background.page}`}>
-      <div className={theme.layout.singleCard}>
+    <div className={`flex min-h-svh items-center justify-center px-6 py-16 ${theme.colors.page}`}>
+      <div className={singleCard}>
         <header className="space-y-2 text-center">
-          <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.singleCard.eyebrow}`}>BT&nbsp;IC</p>
-          <h1 className={`text-3xl font-semibold ${theme.singleCard.heading}`}>Request an invite</h1>
-          <p className={`text-sm ${theme.singleCard.body}`}>
+          <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.colors.textMuted}`}>BT&nbsp;IC</p>
+          <h1 className={`text-3xl font-semibold ${theme.colors.textPrimary}`}>Request an invite</h1>
+          <p className={`text-sm ${theme.colors.textSecondary}`}>
             Invited to the event but having trouble accessing the portal? Help us confirm your event access.
           </p>
         </header>
 
         <form className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="full-name" className={`text-sm font-medium ${theme.text.label}`}>
+            <Label htmlFor="full-name" className={`text-sm font-medium ${theme.colors.textLabel}`}>
               Full name
             </Label>
             <AuthInput
@@ -49,7 +50,7 @@ export default function RequestInvitePage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className={`text-sm font-medium ${theme.text.label}`}>
+            <Label htmlFor="email" className={`text-sm font-medium ${theme.colors.textLabel}`}>
               Email
             </Label>
             <AuthInput
@@ -64,7 +65,7 @@ export default function RequestInvitePage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="affiliation" className={`text-sm font-medium ${theme.text.label}`}>
+            <Label htmlFor="affiliation" className={`text-sm font-medium ${theme.colors.textLabel}`}>
               Organization / affiliation
             </Label>
             <AuthInput
@@ -79,14 +80,14 @@ export default function RequestInvitePage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes" className={`text-sm font-medium ${theme.text.label}`}>
+            <Label htmlFor="notes" className={`text-sm font-medium ${theme.colors.textLabel}`}>
               Anything else we should know?
             </Label>
             <textarea
               id="notes"
               rows={4}
               placeholder="Share context about your role, application, or timeline"
-              className={theme.form.textarea}
+              className={theme.fields.textarea}
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
             />
@@ -110,10 +111,10 @@ export default function RequestInvitePage() {
           </Button>
         </form>
 
-        <footer className={`space-y-2 text-center text-sm ${theme.singleCard.body}`}>
+        <footer className={`space-y-2 text-center text-sm ${theme.colors.textSecondary}`}>
           <p>
             Resolved your issue?{" "}
-            <Link href="/auth/login" className={`font-semibold ${theme.singleCard.link}`}>
+            <Link href="/auth/login" className={`font-semibold ${theme.colors.accent}`}>
               Attendee login page
             </Link>
           </p>
