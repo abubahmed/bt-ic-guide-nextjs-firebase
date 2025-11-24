@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Edit3, Filter, History, Trash2, UploadCloud } from "lucide-react";
+import { JSX } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -234,6 +234,111 @@ export default function StaffSchedulesPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
+                <span>Spreadsheet staging</span>
+                <span className="h-px w-8 bg-slate-800" />
+                <span>Master · Team · Individual</span>
+              </div>
+              <div>
+                <h2 className="text-3xl font-semibold text-white">Upload every scenario from one surface</h2>
+                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                  Pick the scope, drop in the CSV/XLSX, and run validations before publishing to the live grid. We’ll
+                  reuse the same pipeline for master, team, or one-off staffers.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
+            <div className="space-y-3">
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload scope</p>
+              <Tabs value={uploadScope} onValueChange={(value) => setUploadScope(value as UploadScope)}>
+                <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60 text-white">
+                  <TabsTrigger
+                    value="master"
+                    className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                    Master
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="team"
+                    className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                    Team
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="person"
+                    className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                    Individual
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            {uploadScope !== "master" && (
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+                <Select value={uploadTeam} onValueChange={setUploadTeam}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Choose team" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {uploadScope === "person" && (
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Individual</Label>
+                <Select value={uploadPerson} onValueChange={setUploadPerson}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Select person" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {people
+                      .filter((person) => person.team === uploadTeam)
+                      .map((person) => (
+                        <SelectItem key={person.id} value={person.id}>
+                          {person.label}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <label
+              htmlFor="consolidated-upload"
+              className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
+              <UploadCloud className="h-8 w-8 text-sky-300" />
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  {uploadScope === "master"
+                    ? "Drop conference-wide spreadsheet"
+                    : uploadScope === "team"
+                    ? `Upload ${teamLookup[uploadTeam]} rota`
+                    : `Upload schedule for ${people.find((p) => p.id === uploadPerson)?.label ?? "staffer"}`}
+                </p>
+                <p className="text-xs text-slate-500">CSV/XLSX · Auto-maps headers, shifts, and owners</p>
+              </div>
+              <input id="consolidated-upload" type="file" className="hidden" accept=".csv,.xlsx" />
+            </label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button
+                variant="outline"
+                className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover	border-sky-500/60">
+                Run validations
+              </Button>
+              <Button className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+                Stage upload
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
                 <span>BTIC Staff Ops</span>
                 <span className="h-px w-8 bg-slate-800" />
                 <span>Inline schedule grid</span>
@@ -386,105 +491,6 @@ export default function StaffSchedulesPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>Spreadsheet staging</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>Master · Team · Individual</span>
-              </div>
-              <div>
-                <h2 className="text-3xl font-semibold text-white">Upload every scenario from one surface</h2>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Pick the scope, drop in the CSV/XLSX, and run validations before publishing to the live grid. We’ll
-                  reuse the same pipeline for master, team, or one-off staffers.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
-            <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload scope</p>
-              <Tabs value={uploadScope} onValueChange={(value) => setUploadScope(value as UploadScope)}>
-                <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
-                  <TabsTrigger value="master" className="rounded-xl text-xs uppercase tracking-[0.2em]">
-                    Master
-                  </TabsTrigger>
-                  <TabsTrigger value="team" className="rounded-xl text-xs uppercase tracking-[0.2em]">
-                    Team
-                  </TabsTrigger>
-                  <TabsTrigger value="person" className="rounded-xl text-xs uppercase tracking-[0.2em]">
-                    Individual
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-            {uploadScope !== "master" && (
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-                <Select value={uploadTeam} onValueChange={setUploadTeam}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Choose team" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {uploadScope === "person" && (
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Individual</Label>
-                <Select value={uploadPerson} onValueChange={setUploadPerson}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Select person" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {people
-                      .filter((person) => person.team === uploadTeam)
-                      .map((person) => (
-                        <SelectItem key={person.id} value={person.id}>
-                          {person.label}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <label
-              htmlFor="consolidated-upload"
-              className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
-              <UploadCloud className="h-8 w-8 text-sky-300" />
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  {uploadScope === "master"
-                    ? "Drop conference-wide spreadsheet"
-                    : uploadScope === "team"
-                    ? `Upload ${teamLookup[uploadTeam]} rota`
-                    : `Upload schedule for ${people.find((p) => p.id === uploadPerson)?.label ?? "staffer"}`}
-                </p>
-                <p className="text-xs text-slate-500">CSV/XLSX · Auto-maps headers, shifts, and owners</p>
-              </div>
-              <input id="consolidated-upload" type="file" className="hidden" accept=".csv,.xlsx" />
-            </label>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Button
-                variant="outline"
-                className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover	border-sky-500/60">
-                Run validations
-              </Button>
-              <Button className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
-                Stage upload
-              </Button>
-            </div>
-          </div>
-        </section>
-
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 lg:p-8">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
@@ -513,13 +519,19 @@ export default function StaffSchedulesPage() {
             <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
               <Tabs value={downloadScope} onValueChange={(value) => setDownloadScope(value as DownloadScope)}>
                 <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
-                  <TabsTrigger value="all" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                  <TabsTrigger
+                    value="all"
+                    className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                     All teams
                   </TabsTrigger>
-                  <TabsTrigger value="team" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                  <TabsTrigger
+                    value="team"
+                    className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                     Team
                   </TabsTrigger>
-                  <TabsTrigger value="person" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                  <TabsTrigger
+                    value="person"
+                    className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                     Individual
                   </TabsTrigger>
                 </TabsList>
@@ -540,10 +552,6 @@ export default function StaffSchedulesPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <p className="text-xs text-slate-500">
-                      Includes only personnel assigned to {teams.find((team) => team.id === downloadTeam)?.label} for{" "}
-                      {downloadDayLabel}.
-                    </p>
                   </TabsContent>
                   <TabsContent value="person" className="space-y-3">
                     <div className="grid gap-4 md:grid-cols-2">
@@ -580,10 +588,6 @@ export default function StaffSchedulesPage() {
                         </Select>
                       </div>
                     </div>
-                    <p className="text-xs text-slate-500">
-                      Targets {people.find((person) => person.id === downloadPerson)?.label ?? "selected staffer"} for{" "}
-                      {downloadDayLabel}.
-                    </p>
                   </TabsContent>
                 </div>
               </Tabs>
@@ -621,50 +625,6 @@ export default function StaffSchedulesPage() {
                 Generate {downloadFormat === "csv" ? "CSV export" : "XLSX export"}
               </Button>
             </div>
-          </div>
-        </section>
-
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 lg:p-8">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                <span>Change log</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>Uploads · Manual edits · Deletes</span>
-              </div>
-              <h2 className="mt-2 text-2xl font-semibold text-white">Edit history & audit trail</h2>
-            </div>
-            <Button
-              variant="outline"
-              className="rounded-2xl border-slate-700 bg-slate-950/60 text-xs font-semibold uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60">
-              Export log
-            </Button>
-          </div>
-          <div className="mt-6 space-y-4">
-            {historyEntries.map((entry) => {
-              const meta = intentStyles[entry.intent];
-              return (
-                <div
-                  key={entry.id}
-                  className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
-                  <span className={`pointer-events-none absolute inset-0 bg-gradient-to-r ${meta.accent}`} />
-                  <div className="relative flex items-start gap-3">
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/70 p-2">{meta.icon}</div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold text-white">{entry.actor}</p>
-                        <Badge className={`rounded-full border px-2 py-0.5 text-[0.65rem] ${meta.badge}`}>
-                          {entry.intent}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-slate-300">{entry.action}</p>
-                      <p className="text-xs text-slate-500">{entry.detail}</p>
-                      <p className="mt-2 text-xs uppercase tracking-[0.35em] text-slate-500">{entry.timestamp}</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </section>
       </div>
