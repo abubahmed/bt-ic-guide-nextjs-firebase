@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Download, Edit3, FileSpreadsheet, Filter, History, Trash2, UploadCloud } from "lucide-react";
+import { Download, Edit3, Filter, History, Trash2, UploadCloud } from "lucide-react";
  
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -118,12 +118,6 @@ const gridAssignments: Record<string, Record<DayKey, GridSlot[]>> = people.reduc
    },
  ];
  
-const gridSourceStyles: Record<GridSlot["source"], { badge: string; label: string }> = {
-  upload: { badge: "bg-sky-500/10 text-sky-200 border-sky-500/30", label: "Imported" },
-  manual: { badge: "bg-emerald-500/10 text-emerald-200 border-emerald-500/30", label: "Manual" },
-  hold: { badge: "bg-amber-500/10 text-amber-200 border-amber-500/30", label: "Hold" },
-};
-
 const intentStyles: Record<string, { badge: string; icon: JSX.Element; accent: string }> = {
   upload: {
     badge: "bg-emerald-500/10 text-emerald-300 border-emerald-500/40",
@@ -290,12 +284,14 @@ export default function StaffSchedulesPage() {
               </Select>
             </div>
             <div className="mt-4">
-              <Table className="text-sm text-slate-200 [&_td]:align-top">
+              <Table className="text-sm text-slate-200 border-collapse [&_td]:align-top">
                 <TableHeader>
-                  <TableRow className="border-slate-800 bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-                    <TableHead className="min-w-[200px] text-slate-400">Staffer · Team</TableHead>
+                  <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
+                    <TableHead className="min-w-[200px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
+                      Staffer · Team
+                    </TableHead>
                     {visibleDays.map((day) => (
-                      <TableHead key={day.id} className="text-center text-slate-400">
+                      <TableHead key={day.id} className="border border-slate-800/60 bg-slate-950/60 text-center text-slate-400">
                         {day.label}
                       </TableHead>
                     ))}
@@ -303,11 +299,11 @@ export default function StaffSchedulesPage() {
                 </TableHeader>
                 <TableBody>
                   {visiblePeople.map((person) => (
-                    <TableRow key={person.id} className="border-slate-800/70">
-                      <TableCell className="align-top">
-                        <div className="space-y-1">
+                    <TableRow key={person.id} className="border border-slate-800/60">
+                      <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
+                        <div>
                           <p className="font-semibold text-white">{person.label}</p>
-                          <p className="text-xs text-slate-400">
+                          <p className="text-xs text-slate-500">
                             {teamLookup[person.team]} • {person.role}
                           </p>
                         </div>
@@ -315,35 +311,17 @@ export default function StaffSchedulesPage() {
                       {visibleDays.map((day) => {
                         const slots = gridAssignments[person.id]?.[day.id] ?? [];
                         return (
-                          <TableCell key={`${person.id}-${day.id}`}>
-                            <div className="flex min-h-[180px] flex-col gap-3">
-                              {slots.map((slot, slotIndex) => {
-                                const slotMeta = gridSourceStyles[slot.source];
-                                return (
-                                  <div
-                                    key={`${person.id}-${day.id}-${slotIndex}`}
-                                    className="rounded-2xl border border-slate-800 bg-slate-950/40 p-3">
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div>
-                                        <p className="text-sm font-semibold text-white">{slot.title}</p>
-                                        <p className="text-xs text-slate-400">{slot.time}</p>
-                                      </div>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-8 rounded-xl border-slate-700 bg-slate-950/60 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-slate-100 hover:border-sky-500/60">
-                                        Edit
-                                      </Button>
-                                    </div>
-                                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
-                                      <span>{slot.location}</span>
-                                      <Badge className={`rounded-full border px-2 py-0.5 text-[0.65rem] ${slotMeta.badge}`}>
-                                        {slotMeta.label}
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                );
-                              })}
+                          <TableCell
+                            key={`${person.id}-${day.id}`}
+                            className="border border-slate-800/60 align-top p-0">
+                            <div className="divide-y divide-slate-800/60 text-xs">
+                              {slots.map((slot, slotIndex) => (
+                                <div key={`${person.id}-${day.id}-${slotIndex}`} className="p-3">
+                                  <p className="text-sm font-medium text-white">{slot.title}</p>
+                                  <p className="text-xs text-slate-400">{slot.time}</p>
+                                  <p className="text-xs text-slate-500">{slot.location}</p>
+                                </div>
+                              ))}
                             </div>
                           </TableCell>
                         );
@@ -459,18 +437,16 @@ export default function StaffSchedulesPage() {
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                <span>Instant exports</span>
+                <span>Schedule exports</span>
                 <span className="h-px w-8 bg-slate-800" />
                 <span>CSV · XLSX</span>
               </div>
-              <h2 className="mt-2 text-2xl font-semibold text-white">Download exactly what you need</h2>
-              <p className="text-slate-400">
-                Share a conference-wide file, focus on a team, or send a single staffer’s schedule directly from this grid.
-              </p>
+              <h2 className="mt-2 text-2xl font-semibold text-white">Export structured schedules</h2>
+              <p className="text-slate-400">Produce distribution-ready extracts for compliance teams, logistics leads, or individual staffers.</p>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-slate-300">
               <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Last export</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Most recent export</p>
                 <p className="font-semibold text-white">2 mins ago · CSV · Full roster</p>
               </div>
               <div>
@@ -496,7 +472,7 @@ export default function StaffSchedulesPage() {
                 <div className="mt-6 space-y-4">
                   <TabsContent value="all">
                     <p className="text-sm text-slate-300">
-                      You’re exporting the master conference schedule with every team and staffer included for {downloadDayLabel}.
+                      Export includes every scheduled team and staffer for {downloadDayLabel}.
                     </p>
                   </TabsContent>
                   <TabsContent value="team" className="space-y-3">
@@ -516,7 +492,7 @@ export default function StaffSchedulesPage() {
                       </Select>
                     </div>
                     <p className="text-xs text-slate-500">
-                      Includes only people attached to {teams.find((team) => team.id === downloadTeam)?.label} for {downloadDayLabel}.
+                      Includes only personnel assigned to {teams.find((team) => team.id === downloadTeam)?.label} for {downloadDayLabel}.
                     </p>
                   </TabsContent>
                   <TabsContent value="person" className="space-y-3">
@@ -555,7 +531,7 @@ export default function StaffSchedulesPage() {
                       </div>
                     </div>
                     <p className="text-xs text-slate-500">
-                      Perfect for sending one schedule to {people.find((person) => person.id === downloadPerson)?.label ?? "a staffer"} for {downloadDayLabel}.
+                      Targets {people.find((person) => person.id === downloadPerson)?.label ?? "selected staffer"} for {downloadDayLabel}.
                     </p>
                   </TabsContent>
                 </div>
@@ -590,19 +566,8 @@ export default function StaffSchedulesPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Delivery</Label>
-                <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/40 p-3 text-sm text-slate-400">
-                  Send link to ops inbox & make available in downloads tray.
-                </div>
-              </div>
               <Button className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
-                Download {downloadFormat === "csv" ? "CSV" : "Spreadsheet"}
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
-                Schedule recurring export
+                Generate {downloadFormat === "csv" ? "CSV export" : "XLSX export"}
               </Button>
             </div>
           </div>
