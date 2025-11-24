@@ -1,0 +1,4 @@
+const INVITES_COLLECTION = "invites";
+const USERS_COLLECTION = "users";
+
+export { INVITES_COLLECTION, USERS_COLLECTION };

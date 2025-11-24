@@ -1,9 +1,8 @@
 import { db } from "@/lib/firebase/server/config";
 import { Timestamp } from "firebase-admin/firestore";
-import { serialize } from "@/util/firebase/server";
+import { serialize } from "@/lib/firebase/server/utils";
 import { AttendeeInvite, StaffInvite } from "@/types/types";
-
-const INVITES_COLLECTION = "invites";
+import { INVITES_COLLECTION } from "@/lib/firebase/constants";
 
 export async function createInvite(invite: AttendeeInvite | StaffInvite, type: "ATTENDEE" | "STAFF") {
   console.log("Creating invite in createInvite:", invite, type);
