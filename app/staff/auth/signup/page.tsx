@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { signUpWithEmailActionClient, signInWithGoogleActionClient } from "@/actions/client/auth-actions";
-import { getAuthTheme } from "@/lib/auth-theme";
+import { getTheme } from "@/lib/theme";
 
 import GoogleButton from "@/components/custom/google-button";
 import AuthInput from "@/components/custom/auth-input";
@@ -20,20 +20,21 @@ export default function StaffSignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const theme = getAuthTheme("staff");
+  const theme = getTheme("staff");
+  const cardBase = "relative grid gap-8 rounded-[32px] p-6 sm:p-10 lg:grid-cols-[1.1fr_0.9fr]";
 
   return (
-    <div className={`flex min-h-svh flex-col ${theme.pageBackgroundClass}`}>
+    <div className={`flex min-h-svh flex-col ${theme.background.page}`}>
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
         <div className="relative w-full max-w-3xl">
-          <div className={`absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] blur-3xl ${theme.glowOverlayClass}`} />
-          <div className={theme.twoColumnCardClass}>
+          <div className={`absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] blur-3xl ${theme.background.glow}`} />
+          <div className={`${cardBase} ${theme.layout.card}`}>
             <section className="space-y-6">
               <header className="space-y-3">
-                <Badge className={theme.badgeClass}>{theme.badgeLabel}</Badge>
+                <Badge className={theme.badge}>{theme.label}</Badge>
                 <div className="space-y-2">
-                  <h1 className={`text-3xl font-semibold ${theme.headingClass}`}>Join the staff portal</h1>
-                  <p className={`text-sm ${theme.bodyTextClass}`}>
+                  <h1 className={`text-3xl font-semibold ${theme.text.heading}`}>Join the staff portal</h1>
+                  <p className={`text-sm ${theme.text.body}`}>
                     Register with your staff email to unlock admin scheduling tools, comms dashboards, and live
                     programming updates.
                   </p>
@@ -42,7 +43,7 @@ export default function StaffSignUpPage() {
 
               <form className="space-y-5" action="#" method="post">
                 <div className="space-y-2">
-                  <Label htmlFor="staff-signup-email" className={`text-sm font-medium ${theme.labelClass}`}>
+                  <Label htmlFor="staff-signup-email" className={`text-sm font-medium ${theme.text.label}`}>
                     Email
                   </Label>
                   <AuthInput
@@ -50,14 +51,14 @@ export default function StaffSignUpPage() {
                     type="email"
                     placeholder="name@btic.io"
                     autoComplete="email"
-                    staff={theme.isStaff}
+                    theme={theme.id}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="staff-signup-password" className={`text-sm font-medium ${theme.labelClass}`}>
+                  <Label htmlFor="staff-signup-password" className={`text-sm font-medium ${theme.text.label}`}>
                     Password
                   </Label>
                   <AuthInput
@@ -65,14 +66,14 @@ export default function StaffSignUpPage() {
                     type="password"
                     placeholder="Create your password"
                     autoComplete="new-password"
-                    staff={theme.isStaff}
+                    theme={theme.id}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="staff-confirm-password" className={`text-sm font-medium ${theme.labelClass}`}>
+                  <Label htmlFor="staff-confirm-password" className={`text-sm font-medium ${theme.text.label}`}>
                     Confirm password
                   </Label>
                   <AuthInput
@@ -80,7 +81,7 @@ export default function StaffSignUpPage() {
                     type="password"
                     placeholder="Re-enter your password"
                     autoComplete="new-password"
-                    staff={theme.isStaff}
+                    theme={theme.id}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
@@ -110,34 +111,34 @@ export default function StaffSignUpPage() {
               </div>
             </section>
 
-            <aside className={`space-y-5 rounded-[24px] border p-6 text-sm ${theme.asideContainerClass}`}>
-              <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.supportEyebrowClass}`}>Need help?</p>
+            <aside className={`space-y-5 rounded-[24px] border p-6 text-sm ${theme.aside.container}`}>
+              <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.text.support}`}>Need help?</p>
               <div className="space-y-3">
-                <div className={`rounded-2xl border px-4 py-3 ${theme.asideCardClass}`}>
-                  <p className={`font-semibold ${theme.asideCardHeadingClass}`}>Attendee portal</p>
+                <div className={`rounded-2xl border px-4 py-3 ${theme.aside.card}`}>
+                  <p className={`font-semibold ${theme.aside.heading}`}>Attendee portal</p>
                   <p>
                     Registering as a participant instead? Switch over to the{" "}
-                    <Link href="/auth/login" className={`font-semibold ${theme.inlineLinkClass}`}>
+                    <Link href="/auth/login" className={`font-semibold ${theme.link}`}>
                       attendee login
                     </Link>{" "}
                     experience.
                   </p>
                 </div>
-                <div className={`rounded-2xl border px-4 py-3 ${theme.asideCardClass}`}>
-                  <p className={`font-semibold ${theme.asideCardHeadingClass}`}>Request approval</p>
+                <div className={`rounded-2xl border px-4 py-3 ${theme.aside.card}`}>
+                  <p className={`font-semibold ${theme.aside.heading}`}>Request approval</p>
                   <p>
                     Missing credentials or need an invite? Submit a{" "}
-                    <Link href="/staff/auth/invite-request" className={`font-semibold ${theme.inlineLinkClass}`}>
+                    <Link href="/staff/auth/invite-request" className={`font-semibold ${theme.link}`}>
                       staff approval request
                     </Link>{" "}
                     for the ops team.
                   </p>
                 </div>
-                <div className={`rounded-2xl border px-4 py-3 ${theme.asideCardClass}`}>
-                  <p className={`font-semibold ${theme.asideCardHeadingClass}`}>Already approved</p>
+                <div className={`rounded-2xl border px-4 py-3 ${theme.aside.card}`}>
+                  <p className={`font-semibold ${theme.aside.heading}`}>Already approved</p>
                   <p>
                     When your account is confirmed, continue straight to{" "}
-                    <Link href="/staff/auth/login" className={`font-semibold ${theme.inlineLinkClass}`}>
+                    <Link href="/staff/auth/login" className={`font-semibold ${theme.link}`}>
                       staff login
                     </Link>{" "}
                     and pick up where you left off.
