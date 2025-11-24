@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { createInviteActionClient } from "@/actions/client/invite-actions";
+import { getAuthTheme } from "@/lib/auth-theme";
 
 import AuthInput from "@/components/custom/auth-input";
 import { AttendeeInvite } from "@/types/types";
@@ -17,36 +18,34 @@ export default function RequestInvitePage() {
   const [affiliation, setAffiliation] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const theme = getAuthTheme("staff");
 
   return (
-    <div className="flex min-h-svh flex-col bg-sky-100/40">
+    <div className={`flex min-h-svh flex-col ${theme.pageBackgroundClass}`}>
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
         <div className="relative w-full max-w-3xl">
-          <div className="absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] bg-gradient-to-br from-sky-200/70 via-white to-white blur-3xl" />
-          <div className="relative grid gap-8 rounded-[32px] border border-sky-100/70 bg-white/95 p-6 text-black shadow-[0_25px_90px_rgba(14,28,56,0.18)] backdrop-blur-lg sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className={`absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] blur-3xl ${theme.glowOverlayClass}`} />
+          <div className={theme.twoColumnCardClass}>
             <section className="space-y-6">
               <header className="space-y-3">
-                <Badge className="rounded-full bg-sky-100 text-[0.6rem] uppercase tracking-[0.4em] text-sky-900">
-                  Attendee
-                </Badge>
+                <Badge className={theme.badgeClass}>{theme.badgeLabel}</Badge>
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-semibold text-sky-900">Request an invite</h1>
-                  <p className="text-sm text-black">
-                    Need access to the attendee portal? Share your details and we’ll review your status with the events
-                    team.
+                  <h1 className={`text-3xl font-semibold ${theme.headingClass}`}>Request an invite</h1>
+                  <p className={`text-sm ${theme.bodyTextClass}`}>
+                    Need access to the staff portal? Share your details and we’ll review your status with the events team.
                   </p>
                 </div>
               </header>
 
               <form className="space-y-5" action="#" method="post">
                 <div className="space-y-2">
-                  <Label htmlFor="full-name" className="text-sm font-medium text-black">
+                  <Label htmlFor="full-name" className={`text-sm font-medium ${theme.labelClass}`}>
                     Full name
                   </Label>
                   <AuthInput
                     id="full-name"
                     placeholder="Enter your full name"
-                    staff={false}
+                    staff={theme.isStaff}
                     type="text"
                     autoComplete="name"
                     value={fullName}
@@ -55,13 +54,13 @@ export default function RequestInvitePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-black">
+                  <Label htmlFor="email" className={`text-sm font-medium ${theme.labelClass}`}>
                     Email
                   </Label>
                   <AuthInput
                     id="email"
                     placeholder="name@businesstoday.org"
-                    staff={false}
+                    staff={theme.isStaff}
                     type="email"
                     autoComplete="email"
                     value={email}
@@ -70,13 +69,13 @@ export default function RequestInvitePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="affiliation" className="text-sm font-medium text-black">
+                  <Label htmlFor="affiliation" className={`text-sm font-medium ${theme.labelClass}`}>
                     Organization / affiliation
                   </Label>
                   <AuthInput
                     id="affiliation"
                     placeholder="Enter your organization or affiliation"
-                    staff={false}
+                    staff={theme.isStaff}
                     type="text"
                     autoComplete="organization"
                     value={affiliation}
@@ -85,14 +84,14 @@ export default function RequestInvitePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes" className="text-sm font-medium text-black">
+                  <Label htmlFor="notes" className={`text-sm font-medium ${theme.labelClass}`}>
                     Anything else we should know?
                   </Label>
                   <textarea
                     id="notes"
                     rows={4}
                     placeholder="Share context about your role, application, or timeline"
-                    className="w-full resize-none rounded-2xl border border-sky-100 bg-white px-4 py-3 text-sm text-black placeholder:text-sky-700 focus:border-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                    className={theme.textAreaClass}
                     value={notes}
                     onChange={(event) => setNotes(event.target.value)}
                   />
@@ -117,13 +116,13 @@ export default function RequestInvitePage() {
               </form>
             </section>
 
-            <aside className="space-y-5 rounded-[24px] border border-sky-50 bg-gradient-to-b from-white to-sky-50/60 p-6 text-sm text-black">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-900">Need help?</p>
-              <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
-                <p className="font-semibold text-sky-700">Ready to sign in?</p>
+            <aside className={`space-y-5 rounded-[24px] border p-6 text-sm ${theme.asideContainerClass}`}>
+              <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.supportEyebrowClass}`}>Need help?</p>
+              <div className={`rounded-2xl border px-4 py-3 ${theme.asideCardClass}`}>
+                <p className={`font-semibold ${theme.asideCardHeadingClass}`}>Ready to sign in?</p>
                 <p>
                   Already approved and just need to log back in? Head over to the{" "}
-                  <Link href="/auth/login" className="font-semibold text-black hover:text-sky-700">
+                  <Link href="/auth/login" className={`font-semibold ${theme.inlineLinkClass}`}>
                     attendee login
                   </Link>{" "}
                   page.

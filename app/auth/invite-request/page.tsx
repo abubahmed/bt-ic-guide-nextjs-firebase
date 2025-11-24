@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { createInviteActionClient } from "@/actions/client/invite-actions";
+import { getAuthTheme } from "@/lib/auth-theme";
 
 import AuthInput from "@/components/custom/auth-input";
 import { AttendeeInvite } from "@/types/types";
@@ -18,27 +19,28 @@ export default function RequestInvitePage() {
   const [affiliation, setAffiliation] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const theme = getAuthTheme("attendee");
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-sky-100/40 px-6 py-16">
-      <div className="w-full max-w-md space-y-8 rounded-3xl border border-sky-100 bg-white p-10 shadow-sm">
+    <div className={`flex min-h-svh items-center justify-center px-6 py-16 ${theme.pageBackgroundClass}`}>
+      <div className={theme.singleCardContainerClass}>
         <header className="space-y-2 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-500">BT&nbsp;IC</p>
-          <h1 className="text-3xl font-semibold text-sky-800">Request an invite</h1>
-          <p className="text-sm text-sky-600">
+          <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${theme.singleCardEyebrowClass}`}>BT&nbsp;IC</p>
+          <h1 className={`text-3xl font-semibold ${theme.singleCardHeadingClass}`}>Request an invite</h1>
+          <p className={`text-sm ${theme.singleCardBodyClass}`}>
             Invited to the event but having trouble accessing the portal? Help us confirm your event access.
           </p>
         </header>
 
         <form className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="full-name" className="text-sm font-medium text-sky-800">
+            <Label htmlFor="full-name" className={`text-sm font-medium ${theme.labelClass}`}>
               Full name
             </Label>
             <AuthInput
               id="full-name"
               placeholder="Enter your full name"
-              staff={false}
+              staff={theme.isStaff}
               type="text"
               autoComplete="name"
               value={fullName}
@@ -47,13 +49,13 @@ export default function RequestInvitePage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-sky-800">
+            <Label htmlFor="email" className={`text-sm font-medium ${theme.labelClass}`}>
               Email
             </Label>
             <AuthInput
               id="email"
               placeholder="Enter your email address"
-              staff={false}
+              staff={theme.isStaff}
               type="email"
               autoComplete="email"
               value={email}
@@ -62,13 +64,13 @@ export default function RequestInvitePage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="affiliation" className="text-sm font-medium text-sky-800">
+            <Label htmlFor="affiliation" className={`text-sm font-medium ${theme.labelClass}`}>
               Organization / affiliation
             </Label>
             <AuthInput
               id="affiliation"
               placeholder="Enter your organization or affiliation"
-              staff={false}
+              staff={theme.isStaff}
               type="text"
               autoComplete="organization"
               value={affiliation}
@@ -77,14 +79,14 @@ export default function RequestInvitePage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes" className="text-sm font-medium text-sky-800">
+            <Label htmlFor="notes" className={`text-sm font-medium ${theme.labelClass}`}>
               Anything else we should know?
             </Label>
             <textarea
               id="notes"
               rows={4}
               placeholder="Share context about your role, application, or timeline"
-              className="resize-none w-full rounded-2xl border border-sky-100 bg-white px-4 py-3 text-sm text-black placeholder:text-sky-700 focus:border-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+              className={theme.textAreaClass}
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
             />
@@ -108,10 +110,10 @@ export default function RequestInvitePage() {
           </Button>
         </form>
 
-        <footer className="space-y-2 text-center text-sm text-sky-500">
+        <footer className={`space-y-2 text-center text-sm ${theme.singleCardBodyClass}`}>
           <p>
             Resolved your issue?{" "}
-            <Link href="/auth/login" className="font-semibold text-sky-600 hover:text-sky-700">
+            <Link href="/auth/login" className={`font-semibold ${theme.singleCardLinkClass}`}>
               Attendee login page
             </Link>
           </p>
