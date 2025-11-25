@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { people, qrBands } from "./data";
 
 import StaffFooter from "../components/footer";
 import StaffHeader from "../components/header";
@@ -25,40 +26,6 @@ const teamLookup = teams.reduce<Record<string, string>>((acc, team) => {
   acc[team.id] = team.label;
   return acc;
 }, {});
-
-const people = [
-  { id: "alex-chen", label: "Alex Chen", team: "operations", role: "Ops hub lead" },
-  { id: "brianna-lee", label: "Brianna Lee", team: "operations", role: "Site logistics" },
-  { id: "carter-simmons", label: "Carter Simmons", team: "operations", role: "Stage direction" },
-  { id: "dahlia-ortiz", label: "Dahlia Ortiz", team: "operations", role: "Equipment flow" },
-  { id: "ethan-brooks", label: "Ethan Brooks", team: "operations", role: "Ops comms" },
-  { id: "maya-patel", label: "Maya Patel", team: "programming", role: "Panel wrangler" },
-  { id: "noor-kamal", label: "Noor Kamal", team: "programming", role: "Speaker concierge" },
-  { id: "owen-blake", label: "Owen Blake", team: "programming", role: "Content editor" },
-  { id: "priya-iyer", label: "Priya Iyer", team: "programming", role: "Studio coordinator" },
-  { id: "quincy-hale", label: "Quincy Hale", team: "programming", role: "Backstage ops" },
-  { id: "leo-carter", label: "Leo Carter", team: "hospitality", role: "VIP liaison" },
-  { id: "sara-ng", label: "Sara Ng", team: "hospitality", role: "Suite management" },
-  { id: "tariq-farouq", label: "Tariq Farouq", team: "hospitality", role: "Guest transport" },
-  { id: "ivy-lam", label: "Ivy Lam", team: "hospitality", role: "Culinary liaison" },
-  { id: "jamie-bowen", label: "Jamie Bowen", team: "hospitality", role: "Evening host" },
-  { id: "diana-park", label: "Diana Park", team: "security", role: "Access control" },
-  { id: "kofi-diaz", label: "Kofi Diaz", team: "security", role: "Perimeter lead" },
-  { id: "lara-cho", label: "Lara Cho", team: "security", role: "Badge command" },
-  { id: "miles-porter", label: "Miles Porter", team: "security", role: "Escort detail" },
-  { id: "nina-vasquez", label: "Nina Vasquez", team: "security", role: "Night shift lead" },
-  { id: "luca-ramirez", label: "Luca Ramirez", team: "logistics", role: "Transport chief" },
-  { id: "opal-reed", label: "Opal Reed", team: "logistics", role: "Fleet ops" },
-  { id: "paxton-ryu", label: "Paxton Ryu", team: "logistics", role: "Warehouse manager" },
-  { id: "renee-yang", label: "Renee Yang", team: "logistics", role: "Inventory control" },
-  { id: "samir-holt", label: "Samir Holt", team: "logistics", role: "Freight coordinator" },
-];
-
-const qrBands = [
-  { id: "general", label: "General access" },
-  { id: "vip", label: "VIP & suites" },
-  { id: "ops", label: "Ops & logistics" },
-] as const;
 
 type BandKey = (typeof qrBands)[number]["id"];
 type UploadScope = "master" | "team" | "person";
@@ -177,16 +144,11 @@ export default function StaffQrCodesPage() {
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>QR kit staging</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>Master · Team · Individual</span>
-              </div>
               <div>
-                <h2 className="text-3xl font-semibold text-white">Upload every QR scenario from one surface</h2>
+                <h2 className="text-3xl font-semibold text-white">Upload QR codes</h2>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Pick the scope, drop in the ZIP, and run duplicate checks before releasing new badges. The same
-                  pipeline handles master packs, team refreshes, or one-off replacements.
+                  Upload QR codes for all or specific teams or individuals. The system will automatically detect the
+                  team and upload the QR codes.
                 </p>
               </div>
             </div>
@@ -255,14 +217,7 @@ export default function StaffQrCodesPage() {
               className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
               <UploadCloud className="h-8 w-8 text-sky-300" />
               <div>
-                <p className="text-sm font-semibold text-white">
-                  {uploadScope === "master"
-                    ? "Drop conference-wide QR ZIP"
-                    : uploadScope === "team"
-                    ? `Upload ${teamLookup[uploadTeam]} QR pack`
-                    : `Upload QR for ${people.find((p) => p.id === uploadPerson)?.label ?? "staffer"}`}
-                </p>
-                <p className="text-xs text-slate-500">ZIP · Auto-detects filenames, badge owners, and expiry</p>
+                <p className="text-sm font-semibold text-white">Upload ZIP file</p>
               </div>
               <input id="qr-upload" type="file" className="hidden" accept=".zip" />
             </label>
@@ -282,32 +237,16 @@ export default function StaffQrCodesPage() {
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>BTIC Staff Ops</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>Inline QR gallery</span>
-              </div>
               <div>
-                <h1 className="text-3xl font-semibold text-white">Live QR workspace</h1>
+                <h1 className="text-3xl font-semibold text-white">QR code viewer</h1>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Browse every staffer’s QR badge, confirm access bands, and spot stale assets before syncing to the
-                  badge printers.
+                  Browse every staffer’s QR code, check for functionality, and spot broken/expired codes.
                 </p>
               </div>
             </div>
           </div>
           <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
-            <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.35em] text-slate-500">
-              <span>Gallery mirrors the live badge portal</span>
-              <span>Tip: replace assets before expiry</span>
-            </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/30 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                <Filter className="h-4 w-4 text-sky-300" />
-                <span>
-                  {visiblePeople.length} staff · {visiblePeople.length} QR codes
-                </span>
-              </div>
               <Select value={gridTeamFilter} onValueChange={setGridTeamFilter}>
                 <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
                   <SelectValue placeholder="Team filter" />
@@ -373,22 +312,11 @@ export default function StaffQrCodesPage() {
                                 {teamLookup[person.team]} • {person.role}
                               </p>
                             </div>
-                            <div className="mt-3 flex flex-wrap items-center gap-2">
-                              <Badge className="rounded-full border border-slate-700 bg-slate-900/60 text-[0.6rem] uppercase tracking-[0.25em] text-slate-200">
-                                {asset?.waveLabel ?? "Unassigned"}
-                              </Badge>
-                              {asset?.version && (
-                                <span className="text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                                  {asset.version}
-                                </span>
-                              )}
-                            </div>
                           </TableCell>
                           <TableCell className="border border-slate-800/60 p-0">
                             {asset ? (
                               <div className="flex flex-col items-center gap-3 p-4">
                                 <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={asset.qrUrl}
                                     alt={`${person.label} QR code`}
@@ -396,10 +324,9 @@ export default function StaffQrCodesPage() {
                                     loading="lazy"
                                   />
                                 </div>
-                                <p className="text-xs text-slate-500">{asset.lastRotated}</p>
                               </div>
                             ) : (
-                              <div className="p-4 text-center text-xs text-slate-500">No QR assigned.</div>
+                              <div className="p-4 text-center text-xs text-slate-500">No QR assigned</div>
                             )}
                           </TableCell>
                         </TableRow>
@@ -447,25 +374,8 @@ export default function StaffQrCodesPage() {
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 lg:p-8">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                <span>QR exports</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>ZIP · PDF</span>
-              </div>
-              <h2 className="mt-2 text-2xl font-semibold text-white">Export ready-to-share QR packs</h2>
-              <p className="text-slate-400">
-                Produce zipped bundles for distribution lists or PDF contact sheets for onsite scanners.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-6 text-sm text-slate-300">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Most recent export</p>
-                <p className="font-semibold text-white">5 mins ago · ZIP · All teams</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Generated by</p>
-                <p className="font-semibold text-white">Jordan King</p>
-              </div>
+              <h2 className="mt-2 text-2xl font-semibold text-white">Export QR codes</h2>
+              <p className="text-slate-400">Export QR codes for all or specific teams or individuals.</p>
             </div>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
@@ -542,29 +452,8 @@ export default function StaffQrCodesPage() {
                       </div>
                     </div>
                   </TabsContent>
-                  <TabsContent value="all">
-                    <p className="text-sm text-slate-300">
-                      Export includes QR codes for all active staffers and badge types.
-                    </p>
-                  </TabsContent>
                 </div>
               </Tabs>
-              <div className="mt-6 space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Access band focus</Label>
-                <Select value={gridWaveFilter} onValueChange={(value) => setGridWaveFilter(value as WaveScope)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Choose band" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    <SelectItem value="all">All bands</SelectItem>
-                    {qrBands.map((band) => (
-                      <SelectItem key={band.id} value={band.id}>
-                        {band.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
               <div className="space-y-2">

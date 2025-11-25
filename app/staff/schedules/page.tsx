@@ -129,11 +129,8 @@ export default function StaffSchedulesPage() {
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>Spreadsheet staging</span>
-              </div>
               <div>
-                <h2 className="text-3xl font-semibold text-white">Upload Schedule Data Via Spreadsheet</h2>
+                <h2 className="text-3xl font-semibold text-white">Upload schedules</h2>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
                   Upload your schedule data via spreadsheet to the system. Ensure it matches the required format and
                   headers.
@@ -225,9 +222,6 @@ export default function StaffSchedulesPage() {
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>Schedule viewer</span>
-              </div>
               <div>
                 <h1 className="text-3xl font-semibold text-white">View Schedule Data</h1>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
@@ -369,9 +363,6 @@ export default function StaffSchedulesPage() {
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 lg:p-8">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                <span>Schedule exports</span>
-              </div>
               <h2 className="mt-2 text-2xl font-semibold text-white">Export schedules</h2>
               <p className="text-slate-400">
                 Export the schedule data for all or specific teams and days in CSV or XLSX format.
@@ -454,23 +445,6 @@ export default function StaffSchedulesPage() {
                   </TabsContent>
                 </div>
               </Tabs>
-
-              <div className="mt-6 space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Day scope</Label>
-                <Select value={downloadDay} onValueChange={(value) => setDownloadDay(value as DayScope)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Choose day(s)" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    <SelectItem value="all">All days</SelectItem>
-                    {gridDays.map((day) => (
-                      <SelectItem key={day.id} value={day.id}>
-                        {day.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
               <div className="space-y-2">

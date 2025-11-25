@@ -1,5 +1,9 @@
 const navLinks = [
   {
+    label: "Home",
+    href: "/staff",
+  },
+  {
     label: "People",
     href: "/staff/people",
   },

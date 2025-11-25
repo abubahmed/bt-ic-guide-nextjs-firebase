@@ -55,7 +55,7 @@ const staffTypeLookup = staffTypes.reduce<Record<StaffTypeId, string>>((acc, sta
 
 const DEFAULT_TEAM: TeamId = teams[0].id;
 const DEFAULT_PERSON = peopleDirectory.find((person) => person.team === DEFAULT_TEAM)?.id ?? peopleDirectory[0].id;
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 10;
 
 export default function StaffPeoplePage() {
   const [uploadScope, setUploadScope] = useState<UploadScope>("master");
@@ -163,11 +163,8 @@ export default function StaffPeoplePage() {
           <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-3">
-                <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                  <span>Import people</span>
-                </div>
                 <div>
-                  <h1 className="text-3xl font-semibold text-white">Import people, emails, and roles</h1>
+                  <h1 className="text-3xl font-semibold text-white">Upload people data</h1>
                   <p className="mt-2 max-w-3xl text-base text-slate-400">
                     Upload people data via spreadsheet to the system. Ensure it matches the required format and headers.
                   </p>
@@ -258,11 +255,8 @@ export default function StaffPeoplePage() {
           <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-3">
-                <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                  <span>People viewer</span>
-                </div>
                 <div>
-                  <h2 className="text-3xl font-semibold text-white">View or manage people data</h2>
+                  <h2 className="text-3xl font-semibold text-white">People viewer</h2>
                   <p className="mt-2 max-w-3xl text-base text-slate-400">
                     Review or manage people data for all teams. Filter by team, role, or status to find specific people.
                   </p>
@@ -318,11 +312,12 @@ export default function StaffPeoplePage() {
                     <TableHeader>
                       <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
                         <TableHead className="min-w-[240px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
-                          Person · Email
+                          Person
                         </TableHead>
-                        <TableHead className="border border-slate-800/60 text-slate-400">Team · Role</TableHead>
+                        <TableHead className="border border-slate-800/60 text-slate-400">Email</TableHead>
+                        <TableHead className="border border-slate-800/60 text-slate-400">Team</TableHead>
                         <TableHead className="border border-slate-800/60 text-slate-400">Access</TableHead>
-                        <TableHead className="border border-slate-800/60 text-slate-400">Status · Source</TableHead>
+                        <TableHead className="border border-slate-800/60 text-slate-400">Status</TableHead>
                         <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -334,27 +329,18 @@ export default function StaffPeoplePage() {
                           <TableRow key={person.id} className="border border-slate-800/60">
                             <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
                               <p className="font-semibold text-white">{person.name}</p>
-                              <p className="text-xs text-slate-500">{person.email}</p>
+                            </TableCell>
+                            <TableCell className="border border-slate-800/60 p-3">
+                              <p className="text-sm font-medium text-white">{person.email}</p>
                             </TableCell>
                             <TableCell className="border border-slate-800/60 p-3">
                               <p className="text-sm font-medium text-white">{teamLookup[person.team]}</p>
-                              {person.accessRole === "staff" && person.staffType && (
-                                <p className="text-xs text-slate-500">{staffTypeLookup[person.staffType]}</p>
-                              )}
-                              {person.accessRole === "attendee" && (
-                                <p className="text-xs text-slate-500">Attendee · No staff type</p>
-                              )}
                             </TableCell>
                             <TableCell className="border border-slate-800/60 p-3">
                               <div className="flex flex-wrap gap-2">
                                 <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyle.badge}`}>
                                   {accessStyle.label}
                                 </Badge>
-                                {person.accessRole === "staff" && person.staffType && (
-                                  <Badge className="rounded-full border border-slate-700 bg-slate-950/60 text-[0.65rem] text-slate-200">
-                                    {staffTypeLookup[person.staffType]}
-                                  </Badge>
-                                )}
                               </div>
                             </TableCell>
                             <TableCell className="border border-slate-800/60 p-3">
@@ -362,10 +348,6 @@ export default function StaffPeoplePage() {
                                 <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyle.badge}`}>
                                   {statusStyle.label}
                                 </Badge>
-                                <p className="text-xs text-slate-400">{person.source}</p>
-                                <p className="text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">
-                                  {person.lastUpdate}
-                                </p>
                               </div>
                             </TableCell>
                             <TableCell className="border border-slate-800/60 p-3 text-right">
@@ -423,9 +405,6 @@ export default function StaffPeoplePage() {
           <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                  <span>Export people data</span>
-                </div>
                 <h2 className="mt-2 text-2xl font-semibold text-white">Export people data</h2>
                 <p className="text-slate-400">Export people data for all or specific teams in CSV or XLSX format.</p>
               </div>
