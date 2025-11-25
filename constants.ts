@@ -1,4 +1,6 @@
-export const ROOT_ROUTE = "/auth/login";
-export const HOME_ROUTE = "/";
-export const SESSION_COOKIE_NAME = "__Host-session";
-export const SESSION_COOKIE_LIFESPAN = 14 * 24 * 60 * 60 * 1000;
+const SESSION_COOKIE_NAME = "__Host-session";
+const SESSION_COOKIE_LIFESPAN = 14 * 24 * 60 * 60 * 1000;
+const INVITES_COLLECTION = "invites";
+const USERS_COLLECTION = "users";
+
+export { SESSION_COOKIE_NAME, SESSION_COOKIE_LIFESPAN, INVITES_COLLECTION, USERS_COLLECTION };

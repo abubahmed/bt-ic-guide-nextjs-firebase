@@ -1,42 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowUpRight, ClipboardList, LifeBuoy, Megaphone, QrCode, Users } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 import StaffHeader from "../components/header";
 import StaffFooter from "../components/footer";
 import QuickActionButton from "./components/quick-action-button";
-import {
-  stats,
-  quickActions,
-  scheduleViews,
-  announcements,
-  helpRequests,
-  resourceLibraryItems,
-  roomAssignments,
-  accessControls,
-} from "./static-data";
-
-const actionLabels = quickActions.reduce<Record<string, string>>((acc, action) => {
-  acc[action.slug] = action.label;
-  return acc;
-}, {});
-
-type ScheduleKey = keyof typeof scheduleViews;
-
-const scheduleOptions: { id: ScheduleKey; label: string }[] = Object.entries(scheduleViews).map(([key, value]) => ({
-  id: key as ScheduleKey,
-  label: value.label,
-}));
+import { stats, quickActions } from "./static-data";
 
 export default function StaffDashboardPage() {
-  const [scheduleKey, setScheduleKey] = useState<ScheduleKey>("phoenix");
-  const currentSchedule = scheduleViews[scheduleKey];
-
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
       <StaffHeader />
@@ -81,7 +51,7 @@ export default function StaffDashboardPage() {
           </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2">
+        <section className="grid gap-6 md:grid-cols-3">
           {quickActions.map((action) => (
             <QuickActionButton key={action.label} action={action} />
           ))}

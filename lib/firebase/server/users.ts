@@ -1,7 +1,7 @@
 import { db } from "@/lib/firebase/server/config";
 import { Timestamp } from "firebase-admin/firestore";
 import { serialize } from "@/lib/firebase/server/utils";
-import { USERS_COLLECTION } from "@/lib/firebase/constants";
+import { USERS_COLLECTION } from "@/constants";
 
 export async function getUserProfile(uid: string) {
   const userDoc = db.collection(USERS_COLLECTION).doc(uid);
