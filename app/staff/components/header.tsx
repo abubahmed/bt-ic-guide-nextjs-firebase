@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { primaryNav, staffProfile } from "../static-data";
+import { primaryNav, staffProfile } from "../(dashboard)/static-data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

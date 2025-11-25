@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import StaffFooter from "../(dashboard)/components/footer";
-import StaffHeader from "../(dashboard)/components/header";
+import StaffFooter from "../components/footer";
+import StaffHeader from "../components/header";
 
 const teams = [
   { id: "operations", label: "Operations" },
@@ -576,9 +576,7 @@ export default function StaffSchedulesPage() {
                     </div>
                   </TabsContent>
                   <TabsContent value="all">
-                    <p className="text-sm text-slate-300">
-                      Export includes schedules of all attendees and staffers.
-                    </p>
+                    <p className="text-sm text-slate-300">Export includes schedules of all attendees and staffers.</p>
                   </TabsContent>
                 </div>
               </Tabs>

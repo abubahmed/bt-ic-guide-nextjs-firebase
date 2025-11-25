@@ -7,8 +7,8 @@ import { DownloadCloud, FileImage, Trash2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-import StaffFooter from "../(dashboard)/components/footer";
-import StaffHeader from "../(dashboard)/components/header";
+import StaffFooter from "../components/footer";
+import StaffHeader from "../components/header";
 
 type MapMeta = {
   name: string;

@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import StaffFooter from "../(dashboard)/components/footer";
-import StaffHeader from "../(dashboard)/components/header";
+import StaffFooter from "../components/footer";
+import StaffHeader from "../components/header";
 
 const teams = [
   { id: "operations", label: "Operations" },

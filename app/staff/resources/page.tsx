@@ -12,8 +12,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import StaffFooter from "../(dashboard)/components/footer";
-import StaffHeader from "../(dashboard)/components/header";
+import StaffFooter from "../components/footer";
+import StaffHeader from "../components/header";
 
 type Visibility = "staff" | "attendees" | "both";
 type SourceType = "link" | "file";

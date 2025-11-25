@@ -17,8 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import StaffFooter from "../(dashboard)/components/footer";
-import StaffHeader from "../(dashboard)/components/header";
+import StaffFooter from "../components/footer";
+import StaffHeader from "../components/header";
 
 const teams = [
   { id: "operations", label: "Operations" },

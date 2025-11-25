@@ -19,8 +19,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import StaffFooter from "../(dashboard)/components/footer";
-import StaffHeader from "../(dashboard)/components/header";
+import StaffFooter from "../components/footer";
+import StaffHeader from "../components/header";
 
 const teams = [
   { id: "operations", label: "Operations" },
