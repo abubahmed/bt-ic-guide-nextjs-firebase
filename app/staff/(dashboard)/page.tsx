@@ -81,7 +81,7 @@ export default function StaffDashboardPage() {
           </div>
         </section>
 
-        <section className="grid gap-4 md:[grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+        <section className="grid gap-6 md:grid-cols-2">
           {quickActions.map((action) => (
             <QuickActionButton key={action.label} action={action} />
           ))}
