@@ -21,49 +21,69 @@ export default function StaffHeader() {
   const [quickLinkValue, setQuickLinkValue] = useState(quickLinks[0]);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-900/70 bg-slate-950/80 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs text-slate-300 lg:flex-nowrap lg:px-0">
-        <div className="flex flex-1 items-center gap-2">
-          <ul className="hidden flex-wrap items-center gap-3 text-[0.6rem] uppercase tracking-[0.35em] text-slate-500 md:flex">
-            {quickLinks.map((item) => (
-              <li key={item} className="transition hover:text-sky-200">
-                {item}
-              </li>
-            ))}
-          </ul>
-          <Select value={quickLinkValue} onValueChange={setQuickLinkValue}>
-            <SelectTrigger className="h-8 w-32 rounded-full border-slate-800 bg-slate-950/70 text-[0.6rem] uppercase tracking-[0.35em] text-slate-200 md:hidden">
-              <SelectValue placeholder="Quick links" />
-            </SelectTrigger>
-            <SelectContent className="border border-slate-800 bg-slate-950 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100">
-              {quickLinks.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {item}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-1 items-center justify-end gap-2 rounded-full border border-slate-900/60 bg-slate-950/60 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.3em] sm:flex-none">
-          <div className="flex items-center gap-2">
-            <Avatar className="size-9 border border-slate-800 bg-slate-900">
-              <AvatarImage src="/images/profile-placeholder.jpg" alt={staffProfile.name} />
-              <AvatarFallback className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-100">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden min-w-[140px] text-[0.6rem] text-slate-200 sm:flex">
-              <span>{staffProfile.name}</span>
+    <header className="sticky top-0 z-20 border-b border-slate-900/70 bg-slate-950/85 backdrop-blur">
+      <div className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-slate-300 lg:px-0">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/70 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-sky-300">
+              BT
+            </span>
+            <div className="leading-tight">
+              <p className="text-[0.6rem] uppercase tracking-[0.35em] text-slate-500">Conference ops control</p>
+              <p className="text-base font-semibold text-white">Lead Staff Command Deck</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={async () => await signOutActionClient(router)}
-              size="sm"
-              className="h-7 rounded-full bg-slate-100 px-3 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-slate-900">
-              Log out
-            </Button>
+          <div className="flex items-center gap-2 rounded-2xl border border-slate-900/70 bg-slate-950/60 px-4 py-2 text-[0.6rem] uppercase tracking-[0.35em]">
+            <span className="flex h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+            <span className="text-emerald-200">Systems nominal</span>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-4">
+          <nav className="hidden flex-1 flex-wrap items-center gap-2 md:flex">
+            {quickLinks.map((item) => (
+              <span
+                key={item}
+                className="rounded-2xl border border-transparent bg-white/5 px-4 py-2 text-[0.6rem] uppercase tracking-[0.3em] text-slate-300 transition hover:border-sky-500/40 hover:bg-slate-900/70 hover:text-white">
+                {item}
+              </span>
+            ))}
+          </nav>
+
+          <div className="w-full md:hidden">
+            <Select value={quickLinkValue} onValueChange={setQuickLinkValue}>
+              <SelectTrigger className="h-9 w-full rounded-2xl border-slate-800 bg-slate-900/80 text-[0.6rem] uppercase tracking-[0.35em] text-slate-200">
+                <SelectValue placeholder="Quick links" />
+              </SelectTrigger>
+              <SelectContent className="border border-slate-800 bg-slate-950 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100">
+                {quickLinks.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-1 items-center justify-end">
+            <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-900/60 bg-slate-950/60 px-4 py-2 sm:w-auto">
+              <Avatar className="size-10 border border-slate-800 bg-slate-900">
+                <AvatarImage src="/images/profile-placeholder.jpg" alt={staffProfile.name} />
+                <AvatarFallback className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-100">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-1 flex-col text-left text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:text-right">
+                <span className="text-[0.8rem] uppercase tracking-[0.25em] text-white">{staffProfile.name}</span>
+                <span className="text-slate-500">{staffProfile.email}</span>
+              </div>
+              <Button
+                onClick={async () => await signOutActionClient(router)}
+                size="sm"
+                className="h-9 rounded-2xl bg-sky-200/90 px-4 text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-slate-950">
+                Log out
+              </Button>
+            </div>
           </div>
         </div>
       </div>
