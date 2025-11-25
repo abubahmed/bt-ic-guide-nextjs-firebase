@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Edit3, Filter, History, Trash2, UploadCloud } from "lucide-react";
-import { JSX } from "react";
+import { Filter, UploadCloud } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,104 +54,45 @@ const people = [
   { id: "samir-holt", label: "Samir Holt", team: "logistics", role: "Freight coordinator" },
 ];
 
-type GridSlot = {
-  title: string;
-  time: string;
-  location: string;
-  source: "upload" | "manual" | "hold";
-};
-
-const gridDays = [
-  { id: "day0", label: "Fri · Day 1" },
-  { id: "day1", label: "Sat · Day 2" },
-  { id: "day2", label: "Sun · Day 3" },
+const qrBands = [
+  { id: "general", label: "General access" },
+  { id: "vip", label: "VIP & suites" },
+  { id: "ops", label: "Ops & logistics" },
 ] as const;
 
-type DayKey = (typeof gridDays)[number]["id"];
+type BandKey = (typeof qrBands)[number]["id"];
 type UploadScope = "master" | "team" | "person";
 type DownloadScope = "all" | "team" | "person";
-type DayScope = "all" | DayKey;
-type DownloadFormat = "csv" | "xlsx";
+type WaveScope = "all" | BandKey;
+type DownloadFormat = "zip" | "pdf";
 
-const timeBlocks = [
-  { title: "Morning coverage", time: "07:30 – 09:30" },
-  { title: "Midday activation", time: "10:00 – 13:00" },
-  { title: "Afternoon reset", time: "14:00 – 17:00" },
-] as const;
-
-const locationAnchors = ["Command deck", "Main ballroom", "Ops loft"] as const;
-const sourceCycle: GridSlot["source"][] = ["upload", "manual", "hold"];
-const PAGE_SIZE = 5;
-
-const gridAssignments: Record<string, Record<DayKey, GridSlot[]>> = people.reduce((acc, person) => {
-  const personAssignments = gridDays.reduce((dayAcc, day, dayIndex) => {
-    dayAcc[day.id] = timeBlocks.map((block, blockIndex) => ({
-      title: `${block.title} ${dayIndex + 1}`,
-      time: block.time,
-      location: `${day.label.split("·")[0].trim()} · ${locationAnchors[blockIndex]}`,
-      source: sourceCycle[(blockIndex + dayIndex) % sourceCycle.length],
-    }));
-    return dayAcc;
-  }, {} as Record<DayKey, GridSlot[]>);
-
-  acc[person.id] = personAssignments;
+const qrAssets = people.reduce<
+  Record<
+    string,
+    {
+      wave: BandKey;
+      waveLabel: string;
+      qrUrl: string;
+      version: string;
+      lastRotated: string;
+    }
+  >
+>((acc, person, index) => {
+  const band = qrBands[index % qrBands.length];
+  const timing = index % 2 === 0 ? "Today · 08:00 AM" : "Yesterday · 09:30 PM";
+  acc[person.id] = {
+    wave: band.id,
+    waveLabel: band.label,
+    qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(person.label)}`,
+    version: `v${1 + (index % 3)}.${(index * 2) % 10}`,
+    lastRotated: timing,
+  };
   return acc;
-}, {} as Record<string, Record<DayKey, GridSlot[]>>);
+}, {});
 
-const historyEntries = [
-  {
-    id: "evt-1",
-    actor: "Jordan King",
-    action: "Uploaded master schedule",
-    detail: "BTIC_master.csv · 148 rows · validation clean",
-    timestamp: "Today · 09:18 AM",
-    intent: "upload",
-  },
-  {
-    id: "evt-2",
-    actor: "Maya Patel",
-    action: "Edited Operations shift blocks",
-    detail: "Moved AV coverage to 14:30, reassigned two floaters",
-    timestamp: "Today · 07:45 AM",
-    intent: "edit",
-  },
-  {
-    id: "evt-3",
-    actor: "Kofi Diaz",
-    action: "Deleted outdated badge control slot",
-    detail: "Removed 23:00–00:00 slot for Alex Chen",
-    timestamp: "Today · 07:12 AM",
-    intent: "delete",
-  },
-  {
-    id: "evt-4",
-    actor: "Cal Rivers",
-    action: "Uploaded Programming AM rotations",
-    detail: "programming_day2.xlsx · 36 rows",
-    timestamp: "Yesterday · 10:24 PM",
-    intent: "upload",
-  },
-];
+const PAGE_SIZE = 10;
 
-const intentStyles: Record<string, { badge: string; icon: JSX.Element; accent: string }> = {
-  upload: {
-    badge: "bg-emerald-500/10 text-emerald-300 border-emerald-500/40",
-    icon: <UploadCloud className="h-4 w-4 text-emerald-300" />,
-    accent: "from-emerald-500/20 via-transparent to-transparent",
-  },
-  edit: {
-    badge: "bg-sky-500/10 text-sky-300 border-sky-500/40",
-    icon: <Edit3 className="h-4 w-4 text-sky-300" />,
-    accent: "from-sky-500/20 via-transparent to-transparent",
-  },
-  delete: {
-    badge: "bg-rose-500/10 text-rose-300 border-rose-500/40",
-    icon: <Trash2 className="h-4 w-4 text-rose-300" />,
-    accent: "from-rose-500/20 via-transparent to-transparent",
-  },
-};
-
-export default function StaffSchedulesPage() {
+export default function StaffQrCodesPage() {
   const [uploadScope, setUploadScope] = useState<UploadScope>("master");
   const [uploadTeam, setUploadTeam] = useState(teams[0]?.id ?? "");
   const [uploadPerson, setUploadPerson] = useState(
@@ -163,11 +103,10 @@ export default function StaffSchedulesPage() {
   const [downloadPerson, setDownloadPerson] = useState(
     people.find((person) => person.team === (teams[0]?.id ?? ""))?.id ?? ""
   );
-  const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>("csv");
-  const [downloadDay, setDownloadDay] = useState<DayScope>("all");
+  const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>("zip");
   const [gridTeamFilter, setGridTeamFilter] = useState<string>("all");
   const [gridPersonFilter, setGridPersonFilter] = useState<string>("all");
-  const [gridDayFilter, setGridDayFilter] = useState<DayScope>("all");
+  const [gridWaveFilter, setGridWaveFilter] = useState<WaveScope>("all");
   const [gridPage, setGridPage] = useState(0);
 
   useEffect(() => {
@@ -203,28 +142,33 @@ export default function StaffSchedulesPage() {
     return people.filter((person) => person.team === gridTeamFilter);
   }, [gridTeamFilter]);
 
-  const visiblePeople = useMemo(() => {
-    if (gridPersonFilter === "all") {
+  const waveScopedPeople = useMemo(() => {
+    if (gridWaveFilter === "all") {
       return peopleByTeam;
     }
-    return peopleByTeam.filter((person) => person.id === gridPersonFilter);
-  }, [peopleByTeam, gridPersonFilter]);
+    return peopleByTeam.filter((person) => qrAssets[person.id]?.wave === gridWaveFilter);
+  }, [peopleByTeam, gridWaveFilter]);
+
+  const visiblePeople = useMemo(() => {
+    if (gridPersonFilter === "all") {
+      return waveScopedPeople;
+    }
+    return waveScopedPeople.filter((person) => person.id === gridPersonFilter);
+  }, [waveScopedPeople, gridPersonFilter]);
 
   useEffect(() => {
     setGridPage(0);
-  }, [gridTeamFilter, gridPersonFilter, gridDayFilter]);
+  }, [gridTeamFilter, gridPersonFilter, gridWaveFilter]);
 
-  const visibleDays = gridDayFilter === "all" ? gridDays : gridDays.filter((day) => day.id === gridDayFilter);
   useEffect(() => {
     const maxPageIndex = Math.max(0, Math.ceil(visiblePeople.length / PAGE_SIZE) - 1);
     setGridPage((prev) => Math.min(prev, maxPageIndex));
   }, [visiblePeople.length]);
+
   const pageCount = Math.max(1, Math.ceil(visiblePeople.length / PAGE_SIZE));
   const paginatedPeople = visiblePeople.slice(gridPage * PAGE_SIZE, gridPage * PAGE_SIZE + PAGE_SIZE);
   const pageStart = visiblePeople.length === 0 ? 0 : gridPage * PAGE_SIZE + 1;
   const pageEnd = Math.min(visiblePeople.length, (gridPage + 1) * PAGE_SIZE);
-  const downloadDayLabel =
-    downloadDay === "all" ? "All days" : gridDays.find((day) => day.id === downloadDay)?.label ?? "Selected day";
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
@@ -234,15 +178,15 @@ export default function StaffSchedulesPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>Spreadsheet staging</span>
+                <span>QR kit staging</span>
                 <span className="h-px w-8 bg-slate-800" />
                 <span>Master · Team · Individual</span>
               </div>
               <div>
-                <h2 className="text-3xl font-semibold text-white">Upload every scenario from one surface</h2>
+                <h2 className="text-3xl font-semibold text-white">Upload every QR scenario from one surface</h2>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Pick the scope, drop in the CSV/XLSX, and run validations before publishing to the live grid. We’ll
-                  reuse the same pipeline for master, team, or one-off staffers.
+                  Pick the scope, drop in the ZIP, and run duplicate checks before releasing new badges. The same
+                  pipeline handles master packs, team refreshes, or one-off replacements.
                 </p>
               </div>
             </div>
@@ -307,26 +251,26 @@ export default function StaffSchedulesPage() {
               </div>
             )}
             <label
-              htmlFor="consolidated-upload"
+              htmlFor="qr-upload"
               className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
               <UploadCloud className="h-8 w-8 text-sky-300" />
               <div>
                 <p className="text-sm font-semibold text-white">
                   {uploadScope === "master"
-                    ? "Drop conference-wide spreadsheet"
+                    ? "Drop conference-wide QR ZIP"
                     : uploadScope === "team"
-                    ? `Upload ${teamLookup[uploadTeam]} rota`
-                    : `Upload schedule for ${people.find((p) => p.id === uploadPerson)?.label ?? "staffer"}`}
+                    ? `Upload ${teamLookup[uploadTeam]} QR pack`
+                    : `Upload QR for ${people.find((p) => p.id === uploadPerson)?.label ?? "staffer"}`}
                 </p>
-                <p className="text-xs text-slate-500">CSV/XLSX · Auto-maps headers, shifts, and owners</p>
+                <p className="text-xs text-slate-500">ZIP · Auto-detects filenames, badge owners, and expiry</p>
               </div>
-              <input id="consolidated-upload" type="file" className="hidden" accept=".csv,.xlsx" />
+              <input id="qr-upload" type="file" className="hidden" accept=".zip" />
             </label>
             <div className="grid gap-3 sm:grid-cols-2">
               <Button
                 variant="outline"
-                className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover	border-sky-500/60">
-                Run validations
+                className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+                Validate bundle
               </Button>
               <Button className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
                 Stage upload
@@ -341,23 +285,27 @@ export default function StaffSchedulesPage() {
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
                 <span>BTIC Staff Ops</span>
                 <span className="h-px w-8 bg-slate-800" />
-                <span>Inline schedule grid</span>
+                <span>Inline QR gallery</span>
               </div>
               <div>
-                <h1 className="text-3xl font-semibold text-white">Live CSV-style workspace</h1>
+                <h1 className="text-3xl font-semibold text-white">Live QR workspace</h1>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Review every team and day at a glance, then click into a cell to edit, swap locations, or delete
-                  shifts before pushing updates to the master spreadsheet.
+                  Browse every staffer’s QR badge, confirm access bands, and spot stale assets before syncing to the
+                  badge printers.
                 </p>
               </div>
             </div>
           </div>
           <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
+            <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.35em] text-slate-500">
+              <span>Gallery mirrors the live badge portal</span>
+              <span>Tip: replace assets before expiry</span>
+            </div>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/30 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
                 <Filter className="h-4 w-4 text-sky-300" />
                 <span>
-                  {visiblePeople.length} staff · {visibleDays.length * timeBlocks.length} blocks
+                  {visiblePeople.length} staff · {visiblePeople.length} QR codes
                 </span>
               </div>
               <Select value={gridTeamFilter} onValueChange={setGridTeamFilter}>
@@ -386,15 +334,15 @@ export default function StaffSchedulesPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={gridDayFilter} onValueChange={(value) => setGridDayFilter(value as DayScope)}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-                  <SelectValue placeholder="Day filter" />
+              <Select value={gridWaveFilter} onValueChange={(value) => setGridWaveFilter(value as WaveScope)}>
+                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-52">
+                  <SelectValue placeholder="Access band" />
                 </SelectTrigger>
                 <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                  <SelectItem value="all">All days</SelectItem>
-                  {gridDays.map((day) => (
-                    <SelectItem key={day.id} value={day.id}>
-                      {day.label}
+                  <SelectItem value="all">All bands</SelectItem>
+                  {qrBands.map((band) => (
+                    <SelectItem key={band.id} value={band.id}>
+                      {band.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -408,51 +356,60 @@ export default function StaffSchedulesPage() {
                       <TableHead className="min-w-[200px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
                         Staffer · Team
                       </TableHead>
-                      {visibleDays.map((day) => (
-                        <TableHead
-                          key={day.id}
-                          className="border border-slate-800/60 bg-slate-950/60 text-center text-slate-400">
-                          {day.label}
-                        </TableHead>
-                      ))}
+                      <TableHead className="border border-slate-800/60 bg-slate-950/60 text-center text-slate-400">
+                        QR asset
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedPeople.map((person) => (
-                      <TableRow key={person.id} className="border border-slate-800/60">
-                        <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
-                          <div>
-                            <p className="font-semibold text-white">{person.label}</p>
-                            <p className="text-xs text-slate-500">
-                              {teamLookup[person.team]} • {person.role}
-                            </p>
-                          </div>
-                        </TableCell>
-                        {visibleDays.map((day) => {
-                          const slots = gridAssignments[person.id]?.[day.id] ?? [];
-                          return (
-                            <TableCell
-                              key={`${person.id}-${day.id}`}
-                              className="border border-slate-800/60 align-top p-0">
-                              <div className="divide-y divide-slate-800/60 text-xs">
-                                {slots.map((slot, slotIndex) => (
-                                  <div key={`${person.id}-${day.id}-${slotIndex}`} className="p-3">
-                                    <p className="text-sm font-medium text-white">{slot.title}</p>
-                                    <p className="text-xs text-slate-400">{slot.time}</p>
-                                    <p className="text-xs text-slate-500">{slot.location}</p>
-                                  </div>
-                                ))}
+                    {paginatedPeople.map((person) => {
+                      const asset = qrAssets[person.id];
+                      return (
+                        <TableRow key={person.id} className="border border-slate-800/60">
+                          <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
+                            <div>
+                              <p className="font-semibold text-white">{person.label}</p>
+                              <p className="text-xs text-slate-500">
+                                {teamLookup[person.team]} • {person.role}
+                              </p>
+                            </div>
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                              <Badge className="rounded-full border border-slate-700 bg-slate-900/60 text-[0.6rem] uppercase tracking-[0.25em] text-slate-200">
+                                {asset?.waveLabel ?? "Unassigned"}
+                              </Badge>
+                              {asset?.version && (
+                                <span className="text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
+                                  {asset.version}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="border border-slate-800/60 p-0">
+                            {asset ? (
+                              <div className="flex flex-col items-center gap-3 p-4">
+                                <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={asset.qrUrl}
+                                    alt={`${person.label} QR code`}
+                                    className="h-40 w-40 rounded-xl border border-slate-800 bg-white object-contain p-3"
+                                    loading="lazy"
+                                  />
+                                </div>
+                                <p className="text-xs text-slate-500">{asset.lastRotated}</p>
                               </div>
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    ))}
+                            ) : (
+                              <div className="p-4 text-center text-xs text-slate-500">No QR assigned.</div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               ) : (
                 <div className="mt-8 rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
-                  No schedules match the current filters.
+                  No QR codes match the current filters.
                 </div>
               )}
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
@@ -491,14 +448,24 @@ export default function StaffSchedulesPage() {
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                <span>Schedule exports</span>
+                <span>QR exports</span>
                 <span className="h-px w-8 bg-slate-800" />
-                <span>CSV · XLSX</span>
+                <span>ZIP · PDF</span>
               </div>
-              <h2 className="mt-2 text-2xl font-semibold text-white">Export structured schedules</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-white">Export ready-to-share QR packs</h2>
               <p className="text-slate-400">
-                Produce distribution-ready extracts for compliance teams, logistics leads, or individual staffers.
+                Produce zipped bundles for distribution lists or PDF contact sheets for onsite scanners.
               </p>
+            </div>
+            <div className="flex flex-wrap gap-6 text-sm text-slate-300">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Most recent export</p>
+                <p className="font-semibold text-white">5 mins ago · ZIP · All teams</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Generated by</p>
+                <p className="font-semibold text-white">Jordan King</p>
+              </div>
             </div>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
@@ -577,23 +544,22 @@ export default function StaffSchedulesPage() {
                   </TabsContent>
                   <TabsContent value="all">
                     <p className="text-sm text-slate-300">
-                      Export includes schedules of all attendees and staffers.
+                      Export includes QR codes for all active staffers and badge types.
                     </p>
                   </TabsContent>
                 </div>
               </Tabs>
-
               <div className="mt-6 space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Day scope</Label>
-                <Select value={downloadDay} onValueChange={(value) => setDownloadDay(value as DayScope)}>
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Access band focus</Label>
+                <Select value={gridWaveFilter} onValueChange={(value) => setGridWaveFilter(value as WaveScope)}>
                   <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Choose day(s)" />
+                    <SelectValue placeholder="Choose band" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    <SelectItem value="all">All days</SelectItem>
-                    {gridDays.map((day) => (
-                      <SelectItem key={day.id} value={day.id}>
-                        {day.label}
+                    <SelectItem value="all">All bands</SelectItem>
+                    {qrBands.map((band) => (
+                      <SelectItem key={band.id} value={band.id}>
+                        {band.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -608,13 +574,13 @@ export default function StaffSchedulesPage() {
                     <SelectValue placeholder="Choose format" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    <SelectItem value="csv">CSV (spreadsheet ready)</SelectItem>
-                    <SelectItem value="xlsx">Excel spreadsheet (.xlsx)</SelectItem>
+                    <SelectItem value="zip">ZIP (individual PNGs)</SelectItem>
+                    <SelectItem value="pdf">PDF contact sheet</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <Button className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
-                Generate {downloadFormat === "csv" ? "CSV export" : "XLSX export"}
+                Generate {downloadFormat === "zip" ? "ZIP bundle" : "PDF contact sheet"}
               </Button>
             </div>
           </div>

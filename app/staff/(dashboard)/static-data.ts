@@ -59,8 +59,14 @@ const quickActions = [
   },
   {
     slug: "rooms",
-    label: "Manage room assignments & QR badges",
-    description: "Manage room assignments and distribute QR badges.",
+    label: "Manage room assignments",
+    description: "Manage room assignments for attendees and staffers.",
+    icon: QrCode,
+  },
+  {
+    slug: "qrcodes",
+    label: "Manage QR codes",
+    description: "Manage QR codes for attendees and staffers.",
     icon: QrCode,
   },
   {
