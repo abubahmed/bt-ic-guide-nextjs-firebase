@@ -2,9 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Edit3, Filter, History, Trash2, UploadCloud } from "lucide-react";
-import { JSX } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,47 +11,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import StaffFooter from "../components/footer";
 import StaffHeader from "../components/header";
-
-const teams = [
-  { id: "operations", label: "Operations" },
-  { id: "programming", label: "Programming" },
-  { id: "hospitality", label: "Hospitality" },
-  { id: "security", label: "Security" },
-  { id: "logistics", label: "Logistics" },
-];
+import { people, timeBlocks, gridDays, teams } from "./data";
 
 const teamLookup = teams.reduce<Record<string, string>>((acc, team) => {
   acc[team.id] = team.label;
   return acc;
 }, {});
-
-const people = [
-  { id: "alex-chen", label: "Alex Chen", team: "operations", role: "Ops hub lead" },
-  { id: "brianna-lee", label: "Brianna Lee", team: "operations", role: "Site logistics" },
-  { id: "carter-simmons", label: "Carter Simmons", team: "operations", role: "Stage direction" },
-  { id: "dahlia-ortiz", label: "Dahlia Ortiz", team: "operations", role: "Equipment flow" },
-  { id: "ethan-brooks", label: "Ethan Brooks", team: "operations", role: "Ops comms" },
-  { id: "maya-patel", label: "Maya Patel", team: "programming", role: "Panel wrangler" },
-  { id: "noor-kamal", label: "Noor Kamal", team: "programming", role: "Speaker concierge" },
-  { id: "owen-blake", label: "Owen Blake", team: "programming", role: "Content editor" },
-  { id: "priya-iyer", label: "Priya Iyer", team: "programming", role: "Studio coordinator" },
-  { id: "quincy-hale", label: "Quincy Hale", team: "programming", role: "Backstage ops" },
-  { id: "leo-carter", label: "Leo Carter", team: "hospitality", role: "VIP liaison" },
-  { id: "sara-ng", label: "Sara Ng", team: "hospitality", role: "Suite management" },
-  { id: "tariq-farouq", label: "Tariq Farouq", team: "hospitality", role: "Guest transport" },
-  { id: "ivy-lam", label: "Ivy Lam", team: "hospitality", role: "Culinary liaison" },
-  { id: "jamie-bowen", label: "Jamie Bowen", team: "hospitality", role: "Evening host" },
-  { id: "diana-park", label: "Diana Park", team: "security", role: "Access control" },
-  { id: "kofi-diaz", label: "Kofi Diaz", team: "security", role: "Perimeter lead" },
-  { id: "lara-cho", label: "Lara Cho", team: "security", role: "Badge command" },
-  { id: "miles-porter", label: "Miles Porter", team: "security", role: "Escort detail" },
-  { id: "nina-vasquez", label: "Nina Vasquez", team: "security", role: "Night shift lead" },
-  { id: "luca-ramirez", label: "Luca Ramirez", team: "logistics", role: "Transport chief" },
-  { id: "opal-reed", label: "Opal Reed", team: "logistics", role: "Fleet ops" },
-  { id: "paxton-ryu", label: "Paxton Ryu", team: "logistics", role: "Warehouse manager" },
-  { id: "renee-yang", label: "Renee Yang", team: "logistics", role: "Inventory control" },
-  { id: "samir-holt", label: "Samir Holt", team: "logistics", role: "Freight coordinator" },
-];
 
 type GridSlot = {
   title: string;
@@ -62,23 +25,11 @@ type GridSlot = {
   source: "upload" | "manual" | "hold";
 };
 
-const gridDays = [
-  { id: "day0", label: "Fri · Day 1" },
-  { id: "day1", label: "Sat · Day 2" },
-  { id: "day2", label: "Sun · Day 3" },
-] as const;
-
 type DayKey = (typeof gridDays)[number]["id"];
 type UploadScope = "master" | "team" | "person";
 type DownloadScope = "all" | "team" | "person";
 type DayScope = "all" | DayKey;
 type DownloadFormat = "csv" | "xlsx";
-
-const timeBlocks = [
-  { title: "Morning coverage", time: "07:30 – 09:30" },
-  { title: "Midday activation", time: "10:00 – 13:00" },
-  { title: "Afternoon reset", time: "14:00 – 17:00" },
-] as const;
 
 const locationAnchors = ["Command deck", "Main ballroom", "Ops loft"] as const;
 const sourceCycle: GridSlot["source"][] = ["upload", "manual", "hold"];
@@ -98,59 +49,6 @@ const gridAssignments: Record<string, Record<DayKey, GridSlot[]>> = people.reduc
   acc[person.id] = personAssignments;
   return acc;
 }, {} as Record<string, Record<DayKey, GridSlot[]>>);
-
-const historyEntries = [
-  {
-    id: "evt-1",
-    actor: "Jordan King",
-    action: "Uploaded master schedule",
-    detail: "BTIC_master.csv · 148 rows · validation clean",
-    timestamp: "Today · 09:18 AM",
-    intent: "upload",
-  },
-  {
-    id: "evt-2",
-    actor: "Maya Patel",
-    action: "Edited Operations shift blocks",
-    detail: "Moved AV coverage to 14:30, reassigned two floaters",
-    timestamp: "Today · 07:45 AM",
-    intent: "edit",
-  },
-  {
-    id: "evt-3",
-    actor: "Kofi Diaz",
-    action: "Deleted outdated badge control slot",
-    detail: "Removed 23:00–00:00 slot for Alex Chen",
-    timestamp: "Today · 07:12 AM",
-    intent: "delete",
-  },
-  {
-    id: "evt-4",
-    actor: "Cal Rivers",
-    action: "Uploaded Programming AM rotations",
-    detail: "programming_day2.xlsx · 36 rows",
-    timestamp: "Yesterday · 10:24 PM",
-    intent: "upload",
-  },
-];
-
-const intentStyles: Record<string, { badge: string; icon: JSX.Element; accent: string }> = {
-  upload: {
-    badge: "bg-emerald-500/10 text-emerald-300 border-emerald-500/40",
-    icon: <UploadCloud className="h-4 w-4 text-emerald-300" />,
-    accent: "from-emerald-500/20 via-transparent to-transparent",
-  },
-  edit: {
-    badge: "bg-sky-500/10 text-sky-300 border-sky-500/40",
-    icon: <Edit3 className="h-4 w-4 text-sky-300" />,
-    accent: "from-sky-500/20 via-transparent to-transparent",
-  },
-  delete: {
-    badge: "bg-rose-500/10 text-rose-300 border-rose-500/40",
-    icon: <Trash2 className="h-4 w-4 text-rose-300" />,
-    accent: "from-rose-500/20 via-transparent to-transparent",
-  },
-};
 
 export default function StaffSchedulesPage() {
   const [uploadScope, setUploadScope] = useState<UploadScope>("master");
@@ -223,8 +121,6 @@ export default function StaffSchedulesPage() {
   const paginatedPeople = visiblePeople.slice(gridPage * PAGE_SIZE, gridPage * PAGE_SIZE + PAGE_SIZE);
   const pageStart = visiblePeople.length === 0 ? 0 : gridPage * PAGE_SIZE + 1;
   const pageEnd = Math.min(visiblePeople.length, (gridPage + 1) * PAGE_SIZE);
-  const downloadDayLabel =
-    downloadDay === "all" ? "All days" : gridDays.find((day) => day.id === downloadDay)?.label ?? "Selected day";
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
@@ -235,14 +131,12 @@ export default function StaffSchedulesPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
                 <span>Spreadsheet staging</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>Master · Team · Individual</span>
               </div>
               <div>
-                <h2 className="text-3xl font-semibold text-white">Upload every scenario from one surface</h2>
+                <h2 className="text-3xl font-semibold text-white">Upload Schedule Data Via Spreadsheet</h2>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Pick the scope, drop in the CSV/XLSX, and run validations before publishing to the live grid. We’ll
-                  reuse the same pipeline for master, team, or one-off staffers.
+                  Upload your schedule data via spreadsheet to the system. Ensure it matches the required format and
+                  headers.
                 </p>
               </div>
             </div>
@@ -311,14 +205,7 @@ export default function StaffSchedulesPage() {
               className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
               <UploadCloud className="h-8 w-8 text-sky-300" />
               <div>
-                <p className="text-sm font-semibold text-white">
-                  {uploadScope === "master"
-                    ? "Drop conference-wide spreadsheet"
-                    : uploadScope === "team"
-                    ? `Upload ${teamLookup[uploadTeam]} rota`
-                    : `Upload schedule for ${people.find((p) => p.id === uploadPerson)?.label ?? "staffer"}`}
-                </p>
-                <p className="text-xs text-slate-500">CSV/XLSX · Auto-maps headers, shifts, and owners</p>
+                <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
               </div>
               <input id="consolidated-upload" type="file" className="hidden" accept=".csv,.xlsx" />
             </label>
@@ -339,27 +226,19 @@ export default function StaffSchedulesPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>BTIC Staff Ops</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>Inline schedule grid</span>
+                <span>Schedule viewer</span>
               </div>
               <div>
-                <h1 className="text-3xl font-semibold text-white">Live CSV-style workspace</h1>
+                <h1 className="text-3xl font-semibold text-white">View Schedule Data</h1>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Review every team and day at a glance, then click into a cell to edit, swap locations, or delete
-                  shifts before pushing updates to the master spreadsheet.
+                  Review the schedule data for all teams and days. Filter by team, individual, and day to find specific
+                  schedules.
                 </p>
               </div>
             </div>
           </div>
           <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/30 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                <Filter className="h-4 w-4 text-sky-300" />
-                <span>
-                  {visiblePeople.length} staff · {visibleDays.length * timeBlocks.length} blocks
-                </span>
-              </div>
               <Select value={gridTeamFilter} onValueChange={setGridTeamFilter}>
                 <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
                   <SelectValue placeholder="Team filter" />
@@ -492,12 +371,10 @@ export default function StaffSchedulesPage() {
             <div>
               <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
                 <span>Schedule exports</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>CSV · XLSX</span>
               </div>
-              <h2 className="mt-2 text-2xl font-semibold text-white">Export structured schedules</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-white">Export schedules</h2>
               <p className="text-slate-400">
-                Produce distribution-ready extracts for compliance teams, logistics leads, or individual staffers.
+                Export the schedule data for all or specific teams and days in CSV or XLSX format.
               </p>
             </div>
           </div>
@@ -574,9 +451,6 @@ export default function StaffSchedulesPage() {
                         </Select>
                       </div>
                     </div>
-                  </TabsContent>
-                  <TabsContent value="all">
-                    <p className="text-sm text-slate-300">Export includes schedules of all attendees and staffers.</p>
                   </TabsContent>
                 </div>
               </Tabs>

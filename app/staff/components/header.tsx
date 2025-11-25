@@ -27,6 +27,7 @@ export default function StaffHeader() {
           <nav className="hidden flex-1 flex-wrap items-center gap-2 md:flex">
             {navLinks.map((item) => (
               <Link
+                target="_blank"
                 href={item.href}
                 key={item.label}
                 className="rounded-2xl border border-transparent bg-white/5 px-4 py-2 text-[0.6rem] uppercase tracking-[0.3em] text-slate-300 transition hover:bg-slate-900/70 hover:text-white">
@@ -43,7 +44,7 @@ export default function StaffHeader() {
               <SelectContent className="border border-slate-800 bg-slate-950 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100">
                 {navLinks.map((item) => (
                   <SelectItem key={item.label} value={item.label}>
-                    <Link href={item.href} className="transition hover:text-sky-300">
+                    <Link target="_blank" href={item.href} className="transition hover:text-sky-300">
                       {item.label}
                     </Link>
                   </SelectItem>

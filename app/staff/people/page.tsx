@@ -18,27 +18,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { teams, staffTypes, peopleDirectory, statusStyles, accessStyles } from "@/app/staff/people/data";
 
 import StaffFooter from "../components/footer";
 import StaffHeader from "../components/header";
-
-const teams = [
-  { id: "operations", label: "Operations" },
-  { id: "programming", label: "Programming" },
-  { id: "hospitality", label: "Hospitality" },
-  { id: "security", label: "Security" },
-  { id: "logistics", label: "Logistics" },
-] as const;
-
-const staffTypes = [
-  { id: "ops-command", label: "Ops command lead" },
-  { id: "ops-runner", label: "Ops floor runner" },
-  { id: "programming-producer", label: "Programming producer" },
-  { id: "content-host", label: "Content host" },
-  { id: "hospitality-suite", label: "Hospitality suite host" },
-  { id: "security-shift", label: "Security shift lead" },
-  { id: "logistics-fleet", label: "Logistics fleet chief" },
-] as const;
 
 type UploadScope = "master" | "team" | "person";
 type ExportScope = "all" | "team" | "person";
@@ -69,197 +52,6 @@ const staffTypeLookup = staffTypes.reduce<Record<StaffTypeId, string>>((acc, sta
   acc[staffType.id] = staffType.label;
   return acc;
 }, {} as Record<StaffTypeId, string>);
-
-const peopleDirectory: PersonRecord[] = [
-  {
-    id: "alex-chen",
-    name: "Alex Chen",
-    email: "alex.chen@btic.co",
-    team: "operations",
-    accessRole: "staff",
-    staffType: "ops-command",
-    status: "active",
-    source: "Master upload · Clean",
-    lastUpdate: "Today · 09:12 AM",
-  },
-  {
-    id: "maya-patel",
-    name: "Maya Patel",
-    email: "maya.patel@btic.co",
-    team: "programming",
-    accessRole: "staff",
-    staffType: "programming-producer",
-    status: "active",
-    source: "Team import",
-    lastUpdate: "Today · 08:54 AM",
-  },
-  {
-    id: "leo-carter",
-    name: "Leo Carter",
-    email: "leo.carter@btic.co",
-    team: "hospitality",
-    accessRole: "staff",
-    staffType: "hospitality-suite",
-    status: "active",
-    source: "Manual promotion",
-    lastUpdate: "Yesterday · 10:44 PM",
-  },
-  {
-    id: "lara-cho",
-    name: "Lara Cho",
-    email: "lara.cho@btic.co",
-    team: "security",
-    accessRole: "staff",
-    staffType: "security-shift",
-    status: "active",
-    source: "Master upload · Clean",
-    lastUpdate: "Yesterday · 09:20 PM",
-  },
-  {
-    id: "opal-reed",
-    name: "Opal Reed",
-    email: "opal.reed@btic.co",
-    team: "logistics",
-    accessRole: "staff",
-    staffType: "logistics-fleet",
-    status: "active",
-    source: "Fleet update import",
-    lastUpdate: "Today · 07:38 AM",
-  },
-  {
-    id: "natalie-young",
-    name: "Natalie Young",
-    email: "natalie.young@btic.co",
-    team: "programming",
-    accessRole: "attendee",
-    status: "invited",
-    source: "Self-service RSVP",
-    lastUpdate: "Today · 07:05 AM",
-  },
-  {
-    id: "jamie-bowen",
-    name: "Jamie Bowen",
-    email: "jamie.bowen@btic.co",
-    team: "hospitality",
-    accessRole: "attendee",
-    status: "active",
-    source: "Master upload · Clean",
-    lastUpdate: "Yesterday · 11:12 PM",
-  },
-  {
-    id: "dahlia-ortiz",
-    name: "Dahlia Ortiz",
-    email: "dahlia.ortiz@btic.co",
-    team: "operations",
-    accessRole: "staff",
-    staffType: "ops-runner",
-    status: "invited",
-    source: "Team import · Pending",
-    lastUpdate: "Today · 06:54 AM",
-  },
-  {
-    id: "kofi-diaz",
-    name: "Kofi Diaz",
-    email: "kofi.diaz@btic.co",
-    team: "security",
-    accessRole: "staff",
-    staffType: "security-shift",
-    status: "active",
-    source: "Manual promotion",
-    lastUpdate: "Today · 08:04 AM",
-  },
-  {
-    id: "priya-iyer",
-    name: "Priya Iyer",
-    email: "priya.iyer@btic.co",
-    team: "programming",
-    accessRole: "attendee",
-    status: "active",
-    source: "Master upload · Clean",
-    lastUpdate: "Today · 09:00 AM",
-  },
-  {
-    id: "renee-yang",
-    name: "Renee Yang",
-    email: "renee.yang@btic.co",
-    team: "logistics",
-    accessRole: "attendee",
-    status: "invited",
-    source: "Self-service RSVP",
-    lastUpdate: "Today · 08:11 AM",
-  },
-  {
-    id: "samir-holt",
-    name: "Samir Holt",
-    email: "samir.holt@btic.co",
-    team: "logistics",
-    accessRole: "staff",
-    staffType: "logistics-fleet",
-    status: "active",
-    source: "Master upload · Clean",
-    lastUpdate: "Today · 09:20 AM",
-  },
-  {
-    id: "ivy-lam",
-    name: "Ivy Lam",
-    email: "ivy.lam@btic.co",
-    team: "hospitality",
-    accessRole: "attendee",
-    status: "revoked",
-    source: "Manual revoke",
-    lastUpdate: "Yesterday · 05:10 PM",
-  },
-  {
-    id: "ethan-brooks",
-    name: "Ethan Brooks",
-    email: "ethan.brooks@btic.co",
-    team: "operations",
-    accessRole: "staff",
-    staffType: "ops-runner",
-    status: "active",
-    source: "Master upload · Clean",
-    lastUpdate: "Today · 08:58 AM",
-  },
-  {
-    id: "noor-kamal",
-    name: "Noor Kamal",
-    email: "noor.kamal@btic.co",
-    team: "programming",
-    accessRole: "attendee",
-    status: "active",
-    source: "Team import",
-    lastUpdate: "Today · 08:01 AM",
-  },
-] as const;
-
-const statusStyles: Record<PersonStatus, { label: string; badge: string; copy: string }> = {
-  active: {
-    label: "Active access",
-    badge: "bg-emerald-500/10 text-emerald-300 border border-emerald-500/40",
-    copy: "Person can log in and scan badges right now.",
-  },
-  invited: {
-    label: "Invite pending",
-    badge: "bg-amber-500/10 text-amber-300 border border-amber-500/40",
-    copy: "Waiting on verification email or staff approval.",
-  },
-  revoked: {
-    label: "Access revoked",
-    badge: "bg-rose-500/10 text-rose-300 border border-rose-500/40",
-    copy: "Login blocked until access is restored.",
-  },
-};
-
-const accessStyles: Record<AccessRole, { label: string; badge: string }> = {
-  staff: {
-    label: "Staff",
-    badge: "bg-sky-500/10 text-sky-300 border border-sky-500/40",
-  },
-  attendee: {
-    label: "Attendee",
-    badge: "bg-slate-500/10 text-slate-300 border border-slate-500/40",
-  },
-};
 
 const DEFAULT_TEAM: TeamId = teams[0].id;
 const DEFAULT_PERSON = peopleDirectory.find((person) => person.team === DEFAULT_TEAM)?.id ?? peopleDirectory[0].id;
@@ -297,7 +89,7 @@ export default function StaffPeoplePage() {
   useEffect(() => {
     if (activePerson) {
       setModalRole(activePerson.accessRole);
-      setModalStaffType(activePerson.staffType ?? staffTypes[0].id);
+      setModalStaffType((activePerson as any).staffType ?? staffTypes[0].id);
     }
   }, [activePerson]);
 
@@ -350,8 +142,6 @@ export default function StaffPeoplePage() {
   const pageCount = Math.max(1, Math.ceil(filteredRoster.length / PAGE_SIZE));
   const pageStart = filteredRoster.length === 0 ? 0 : gridPage * PAGE_SIZE + 1;
   const pageEnd = Math.min(filteredRoster.length, (gridPage + 1) * PAGE_SIZE);
-  const uploadPersonLabel = peopleDirectory.find((person) => person.id === uploadPerson)?.name ?? "selected contact";
-  const exportPersonLabel = peopleDirectory.find((person) => person.id === exportPerson)?.name ?? "selected contact";
 
   const handleOpenDialog = (personId: string) => {
     setActivePersonId(personId);
@@ -374,22 +164,14 @@ export default function StaffPeoplePage() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                  <span>Roster ingest</span>
-                  <span className="h-px w-8 bg-slate-800" />
-                  <span>Master · Team · Individual</span>
+                  <span>Import people</span>
                 </div>
                 <div>
                   <h1 className="text-3xl font-semibold text-white">Import people, emails, and roles</h1>
                   <p className="mt-2 max-w-3xl text-base text-slate-400">
-                    Drop CSV/XLSX files that include name, email, team, and access tags. We reuse the same validations
-                    across attendees and staff so you can keep one template.
+                    Upload people data via spreadsheet to the system. Ensure it matches the required format and headers.
                   </p>
                 </div>
-              </div>
-              <div className="rounded-3xl border border-slate-800/70 bg-slate-950/40 px-6 py-4 text-center text-sm text-slate-400">
-                <p className="text-4xl font-semibold text-white">{peopleDirectory.length}</p>
-                <p>records mirrored from CSV</p>
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Emails + access</p>
               </div>
             </div>
             <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
@@ -456,14 +238,7 @@ export default function StaffPeoplePage() {
                 className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
                 <UploadCloud className="h-8 w-8 text-sky-300" />
                 <div>
-                  <p className="text-sm font-semibold text-white">
-                    {uploadScope === "master"
-                      ? "Drop global roster CSV"
-                      : uploadScope === "team"
-                      ? `Upload ${teamLookup[uploadTeam]} contacts`
-                      : `Upload roster entry for ${uploadPersonLabel}`}
-                  </p>
-                  <p className="text-xs text-slate-500">Required columns: name, email, team, access_role, staff_type</p>
+                  <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
                 </div>
                 <input id="people-upload" type="file" className="hidden" accept=".csv,.xlsx" />
               </label>
@@ -484,39 +259,18 @@ export default function StaffPeoplePage() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                  <span>Directory intelligence</span>
-                  <span className="h-px w-8 bg-slate-800" />
-                  <span>Live roster grid</span>
+                  <span>People viewer</span>
                 </div>
                 <div>
-                  <h2 className="text-3xl font-semibold text-white">People · Emails · Access guardrails</h2>
+                  <h2 className="text-3xl font-semibold text-white">View or manage people data</h2>
                   <p className="mt-2 max-w-3xl text-base text-slate-400">
-                    Filter by team, role, or status, then open any row to promote them to staff, change their staff
-                    type, or fully revoke access with audit-ready notes.
+                    Review or manage people data for all teams. Filter by team, role, or status to find specific people.
                   </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-5 py-3 text-center">
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Staffers</p>
-                  <p className="text-2xl font-semibold text-white">{rosterTotals.staffCount}</p>
-                </div>
-                <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-5 py-3 text-center">
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Attendees</p>
-                  <p className="text-2xl font-semibold text-white">{rosterTotals.attendeeCount}</p>
                 </div>
               </div>
             </div>
             <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
-              <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.35em] text-slate-500">
-                <span>Mirrors roster_template.csv</span>
-                <span>Inline access actions</span>
-              </div>
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 rounded-2xl border border-slate-800/70 bg-slate-950/30 px-4 py-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                  <Filter className="h-4 w-4 text-sky-300" />
-                  <span>{filteredRoster.length} people</span>
-                </div>
                 <Select value={teamFilter} onValueChange={(value) => setTeamFilter(value as "all" | TeamId)}>
                   <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
                     <SelectValue placeholder="Team filter" />
@@ -670,47 +424,33 @@ export default function StaffPeoplePage() {
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
                 <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                  <span>Roster exports</span>
-                  <span className="h-px w-8 bg-slate-800" />
-                  <span>CSV · XLSX</span>
+                  <span>Export people data</span>
                 </div>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Shareable snapshots for compliance + ops</h2>
-                <p className="text-slate-400">
-                  Mirror whatever filters you need—everyone, a specific team, or just one staffer—for downstream audits
-                  or contract uploaders.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-6 text-sm text-slate-300">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Most recent export</p>
-                  <p className="font-semibold text-white">2 mins ago · CSV · All staff</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Generated by</p>
-                  <p className="font-semibold text-white">Jordan King</p>
-                </div>
+                <h2 className="mt-2 text-2xl font-semibold text-white">Export people data</h2>
+                <p className="text-slate-400">Export people data for all or specific teams in CSV or XLSX format.</p>
               </div>
             </div>
             <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
               <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
                 <Tabs value={exportScope} onValueChange={(value) => setExportScope(value as ExportScope)}>
                   <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
-                    <TabsTrigger value="all" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    <TabsTrigger
+                      value="all"
+                      className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                       Everyone
                     </TabsTrigger>
-                    <TabsTrigger value="team" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    <TabsTrigger
+                      value="team"
+                      className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                       Team
                     </TabsTrigger>
-                    <TabsTrigger value="person" className="rounded-xl text-xs uppercase tracking-[0.2em]">
+                    <TabsTrigger
+                      value="person"
+                      className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                       Individual
                     </TabsTrigger>
                   </TabsList>
                   <div className="mt-6 space-y-4">
-                    <TabsContent value="all">
-                      <p className="text-sm text-slate-300">
-                        Includes every attendee and staff record with current access + roles.
-                      </p>
-                    </TabsContent>
                     <TabsContent value="team" className="space-y-3">
                       <div className="space-y-2">
                         <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
@@ -727,7 +467,6 @@ export default function StaffPeoplePage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <p className="text-xs text-slate-500">Limited to roster rows tied to {teamLookup[exportTeam]}.</p>
                     </TabsContent>
                     <TabsContent value="person" className="space-y-3">
                       <div className="grid gap-4 md:grid-cols-2">
@@ -764,7 +503,6 @@ export default function StaffPeoplePage() {
                           </Select>
                         </div>
                       </div>
-                      <p className="text-xs text-slate-500">Targets {exportPersonLabel} with their latest metadata.</p>
                     </TabsContent>
                   </div>
                 </Tabs>
@@ -797,10 +535,6 @@ export default function StaffPeoplePage() {
           {activePerson ? (
             <>
               <DialogHeader className="gap-3">
-                <div className="flex items-center gap-2 text-[0.65rem] uppercase tracking-[0.35em] text-slate-500">
-                  <Users2 className="h-4 w-4 text-sky-300" />
-                  <span>Access control</span>
-                </div>
                 <DialogTitle className="text-2xl text-white">{activePerson.name}</DialogTitle>
                 <DialogDescription className="text-slate-400">{activePerson.email}</DialogDescription>
               </DialogHeader>
