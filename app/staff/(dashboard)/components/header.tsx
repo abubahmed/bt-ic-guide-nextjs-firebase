@@ -1,5 +1,5 @@
 import { primaryNav, staffProfile } from "../static-data";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { signOutActionClient } from "@/actions/client/auth-actions";
 import { useRouter } from "next/navigation";
@@ -16,9 +16,7 @@ export default function StaffHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-slate-900/70 bg-slate-950/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs text-slate-300 lg:flex-nowrap lg:px-0">
-        <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em]">
-          <span className="rounded-full bg-sky-500/20 px-3 py-1 text-sky-100">BTIC Ops</span>
-        </div>
+        <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em]"></div>
 
         <nav className="flex flex-1 items-center justify-start gap-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] sm:justify-center">
           {primaryNav.map((link) => (
@@ -34,13 +32,13 @@ export default function StaffHeader() {
         <div className="flex flex-1 items-center justify-end gap-2 rounded-full border border-slate-900/60 bg-slate-950/60 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.3em] sm:flex-none">
           <div className="flex items-center gap-2">
             <Avatar className="size-9 border border-slate-800 bg-slate-900">
+              <AvatarImage src="/images/profile-placeholder.jpg" alt={staffProfile.name} />
               <AvatarFallback className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-100">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <div className="hidden min-w-[140px] text-[0.6rem] text-slate-400 sm:flex sm:flex-col">
-              <span className="text-slate-200">{staffProfile.name}</span>
-              <span>{staffProfile.email}</span>
+            <div className="hidden min-w-[140px] text-[0.6rem] text-slate-200 sm:flex">
+              <span>{staffProfile.name}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
