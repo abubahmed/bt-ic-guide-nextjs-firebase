@@ -1,27 +1,30 @@
-export const STAFF_ROUTE = "/staff";
-export const ATTENDEE_ROUTE = "/attendee";
-export const ATTENDEE_AUTH_ROUTE = "/attendee/auth";
-export const STAFF_AUTH_ROUTE = "/staff/auth";
+const STAFF_ROUTE_PREFIX = "/staff";
+const ATTENDEE_ROUTE_PREFIX = "/attendee";
+const ATTENDEE_AUTH_ROUTE_PREFIX = "/attendee/auth";
+const STAFF_AUTH_ROUTE_PREFIX = "/staff/auth";
 
-export const APP_ROUTES = {
-  staffProtectedRoutes: [
-    `${STAFF_ROUTE}/announcements`,
-    `${STAFF_ROUTE}/help`,
-    `${STAFF_ROUTE}/rooms`,
-    `${STAFF_ROUTE}/qrcodes`,
-    `${STAFF_ROUTE}/resources`,
-    `${STAFF_ROUTE}/people`,
-    `${STAFF_ROUTE}/map`,
-    `${STAFF_ROUTE}/schedules`,
-    `${STAFF_ROUTE}/`,
-  ],
-  attendeeProtectedRoutes: [`${ATTENDEE_ROUTE}/`],
-  publicRoutes: [
-    `${ATTENDEE_AUTH_ROUTE}/login`,
-    `${ATTENDEE_AUTH_ROUTE}/signup`,
-    `${ATTENDEE_AUTH_ROUTE}/invite-request`,
-    `${STAFF_AUTH_ROUTE}/login`,
-    `${STAFF_AUTH_ROUTE}/signup`,
-    `${STAFF_AUTH_ROUTE}/invite-request`,
-  ],
+const PUBLIC_ROUTES = [
+  `${ATTENDEE_AUTH_ROUTE_PREFIX}/login`,
+  `${ATTENDEE_AUTH_ROUTE_PREFIX}/signup`,
+  `${ATTENDEE_AUTH_ROUTE_PREFIX}/invite-request`,
+  `${STAFF_AUTH_ROUTE_PREFIX}/login`,
+  `${STAFF_AUTH_ROUTE_PREFIX}/signup`,
+  `${STAFF_AUTH_ROUTE_PREFIX}/invite-request`,
+];
+
+const ATTENDEE_LOGIN_ROUTE = `${ATTENDEE_AUTH_ROUTE_PREFIX}/login`;
+const STAFF_LOGIN_ROUTE = `${STAFF_AUTH_ROUTE_PREFIX}/login`;
+const STAFF_HOME_ROUTE = `${STAFF_ROUTE_PREFIX}/`;
+const ATTENDEE_HOME_ROUTE = `${ATTENDEE_ROUTE_PREFIX}/`;
+
+export {
+  STAFF_ROUTE_PREFIX,
+  ATTENDEE_ROUTE_PREFIX,
+  ATTENDEE_AUTH_ROUTE_PREFIX,
+  STAFF_AUTH_ROUTE_PREFIX,
+  PUBLIC_ROUTES,
+  ATTENDEE_LOGIN_ROUTE,
+  STAFF_LOGIN_ROUTE,
+  STAFF_HOME_ROUTE,
+  ATTENDEE_HOME_ROUTE,
 };
