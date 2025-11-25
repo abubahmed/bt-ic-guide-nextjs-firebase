@@ -11,7 +11,7 @@ import {
 } from "./route-config";
 
 const staffOrAttendee = () => {
-  const values = ["STAFF", "ATTENDEE"];
+  const values = ["STAFF", "STAFF"];
   const index = Math.random() < 0.5 ? 0 : 1;
   return values[index];
 };

@@ -13,7 +13,7 @@ import {
   signOut,
   sendEmailVerification,
 } from "@/lib/firebase/client/auth";
-import { HOME_ROUTE, ROOT_ROUTE } from "@/constants";
+import { STAFF_HOME_ROUTE, ATTENDEE_HOME_ROUTE } from "@/route-config";
 import { getSessionUser } from "@/actions/server/session-actions";
 import { signInWithGoogleActionServer, signInWithEmailActionServer } from "@/actions/server/auth-actions";
 
@@ -45,7 +45,7 @@ export const signInWithGoogleActionClient = async (router: any) => {
     }
 
     // redirect to home page
-    router.push(HOME_ROUTE);
+    router.push(STAFF_HOME_ROUTE);
   } catch (error) {
     console.error("Failed to sign in with Google in signInWithGoogleActionClient:", error);
     await signOut();
@@ -134,7 +134,7 @@ export const signInWithEmailActionClient = async (
     }
 
     // redirect to home page
-    router.push(HOME_ROUTE);
+    router.push(ATTENDEE_HOME_ROUTE);
   } catch (error) {
     console.error("Failed to sign in with email in signInWithEmailActionClient:", error);
     await signOut();
@@ -151,7 +151,7 @@ export const signOutActionClient = async (router: any) => {
   try {
     await fetch("/api/logout", { method: "POST", credentials: "include" });
     await signOut();
-    router.push(ROOT_ROUTE);
+    router.push(STAFF_HOME_ROUTE);
   } catch (error) {
     console.error("Failed to log out in signOutActionClient:", error);
   }
