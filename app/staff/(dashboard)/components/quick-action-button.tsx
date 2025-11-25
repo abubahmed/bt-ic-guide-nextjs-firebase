@@ -1,8 +1,9 @@
 import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
 interface QuickAction {
   label: string;
-  slug: string;
+  href: string;
   icon: React.ElementType;
   description: string;
 }
@@ -10,20 +11,20 @@ interface QuickAction {
 export default function QuickActionButton({ action }: { action: QuickAction }) {
   const Icon = action.icon;
   return (
-    <button
+    <Link
       key={action.label}
-      data-action={action.slug}
+      href={action.href}
       aria-label={action.label}
-      className="group flex items-center gap-4 rounded-3xl border border-slate-800/60 bg-slate-900/40 p-6 text-left transition hover:-translate-y-0.5 hover:border-sky-500/50 hover:bg-slate-900/80"
-      type="button">
+      target="_blank"
+      className="group flex min-h-[130px] items-center gap-4 rounded-3xl border border-slate-800/60 bg-slate-900/40 p-6 text-left transition hover:-translate-y-0.5 hover:border-sky-500/50 hover:bg-slate-900/80">
       <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/60 text-sky-400">
         <Icon className="h-5 w-5" />
       </span>
       <div className="flex-1">
-        <p className="text-sm font-semibold text-white">{action.label}</p>
+        <p className="text-sm mb-2 font-semibold text-white">{action.label}</p>
         <p className="text-sm text-slate-400">{action.description}</p>
       </div>
       <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:text-sky-400" />
-    </button>
+    </Link>
   );
 }

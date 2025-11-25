@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import StaffHeader from "../components/header";
 import StaffFooter from "../components/footer";
 import QuickActionButton from "./components/quick-action-button";
-import { stats, quickActions } from "./static-data";
+import { stats, quickActions } from "./data";
+import StatCard from "./components/stat-card";
 
 export default function StaffDashboardPage() {
   return (
@@ -15,38 +15,19 @@ export default function StaffDashboardPage() {
           <div className="flex flex-wrap items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
             <span>Business Today International Conference</span>
             <span className="h-px w-8 bg-slate-800" />
-            <span>Staff admin command center</span>
+            <span>Admin staff dashboard</span>
           </div>
           <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold text-white md:text-4xl">Lead Staffer Dashboard</h1>
+              <h1 className="text-3xl font-semibold text-white md:text-4xl">Admin Staffer Dashboard</h1>
               <p className="mt-3 max-w-2xl text-base text-slate-400">
-                Business Today International Conference Operations Dashboard
+                Business Today International Conference Admin Staff Dashboard
               </p>
             </div>
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {stats.map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <Card key={stat.label} className="border-slate-800 bg-slate-900/70 text-slate-100">
-                  <CardContent className="relative rounded-2xl border border-slate-800/80 bg-slate-950/40 p-6">
-                    <span
-                      className={`pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.accent} opacity-70`}
-                    />
-                    <div className="relative flex items-start justify-between">
-                      <div>
-                        <p className="text-sm uppercase tracking-[0.35em] text-slate-500">{stat.label}</p>
-                        <p className="mt-4 text-3xl font-semibold text-white">{stat.value}</p>
-                        <p className="mt-2 text-sm text-slate-400">{stat.meta}</p>
-                      </div>
-                      <span className="rounded-2xl border border-slate-800 bg-slate-900/70 p-3 text-sky-400">
-                        <Icon className="h-5 w-5" />
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
+              return <StatCard key={stat.label} stat={stat} />;
             })}
           </div>
         </section>
