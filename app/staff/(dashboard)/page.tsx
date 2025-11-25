@@ -39,8 +39,8 @@ export default function StaffDashboardPage() {
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
+      <StaffHeader />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <StaffHeader />
         <section className="rounded-[32px] border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/70 to-slate-950 p-8 shadow-[0px_30px_80px_rgba(2,6,23,0.7)]">
           <div className="flex flex-wrap items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
             <span>Business Today International Conference</span>
