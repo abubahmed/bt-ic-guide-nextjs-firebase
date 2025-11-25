@@ -1,6 +1,5 @@
 import {
   FileSpreadsheet,
-  Users,
   LifeBuoy,
   CalendarClock,
   Megaphone,
@@ -85,13 +84,7 @@ const quickActions = [
   },
 ];
 
-const staffProfile = {
-  name: "Maya Chen",
-  email: "maya.chen@bt.org",
-};
-
 export {
   stats,
   quickActions,
-  staffProfile,
 };
