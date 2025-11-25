@@ -10,7 +10,7 @@ import { signOutActionClient } from "@/actions/client/auth-actions";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function StaffHeader() {
+export default function StaffHeader({ currentPage }: { currentPage: string }) {
   const router = useRouter();
   const initials = staffProfile.name
     .split(" ")
@@ -25,15 +25,17 @@ export default function StaffHeader() {
       <div className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-slate-300 lg:px-0">
         <div className="mt-4 flex flex-wrap items-center gap-4">
           <nav className="hidden flex-1 flex-wrap items-center gap-2 md:flex">
-            {navLinks.map((item) => (
-              <Link
-                target="_blank"
-                href={item.href}
-                key={item.label}
-                className="rounded-2xl border border-transparent bg-white/5 px-4 py-2 text-[0.6rem] uppercase tracking-[0.3em] text-slate-300 transition hover:bg-slate-900/70 hover:text-white">
-                {item.label}
-              </Link>
-            ))}
+            {navLinks
+              .filter((item) => item.key !== currentPage)
+              .map((item) => (
+                <Link
+                  target="_blank"
+                  href={item.href}
+                  key={item.key}
+                  className="rounded-2xl border border-transparent bg-white/5 px-4 py-2 text-[0.6rem] uppercase tracking-[0.3em] text-slate-300 transition hover:bg-slate-900/70 hover:text-white">
+                  {item.label}
+                </Link>
+              ))}
           </nav>
 
           <div className="w-full md:hidden">
