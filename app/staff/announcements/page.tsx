@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -30,7 +30,6 @@ const channels = [
   { id: "stage", label: "Stage screen" },
 ] as const;
 
-type AnnouncementType = "announcement" | "reminder";
 type AudienceScope = "all" | "team";
 type ScopeFilter = "all" | "everyone" | "team";
 type TeamId = (typeof teams)[number]["id"];
@@ -40,7 +39,6 @@ type AnnouncementEntry = {
   id: string;
   title: string;
   message: string;
-  type: AnnouncementType;
   channel: ChannelId;
   scope: "all" | TeamId;
   author: string;
@@ -63,7 +61,6 @@ const seededAnnouncements: AnnouncementEntry[] = [
     id: "msg-01",
     title: "Door rotations begin in 15",
     message: "Security + logistics, swap badges and stage at Ballroom North.",
-    type: "reminder",
     channel: "push",
     scope: "all",
     author: "Jordan King",
@@ -74,7 +71,6 @@ const seededAnnouncements: AnnouncementEntry[] = [
     id: "msg-02",
     title: "Hospitality suites briefing",
     message: "Hospitality leads meet at Ops Loft room 4 for VIP prep.",
-    type: "announcement",
     channel: "email",
     scope: "hospitality",
     author: "Nora Quinn",
@@ -85,7 +81,6 @@ const seededAnnouncements: AnnouncementEntry[] = [
     id: "msg-03",
     title: "Stage walk-through",
     message: "Programming + operations join the ballroom walk-through at 11:00.",
-    type: "announcement",
     channel: "stage",
     scope: "programming",
     author: "Cal Rivers",
@@ -94,9 +89,8 @@ const seededAnnouncements: AnnouncementEntry[] = [
   },
   {
     id: "msg-04",
-    title: "Reminder · shuttle manifests",
+    title: "Shuttle manifests check",
     message: "Logistics verify shuttle manifests before 14:00 dispatch.",
-    type: "reminder",
     channel: "sms",
     scope: "logistics",
     author: "Alex Chen",
@@ -107,7 +101,6 @@ const seededAnnouncements: AnnouncementEntry[] = [
     id: "msg-05",
     title: "Attendee dinner seating",
     message: "Attendees check app for assigned tables at 18:30 dinner.",
-    type: "announcement",
     channel: "push",
     scope: "all",
     author: "Maya Patel",
@@ -118,7 +111,6 @@ const seededAnnouncements: AnnouncementEntry[] = [
     id: "msg-06",
     title: "Badge troubleshooting stand-up",
     message: "Security bring escalations to the Command Deck at 09:45.",
-    type: "reminder",
     channel: "sms",
     scope: "security",
     author: "Kofi Diaz",
@@ -131,7 +123,6 @@ const PAGE_SIZE = 6;
 
 export default function StaffAnnouncementsPage() {
   const [entries, setEntries] = useState<AnnouncementEntry[]>(seededAnnouncements);
-  const [formType, setFormType] = useState<AnnouncementType>("announcement");
   const [formChannel, setFormChannel] = useState<ChannelId>(channels[0].id);
   const [formScope, setFormScope] = useState<AudienceScope>("all");
   const [formTeam, setFormTeam] = useState<TeamId>(teams[0].id);
@@ -140,25 +131,19 @@ export default function StaffAnnouncementsPage() {
   const [formSendWindow, setFormSendWindow] = useState("Now");
 
   const [channelFilter, setChannelFilter] = useState<"all" | ChannelId>("all");
-  const [typeFilter, setTypeFilter] = useState<"all" | AnnouncementType>("all");
   const [scopeFilter, setScopeFilter] = useState<ScopeFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [gridPage, setGridPage] = useState(0);
 
   const totals = useMemo(() => {
-    const announcementCount = entries.filter((entry) => entry.type === "announcement").length;
-    const reminderCount = entries.length - announcementCount;
     const scheduledCount = entries.filter((entry) => entry.status === "scheduled").length;
-    return { announcementCount, reminderCount, scheduledCount };
+    return { announcementCount: entries.length, scheduledCount };
   }, [entries]);
 
   const filteredEntries = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
     return entries.filter((entry) => {
       if (channelFilter !== "all" && entry.channel !== channelFilter) {
-        return false;
-      }
-      if (typeFilter !== "all" && entry.type !== typeFilter) {
         return false;
       }
       if (scopeFilter === "everyone" && entry.scope !== "all") {
@@ -175,7 +160,7 @@ export default function StaffAnnouncementsPage() {
       }
       return true;
     });
-  }, [entries, channelFilter, typeFilter, scopeFilter, searchQuery]);
+  }, [entries, channelFilter, scopeFilter, searchQuery]);
 
   const pageCount = Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE));
   const pagedEntries = filteredEntries.slice(gridPage * PAGE_SIZE, gridPage * PAGE_SIZE + PAGE_SIZE);
@@ -184,7 +169,7 @@ export default function StaffAnnouncementsPage() {
 
   useEffect(() => {
     setGridPage(0);
-  }, [channelFilter, typeFilter, scopeFilter, searchQuery]);
+  }, [channelFilter, scopeFilter, searchQuery]);
 
   const handleDelete = (id: string) => {
     setEntries((prev) => prev.filter((entry) => entry.id !== id));
@@ -195,7 +180,6 @@ export default function StaffAnnouncementsPage() {
       id: `msg-${Date.now()}`,
       title: formTitle || "Untitled message",
       message: formMessage || "Pending content",
-      type: formType,
       channel: formChannel,
       scope: formScope === "all" ? "all" : formTeam,
       author: "You",
@@ -226,21 +210,16 @@ export default function StaffAnnouncementsPage() {
                 <span>App · SMS · Email</span>
               </div>
               <div>
-                <h1 className="text-3xl font-semibold text-white">Compose announcements + reminders</h1>
+                <h1 className="text-3xl font-semibold text-white">Compose announcements</h1>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Stage a quick reminder or a polished announcement, then push it through app push, SMS, or email
-                  channels with one consistent template.
+                  Broadcast polished updates across app push, SMS, or email from one streamlined console.
                 </p>
               </div>
             </div>
-            <div className="grid gap-3 text-center text-xs uppercase tracking-[0.35em] text-slate-500 sm:grid-cols-3 lg:text-right">
+            <div className="grid gap-3 text-center text-xs uppercase tracking-[0.35em] text-slate-500 sm:grid-cols-2 lg:text-right">
               <div className="rounded-3xl border border-slate-800/70 bg-slate-950/50 px-4 py-3 text-slate-400">
                 <p className="text-3xl font-semibold text-white">{totals.announcementCount}</p>
                 <p>Announcements</p>
-              </div>
-              <div className="rounded-3xl border border-slate-800/70 bg-slate-950/50 px-4 py-3 text-slate-400">
-                <p className="text-3xl font-semibold text-white">{totals.reminderCount}</p>
-                <p>Reminders</p>
               </div>
               <div className="rounded-3xl border border-slate-800/70 bg-slate-950/50 px-4 py-3 text-slate-400">
                 <p className="text-3xl font-semibold text-white">{totals.scheduledCount}</p>
@@ -249,26 +228,9 @@ export default function StaffAnnouncementsPage() {
             </div>
           </div>
           <div className="mt-6 rounded-[28px] border border-slate-800/70 bg-slate-950/50 p-6">
-            <Tabs value={formType} onValueChange={(value) => setFormType(value as AnnouncementType)}>
-              <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-900/60">
-                <TabsTrigger
-                  value="announcement"
-                  className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                  Announcement
-                </TabsTrigger>
-                <TabsTrigger
-                  value="reminder"
-                  className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                  Reminder
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="announcement" className="mt-6 text-sm text-slate-400">
-                Use for formal updates, major shifts, or attendee-facing moments.
-              </TabsContent>
-              <TabsContent value="reminder" className="mt-6 text-sm text-slate-400">
-                Ping teams minutes before key handoffs or deadlines.
-              </TabsContent>
-            </Tabs>
+            <p className="text-sm text-slate-400">
+              Set the channel, audience, and timing below—every announcement uses the same consistent template.
+            </p>
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -377,9 +339,9 @@ export default function StaffAnnouncementsPage() {
                 <span>Searchable + filterable</span>
               </div>
               <div>
-                <h2 className="text-3xl font-semibold text-white">Past announcements + reminders</h2>
+                <h2 className="text-3xl font-semibold text-white">Past announcements</h2>
                 <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Filter by channel, scope, or tone. Delete stale updates to keep the queue focused on the current
+                  Filter by channel, scope, or keyword. Delete stale updates to keep the queue focused on the current
                   conference run of show.
                 </p>
               </div>
@@ -408,16 +370,6 @@ export default function StaffAnnouncementsPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as "all" | AnnouncementType)}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-                  <SelectValue placeholder="Type filter" />
-                </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                  <SelectItem value="all">Announcements + Reminders</SelectItem>
-                  <SelectItem value="announcement">Announcements</SelectItem>
-                  <SelectItem value="reminder">Reminders</SelectItem>
-                </SelectContent>
-              </Select>
               <Select value={scopeFilter} onValueChange={(value) => setScopeFilter(value as ScopeFilter)}>
                 <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
                   <SelectValue placeholder="Scope filter" />
@@ -443,7 +395,7 @@ export default function StaffAnnouncementsPage() {
                       <TableHead className="min-w-[220px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
                         Title · Message
                       </TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Channel · Type</TableHead>
+                      <TableHead className="border border-slate-800/60 text-slate-400">Channel</TableHead>
                       <TableHead className="border border-slate-800/60 text-slate-400">Audience</TableHead>
                       <TableHead className="border border-slate-800/60 text-slate-400">Status · Author</TableHead>
                       <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
@@ -457,19 +409,9 @@ export default function StaffAnnouncementsPage() {
                           <p className="text-xs text-slate-500">{entry.message}</p>
                         </TableCell>
                         <TableCell className="border border-slate-800/60 p-3">
-                          <div className="flex flex-wrap gap-2">
-                            <Badge className="rounded-full border border-slate-700 bg-slate-950/60 text-[0.65rem] text-slate-200">
-                              {channelLookup[entry.channel]}
-                            </Badge>
-                            <Badge
-                              className={`rounded-full px-3 py-1 text-[0.65rem] ${
-                                entry.type === "announcement"
-                                  ? "border border-sky-500/40 bg-sky-500/10 text-sky-200"
-                                  : "border border-amber-500/40 bg-amber-500/10 text-amber-200"
-                              }`}>
-                              {entry.type}
-                            </Badge>
-                          </div>
+                          <Badge className="rounded-full border border-slate-700 bg-slate-950/60 text-[0.65rem] text-slate-200">
+                            {channelLookup[entry.channel]}
+                          </Badge>
                         </TableCell>
                         <TableCell className="border border-slate-800/60 p-3">
                           {entry.scope === "all" ? (
