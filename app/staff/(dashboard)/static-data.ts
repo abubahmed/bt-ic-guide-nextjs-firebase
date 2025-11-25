@@ -12,6 +12,7 @@ import {
   Share2,
   MessageSquare,
   BusFront,
+  Map,
 } from "lucide-react";
 
 const stats = [
@@ -42,44 +43,50 @@ const quickActions = [
   {
     slug: "schedules",
     label: "Manage personal schedules",
-    description: "Upload CSV schedules or manually edit schedules.",
+    description: "View and upload schedules for attendees and staffers.",
     icon: CalendarClock,
   },
   {
     slug: "announcements",
     label: "Manage announcements & reminders",
-    description: "Compose push/email nudges or schedule reminders.",
+    description: "Compose push/email announcements or reminders.",
     icon: Megaphone,
   },
   {
     slug: "help",
     label: "Open help desk queue",
-    description: "Triage help requests and dispatch on-site support.",
+    description: "Triage help requests and provide support.",
     icon: LifeBuoy,
   },
   {
     slug: "rooms",
     label: "Manage room assignments",
-    description: "Manage room assignments for attendees and staffers.",
+    description: "View and assign rooms to attendees and staffers.",
     icon: QrCode,
   },
   {
     slug: "qrcodes",
     label: "Manage QR codes",
-    description: "Manage QR codes for attendees and staffers.",
+    description: "View and assign QR codes to attendees and staffers.",
     icon: QrCode,
   },
   {
     slug: "resources",
     label: "Manage resource library",
-    description: "Slides, FAQ, forms, merchandise, and more.",
+    description: "View and upload slides, FAQ, forms, merchandise, and more.",
     icon: ClipboardList,
   },
   {
     slug: "roles",
     label: "Manage people & access control",
-    description: "Invite attendees/staffers, update roles, revoke access, etc.",
+    description: "Invite attendees/staffers, update roles, revoke access, and more.",
     icon: ShieldCheck,
+  },
+  {
+    slug: "map",
+    label: "Manage map",
+    description: "View and upload map for attendees and staffers.",
+    icon: Map,
   },
 ];
 

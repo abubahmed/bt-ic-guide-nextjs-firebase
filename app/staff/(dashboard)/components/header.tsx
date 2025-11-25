@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
+
 import { primaryNav, staffProfile } from "../static-data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { signOutActionClient } from "@/actions/client/auth-actions";
 import { useRouter } from "next/navigation";
 
@@ -12,22 +17,33 @@ export default function StaffHeader() {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const quickLinks = ["People", "Schedules", "Rooms", "QR Codes", "Help", "Announcements"];
+  const [quickLinkValue, setQuickLinkValue] = useState(quickLinks[0]);
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-900/70 bg-slate-950/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs text-slate-300 lg:flex-nowrap lg:px-0">
-        <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em]"></div>
-
-        <nav className="flex flex-1 items-center justify-start gap-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] sm:justify-center">
-          {primaryNav.map((link) => (
-            <button
-              key={link.slug}
-              type="button"
-              className="rounded-full px-3 py-1 text-slate-500 transition hover:bg-slate-900/70 hover:text-sky-200">
-              {link.label}
-            </button>
-          ))}
-        </nav>
+        <div className="flex flex-1 items-center gap-2">
+          <ul className="hidden flex-wrap items-center gap-3 text-[0.6rem] uppercase tracking-[0.35em] text-slate-500 md:flex">
+            {quickLinks.map((item) => (
+              <li key={item} className="transition hover:text-sky-200">
+                {item}
+              </li>
+            ))}
+          </ul>
+          <Select value={quickLinkValue} onValueChange={setQuickLinkValue}>
+            <SelectTrigger className="h-8 w-32 rounded-full border-slate-800 bg-slate-950/70 text-[0.6rem] uppercase tracking-[0.35em] text-slate-200 md:hidden">
+              <SelectValue placeholder="Quick links" />
+            </SelectTrigger>
+            <SelectContent className="border border-slate-800 bg-slate-950 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100">
+              {quickLinks.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <div className="flex flex-1 items-center justify-end gap-2 rounded-full border border-slate-900/60 bg-slate-950/60 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.3em] sm:flex-none">
           <div className="flex items-center gap-2">
