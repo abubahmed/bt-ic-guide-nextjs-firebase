@@ -1,0 +1,13 @@
+day,date,team,staff_id,staff_name,role,shift_title,start_time,end_time,location,source,notes
+Day 1,2025-06-13,operations,alex-chen,Alex Chen,Ops hub lead,Morning coverage,07:30,09:30,Command deck,upload,Oversee hall opening checklist
+Day 1,2025-06-13,programming,maya-patel,Maya Patel,Panel wrangler,Midday activation,10:00,13:00,Main ballroom,manual,Prep concierge briefings
+Day 1,2025-06-13,hospitality,leo-carter,Leo Carter,VIP liaison,Afternoon reset,14:00,17:00,Ops loft,hold,Ready lounge walk-through
+Day 1,2025-06-13,logistics,luca-ramirez,Luca Ramirez,Transport chief,Midday activation,10:00,13:00,Loading dock,upload,Stage inbound fleet
+Day 2,2025-06-14,security,diana-park,Diana Park,Access control,Morning coverage,07:30,09:30,Command deck,manual,Audit overnight pass list
+Day 2,2025-06-14,operations,brianna-lee,Brianna Lee,Site logistics,Midday activation,10:00,13:00,Ops loft,upload,Refresh signage and queues
+Day 2,2025-06-14,programming,noor-kamal,Noor Kamal,Speaker concierge,Afternoon reset,14:00,17:00,Main ballroom,hold,Coordinate rehearsal pivots
+Day 2,2025-06-14,hospitality,sara-ng,Sara Ng,Suite management,Midday activation,10:00,13:00,VIP suites,manual,Rotate suite stewards
+Day 3,2025-06-15,logistics,opal-reed,Opal Reed,Fleet ops,Morning coverage,07:30,09:30,Loading dock,upload,Dispatch rollout wave 1
+Day 3,2025-06-15,security,miles-porter,Miles Porter,Escort detail,Midday activation,10:00,13:00,Command deck,manual,Stage escort pairings
+Day 3,2025-06-15,programming,owen-blake,Owen Blake,Content editor,Afternoon reset,14:00,17:00,Studio B,hold,Prep highlight reels
+Day 3,2025-06-15,hospitality,jamie-bowen,Jamie Bowen,Evening host,Afternoon reset,14:00,17:00,Main ballroom,upload,Rebrief nightly hosts

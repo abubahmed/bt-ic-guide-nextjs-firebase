@@ -1,0 +1,10 @@
+day,date,team,staff_id,staff_name,role,shift_title,start_time,end_time,location,source,notes
+Day 1,2025-06-13,operations,alex-chen,Alex Chen,Ops hub lead,Morning coverage,07:30,09:30,Command deck,upload,Anchor ops stand-up and overnight recap
+Day 1,2025-06-13,operations,brianna-lee,Brianna Lee,Site logistics,Midday activation,10:00,13:00,Ops loft,manual,Coordinate dock-to-stage load-in windows
+Day 1,2025-06-13,operations,carter-simmons,Carter Simmons,Stage direction,Afternoon reset,14:00,17:00,Stage left,hold,Cue deck turnover for keynote rig
+Day 2,2025-06-14,operations,dahlia-ortiz,Dahlia Ortiz,Equipment flow,Morning coverage,07:30,09:30,Equipment bay,upload,Verify lifts and outbound carts
+Day 2,2025-06-14,operations,ethan-brooks,Ethan Brooks,Ops comms,Midday activation,10:00,13:00,Comms pod,manual,Refresh radio trees and huddles
+Day 2,2025-06-14,operations,alex-chen,Alex Chen,Ops hub lead,Afternoon reset,14:00,17:00,Command deck,hold,Review incident log and prep night brief
+Day 3,2025-06-15,operations,brianna-lee,Brianna Lee,Site logistics,Morning coverage,07:30,09:30,Gate A,upload,Supervise arrival queues and signage reset
+Day 3,2025-06-15,operations,carter-simmons,Carter Simmons,Stage direction,Midday activation,10:00,13:00,Main ballroom catwalk,manual,Finalize cueing for closing plenary
+Day 3,2025-06-15,operations,dahlia-ortiz,Dahlia Ortiz,Equipment flow,Afternoon reset,14:00,17:00,Ops loft,hold,Audit equipment returns before strike

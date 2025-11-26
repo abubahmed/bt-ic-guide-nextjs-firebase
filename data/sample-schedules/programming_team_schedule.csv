@@ -1,0 +1,10 @@
+day,date,team,staff_id,staff_name,role,shift_title,start_time,end_time,location,source,notes
+Day 1,2025-06-13,programming,maya-patel,Maya Patel,Panel wrangler,Morning coverage,07:30,09:30,Main ballroom,upload,Confirm decks and name slates for morning panels
+Day 1,2025-06-13,programming,priya-iyer,Priya Iyer,Studio coordinator,Midday activation,10:00,13:00,Studio A,manual,Block camera shots for live segment
+Day 1,2025-06-13,programming,quincy-hale,Quincy Hale,Backstage ops,Afternoon reset,14:00,17:00,Backstage corridor,hold,Oversee turnover for evening talk
+Day 2,2025-06-14,programming,noor-kamal,Noor Kamal,Speaker concierge,Morning coverage,07:30,09:30,Speaker lounge,upload,Walk keynote lineup through run of show
+Day 2,2025-06-14,programming,maya-patel,Maya Patel,Panel wrangler,Midday activation,10:00,13:00,Main ballroom,manual,Shadow moderator and manage transitions
+Day 2,2025-06-14,programming,owen-blake,Owen Blake,Content editor,Afternoon reset,14:00,17:00,Edit suite,hold,Assemble highlight reel selects
+Day 3,2025-06-15,programming,priya-iyer,Priya Iyer,Studio coordinator,Morning coverage,07:30,09:30,Studio B,upload,Prep remote uplinks and comms tests
+Day 3,2025-06-15,programming,quincy-hale,Quincy Hale,Backstage ops,Midday activation,10:00,13:00,Stage right,manual,Reset backstage flow for finale
+Day 3,2025-06-15,programming,noor-kamal,Noor Kamal,Speaker concierge,Afternoon reset,14:00,17:00,Main ballroom greenroom,hold,Shepherd closing speakers to stage
