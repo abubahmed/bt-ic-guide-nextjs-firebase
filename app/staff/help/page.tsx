@@ -112,14 +112,14 @@ export default function StaffHelpPage() {
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
-      <StaffHeader />
+      <StaffHeader currentPage="help" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
                 <h1 className="text-3xl font-semibold text-white">View and manage help requests</h1>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                <p className="mt-2 text-base text-slate-400">
                   Track help requests from all teams and individuals. Click any row to view full context, add notes, or
                   update disposition.
                 </p>

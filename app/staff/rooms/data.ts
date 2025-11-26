@@ -29,4 +29,12 @@ const roomTemplates = [
   { room: "504", floor: "5", type: "Standard king" },
 ] as const;
 
-export { staff, roomTemplates };
+const teams = [
+  { id: "operations", label: "Operations" },
+  { id: "programming", label: "Programming" },
+  { id: "hospitality", label: "Hospitality" },
+  { id: "security", label: "Security" },
+  { id: "logistics", label: "Logistics" },
+] as const;
+
+export { staff, roomTemplates, teams };

@@ -107,21 +107,15 @@ export default function StaffMapPage() {
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
-      <StaffHeader />
+      <StaffHeader currentPage="map" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>Wayfinding ops</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>Map import · Export</span>
-              </div>
               <div>
-                <h1 className="text-3xl font-semibold text-white">Control the single source of truth map</h1>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  Upload the latest campus or floor image, download the current one, and keep staff signage aligned—all
-                  from the same surface.
+                <h1 className="text-3xl font-semibold text-white">Upload event map</h1>
+                <p className="mt-2 text-base text-slate-400">
+                  Upload the latest event floor map, or delete or download the current one.
                 </p>
               </div>
             </div>
@@ -129,20 +123,13 @@ export default function StaffMapPage() {
           <div className="mt-6 grid gap-6">
             <div className="space-y-5 rounded-[28px] border border-slate-800/70 bg-slate-950/50 p-5">
               <div className="space-y-3">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload replacement</Label>
                 <label
                   htmlFor="map-file-upload"
                   className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-900/40 p-6 text-center transition hover:border-sky-500/60">
                   <UploadCloud className="h-10 w-10 text-sky-300" />
                   <div>
-                    <p className="text-sm font-semibold text-white">
-                      {stagedMeta?.name ?? "Drop JPG, PNG, or SVG of the event map"}
-                    </p>
-                    <p className="text-xs text-slate-500">Single file · max 10 MB · Replaces everywhere instantly</p>
+                    <p className="text-sm font-semibold text-white">{stagedMeta?.name ?? "Drop JPG, PNG, or SVG"}</p>
                   </div>
-                  <span className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-500">
-                    {stagedMeta?.size ?? "No file staged"}
-                  </span>
                   <input
                     id="map-file-upload"
                     type="file"
@@ -169,7 +156,7 @@ export default function StaffMapPage() {
                   Stage replacement
                 </Button>
               </div>
-              {hasStagedUpload ? (
+              {hasStagedUpload && (
                 <div className="flex flex-col gap-1 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-left">
                   <p className="text-sm font-semibold text-white">{stagedMeta?.name}</p>
                   <p className="text-xs text-amber-100">
@@ -182,10 +169,6 @@ export default function StaffMapPage() {
                     Clear selection
                   </Button>
                 </div>
-              ) : (
-                <p className="text-sm text-slate-500">
-                  No pending upload. Pick a file to stage a new map and sync signage after publish.
-                </p>
               )}
             </div>
           </div>
@@ -194,16 +177,10 @@ export default function StaffMapPage() {
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>Live preview</span>
-                <span className="h-px w-8 bg-slate-800" />
-                <span>Delete · Refresh</span>
-              </div>
               <div>
-                <h2 className="text-3xl font-semibold text-white">See exactly what staff tablets render</h2>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
-                  The panel below mirrors the published asset in the staff portal. Delete to clear signage or stage a
-                  new upload above.
+                <h2 className="text-3xl font-semibold text-white">Map preview</h2>
+                <p className="mt-2 text-base text-slate-400">
+                  The panel below displays the current event floor map.
                 </p>
               </div>
             </div>

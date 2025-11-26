@@ -62,7 +62,6 @@ export default function StaffSchedulesPage() {
     people.find((person) => person.team === (teams[0]?.id ?? ""))?.id ?? ""
   );
   const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>("csv");
-  const [downloadDay, setDownloadDay] = useState<DayScope>("all");
   const [gridTeamFilter, setGridTeamFilter] = useState<string>("all");
   const [gridPersonFilter, setGridPersonFilter] = useState<string>("all");
   const [gridDayFilter, setGridDayFilter] = useState<DayScope>("all");
@@ -124,14 +123,14 @@ export default function StaffSchedulesPage() {
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
-      <StaffHeader />
+      <StaffHeader currentPage="schedules" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
                 <h2 className="text-3xl font-semibold text-white">Upload schedules</h2>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                <p className="mt-2 text-base text-slate-400">
                   Upload your schedule data via spreadsheet to the system. Ensure it matches the required format and
                   headers.
                 </p>
@@ -161,42 +160,44 @@ export default function StaffSchedulesPage() {
                 </TabsList>
               </Tabs>
             </div>
-            {uploadScope !== "master" && (
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-                <Select value={uploadTeam} onValueChange={setUploadTeam}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Choose team" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            {uploadScope === "person" && (
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Individual</Label>
-                <Select value={uploadPerson} onValueChange={setUploadPerson}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Select person" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {people
-                      .filter((person) => person.team === uploadTeam)
-                      .map((person) => (
-                        <SelectItem key={person.id} value={person.id}>
-                          {person.label}
+            <div className="grid gap-4 md:grid-cols-2">
+              {uploadScope !== "master" && (
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+                  <Select value={uploadTeam} onValueChange={setUploadTeam}>
+                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                      <SelectValue placeholder="Choose team" />
+                    </SelectTrigger>
+                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.label}
                         </SelectItem>
                       ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {uploadScope === "person" && (
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Individual</Label>
+                  <Select value={uploadPerson} onValueChange={setUploadPerson}>
+                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                      <SelectValue placeholder="Select person" />
+                    </SelectTrigger>
+                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                      {people
+                        .filter((person) => person.team === uploadTeam)
+                        .map((person) => (
+                          <SelectItem key={person.id} value={person.id}>
+                            {person.label}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
             <label
               htmlFor="consolidated-upload"
               className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
@@ -224,7 +225,7 @@ export default function StaffSchedulesPage() {
             <div className="space-y-3">
               <div>
                 <h1 className="text-3xl font-semibold text-white">View Schedule Data</h1>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                <p className="mt-2 text-base text-slate-400">
                   Review the schedule data for all teams and days. Filter by team, individual, and day to find specific
                   schedules.
                 </p>

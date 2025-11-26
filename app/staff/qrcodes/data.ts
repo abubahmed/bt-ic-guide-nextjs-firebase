@@ -32,4 +32,12 @@ const qrBands = [
   { id: "ops", label: "Ops & logistics" },
 ] as const;
 
-export { people, qrBands };
+const teams = [
+    { id: "operations", label: "Operations" },
+    { id: "programming", label: "Programming" },
+    { id: "hospitality", label: "Hospitality" },
+    { id: "security", label: "Security" },
+    { id: "logistics", label: "Logistics" },
+  ];
+
+export { people, qrBands, teams };

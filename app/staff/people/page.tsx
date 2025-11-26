@@ -158,17 +158,15 @@ export default function StaffPeoplePage() {
   return (
     <>
       <main className="min-h-dvh bg-slate-950 text-slate-100">
-        <StaffHeader />
+        <StaffHeader currentPage="people" />
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
           <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-3">
-                <div>
-                  <h1 className="text-3xl font-semibold text-white">Upload people data</h1>
-                  <p className="mt-2 max-w-3xl text-base text-slate-400">
-                    Upload people data via spreadsheet to the system. Ensure it matches the required format and headers.
-                  </p>
-                </div>
+            <div className="space-y-3">
+              <div>
+                <h1 className="text-3xl font-semibold text-white">Upload people data</h1>
+                <p className="mt-2 text-base text-slate-400">
+                  Upload people data via spreadsheet to the system. Ensure it matches the required format and headers.
+                </p>
               </div>
             </div>
             <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
@@ -194,42 +192,44 @@ export default function StaffPeoplePage() {
                   </TabsList>
                 </Tabs>
               </div>
-              {uploadScope !== "master" && (
-                <div className="space-y-2">
-                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-                  <Select value={uploadTeam} onValueChange={(value) => setUploadTeam(value as TeamId)}>
-                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                      <SelectValue placeholder="Choose team" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                      {teams.map((team) => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              {uploadScope === "person" && (
-                <div className="space-y-2">
-                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Individual</Label>
-                  <Select value={uploadPerson} onValueChange={setUploadPerson}>
-                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                      <SelectValue placeholder="Select person" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                      {peopleDirectory
-                        .filter((person) => person.team === uploadTeam)
-                        .map((person) => (
-                          <SelectItem key={person.id} value={person.id}>
-                            {person.name}
+              <div className="grid gap-4 md:grid-cols-2">
+                {uploadScope !== "master" && (
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+                    <Select value={uploadTeam} onValueChange={(value) => setUploadTeam(value as TeamId)}>
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                        <SelectValue placeholder="Choose team" />
+                      </SelectTrigger>
+                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                        {teams.map((team) => (
+                          <SelectItem key={team.id} value={team.id}>
+                            {team.label}
                           </SelectItem>
                         ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {uploadScope === "person" && (
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Individual</Label>
+                    <Select value={uploadPerson} onValueChange={setUploadPerson}>
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                        <SelectValue placeholder="Select person" />
+                      </SelectTrigger>
+                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                        {peopleDirectory
+                          .filter((person) => person.team === uploadTeam)
+                          .map((person) => (
+                            <SelectItem key={person.id} value={person.id}>
+                              {person.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
               <label
                 htmlFor="people-upload"
                 className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
@@ -253,14 +253,12 @@ export default function StaffPeoplePage() {
           </section>
 
           <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="space-y-3">
-                <div>
-                  <h2 className="text-3xl font-semibold text-white">People viewer</h2>
-                  <p className="mt-2 max-w-3xl text-base text-slate-400">
-                    Review or manage people data for all teams. Filter by team, role, or status to find specific people.
-                  </p>
-                </div>
+            <div className="space-y-3">
+              <div>
+                <h2 className="text-3xl font-semibold text-white">People viewer</h2>
+                <p className="mt-2 text-base text-slate-400">
+                  Review or manage people data for all teams. Filter by team, role, or status to find specific people.
+                </p>
               </div>
             </div>
             <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">

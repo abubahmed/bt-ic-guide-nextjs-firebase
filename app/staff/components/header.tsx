@@ -27,15 +27,29 @@ export default function StaffHeader({ currentPage }: { currentPage: string }) {
           <nav className="hidden flex-1 flex-wrap items-center gap-2 md:flex">
             {navLinks
               .filter((item) => item.key !== currentPage)
-              .map((item) => (
-                <Link
-                  target="_blank"
-                  href={item.href}
-                  key={item.key}
-                  className="rounded-2xl border border-transparent bg-white/5 px-4 py-2 text-[0.6rem] uppercase tracking-[0.3em] text-slate-300 transition hover:bg-slate-900/70 hover:text-white">
-                  {item.label}
-                </Link>
-              ))}
+              .map((item) => {
+                if (item.key === "logout") {
+                  return (
+                    <Button
+                      key={item.key}
+                      onClick={async () => await signOutActionClient(router)}
+                      size="sm"
+                      className="rounded-2xl border border-transparent bg-white/5 px-4 py-2 text-[0.6rem] uppercase tracking-[0.3em] text-slate-300 transition hover:bg-slate-900/70 hover:text-white">
+                      Log out
+                    </Button>
+                  );
+                }
+
+                return (
+                  <Link
+                    target="_blank"
+                    href={item.href}
+                    key={item.key}
+                    className={`rounded-2xl border border-transparent bg-white/5 px-4 py-2 text-[0.6rem] uppercase tracking-[0.3em] text-slate-300 transition hover:bg-slate-900/70 hover:text-white`}>
+                    {item.label}
+                  </Link>
+                );
+              })}
           </nav>
 
           <div className="w-full md:hidden">
@@ -56,23 +70,17 @@ export default function StaffHeader({ currentPage }: { currentPage: string }) {
           </div>
 
           <div className="flex flex-1 items-center justify-end">
-            <div className="flex w-full items-center gap-3 rounded-2xl border border-slate-900/60 bg-slate-950/60 px-4 py-2 sm:w-auto">
+            <div className="flex w-full items-center gap-3 bg-transparent px-4 py-2 sm:w-auto">
+              <div className="flex flex-1 flex-col text-left text-[0.65rem] text-slate-400 sm:text-right">
+                <span className="text-sm text-white">{staffProfile.name}</span>
+                <span className="text-sm slate-500">{staffProfile.email}</span>
+              </div>{" "}
               <Avatar className="size-10 border border-slate-800 bg-slate-900">
                 <AvatarImage src={`https://ui-avatars.com/api/?name=${staffProfile.name}`} alt={staffProfile.name} />
                 <AvatarFallback className="text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-100">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-1 flex-col text-left text-[0.65rem] uppercase tracking-[0.3em] text-slate-400 sm:text-right">
-                <span className="text-[0.75rem] uppercase tracking-[0.25em] text-white">{staffProfile.name}</span>
-                <span className="text-slate-500">{staffProfile.email}</span>
-              </div>
-              <Button
-                onClick={async () => await signOutActionClient(router)}
-                size="sm"
-                className="h-9 rounded-2xl bg-white px-4 text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-slate-950">
-                Log out
-              </Button>
             </div>
           </div>
         </div>

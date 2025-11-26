@@ -58,11 +58,6 @@ export default function StaffAnnouncementsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [gridPage, setGridPage] = useState(0);
 
-  const totals = useMemo(() => {
-    const scheduledCount = entries.filter((entry) => entry.status === "scheduled").length;
-    return { announcementCount: entries.length, scheduledCount };
-  }, [entries]);
-
   const filteredEntries = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
     return entries.filter((entry) => {
@@ -117,14 +112,14 @@ export default function StaffAnnouncementsPage() {
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
-      <StaffHeader />
+      <StaffHeader currentPage="announcements" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
                 <h1 className="text-3xl font-semibold text-white">Compose announcements</h1>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                <p className="mt-2 text-base text-slate-400">
                   Compose and send announcements through the app or email.
                 </p>
               </div>

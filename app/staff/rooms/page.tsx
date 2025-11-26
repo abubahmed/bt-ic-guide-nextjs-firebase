@@ -8,18 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { staff, roomTemplates } from "./data";
+import { staff, roomTemplates, teams } from "./data";
 
 import StaffFooter from "../components/footer";
 import StaffHeader from "../components/header";
-
-const teams = [
-  { id: "operations", label: "Operations" },
-  { id: "programming", label: "Programming" },
-  { id: "hospitality", label: "Hospitality" },
-  { id: "security", label: "Security" },
-  { id: "logistics", label: "Logistics" },
-] as const;
 
 const teamLookup = teams.reduce<Record<string, string>>((acc, team) => {
   acc[team.id] = team.label;
@@ -108,22 +100,16 @@ export default function StaffRoomsPage() {
   const pageStart = visiblePeople.length === 0 ? 0 : gridPage * PAGE_SIZE + 1;
   const pageEnd = Math.min(visiblePeople.length, (gridPage + 1) * PAGE_SIZE);
 
-  const uploadPersonLabel = staff.find((person) => person.id === uploadPerson)?.name ?? "selected staffer";
-  const exportPersonLabel = staff.find((person) => person.id === exportPerson)?.name ?? "selected staffer";
-
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
-      <StaffHeader />
+      <StaffHeader currentPage="rooms" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>Spreadsheet staging</span>
-              </div>
               <div>
                 <h2 className="text-3xl font-semibold text-white">Upload room assignments</h2>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                <p className="mt-2 text-base text-slate-400">
                   Upload room assignments via spreadsheet to the system. Ensure it matches the required format and
                   headers.
                 </p>
@@ -153,6 +139,7 @@ export default function StaffRoomsPage() {
                 </TabsList>
               </Tabs>
             </div>
+            <div className="grid gap-4 md:grid-cols-2">
             {uploadScope !== "master" && (
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
@@ -189,6 +176,7 @@ export default function StaffRoomsPage() {
                 </Select>
               </div>
             )}
+            </div>
             <label
               htmlFor="rooms-upload"
               className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
@@ -214,12 +202,9 @@ export default function StaffRoomsPage() {
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.35em] text-sky-400">
-                <span>Room assignments viewer</span>
-              </div>
               <div>
                 <h1 className="text-3xl font-semibold text-white">View or manage room assignments</h1>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                <p className="mt-2 text-base text-slate-400">
                   Review or manage room assignments for all teams. Filter by team to find specific room assignments.
                 </p>
               </div>
@@ -328,9 +313,6 @@ export default function StaffRoomsPage() {
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
-              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                <span>Export room assignments</span>
-              </div>
               <h2 className="mt-2 text-2xl font-semibold text-white">Export room assignments</h2>
               <p className="text-slate-400">Export room assignments for all or specific teams in CSV or XLSX format.</p>
             </div>

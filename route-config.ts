@@ -1,6 +1,6 @@
 const STAFF_ROUTE_PREFIX = "/staff";
 const ATTENDEE_ROUTE_PREFIX = "/attendee";
-const ATTENDEE_AUTH_ROUTE_PREFIX = "/attendee/auth";
+const ATTENDEE_AUTH_ROUTE_PREFIX = "/auth";
 const STAFF_AUTH_ROUTE_PREFIX = "/staff/auth";
 
 const PUBLIC_ROUTES = [

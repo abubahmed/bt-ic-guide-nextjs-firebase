@@ -1,26 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Filter, UploadCloud } from "lucide-react";
+import { UploadCloud } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { people, qrBands } from "./data";
+import { people, qrBands, teams } from "./data";
 
 import StaffFooter from "../components/footer";
 import StaffHeader from "../components/header";
-
-const teams = [
-  { id: "operations", label: "Operations" },
-  { id: "programming", label: "Programming" },
-  { id: "hospitality", label: "Hospitality" },
-  { id: "security", label: "Security" },
-  { id: "logistics", label: "Logistics" },
-];
 
 const teamLookup = teams.reduce<Record<string, string>>((acc, team) => {
   acc[team.id] = team.label;
@@ -41,18 +32,15 @@ const qrAssets = people.reduce<
       waveLabel: string;
       qrUrl: string;
       version: string;
-      lastRotated: string;
     }
   >
 >((acc, person, index) => {
   const band = qrBands[index % qrBands.length];
-  const timing = index % 2 === 0 ? "Today · 08:00 AM" : "Yesterday · 09:30 PM";
   acc[person.id] = {
     wave: band.id,
     waveLabel: band.label,
     qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(person.label)}`,
     version: `v${1 + (index % 3)}.${(index * 2) % 10}`,
-    lastRotated: timing,
   };
   return acc;
 }, {});
@@ -139,14 +127,14 @@ export default function StaffQrCodesPage() {
 
   return (
     <main className="min-h-dvh bg-slate-950 text-slate-100">
-      <StaffHeader />
+      <StaffHeader currentPage="qrcodes" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
         <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
                 <h2 className="text-3xl font-semibold text-white">Upload QR codes</h2>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                <p className="mt-2 text-base text-slate-400">
                   Upload QR codes for all or specific teams or individuals. The system will automatically detect the
                   team and upload the QR codes.
                 </p>
@@ -176,6 +164,7 @@ export default function StaffQrCodesPage() {
                 </TabsList>
               </Tabs>
             </div>
+            <div className="grid gap-4 md:grid-cols-2">
             {uploadScope !== "master" && (
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
@@ -212,6 +201,7 @@ export default function StaffQrCodesPage() {
                 </Select>
               </div>
             )}
+            </div>
             <label
               htmlFor="qr-upload"
               className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
@@ -239,7 +229,7 @@ export default function StaffQrCodesPage() {
             <div className="space-y-3">
               <div>
                 <h1 className="text-3xl font-semibold text-white">QR code viewer</h1>
-                <p className="mt-2 max-w-3xl text-base text-slate-400">
+                <p className="mt-2 text-base text-slate-400">
                   Browse every staffer’s QR code, check for functionality, and spot broken/expired codes.
                 </p>
               </div>

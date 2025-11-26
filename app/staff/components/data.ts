@@ -44,6 +44,11 @@ const navLinks = [
     label: "Map",
     href: "/staff/map",
   },
+  {
+    key: "logout",
+    label: "Logout",
+    href: "/staff/logout",
+  },
 ];
 
 const staffProfile = {
