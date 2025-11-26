@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScheduleEvent",
+  "type": "object",
+
+  "properties": {
+    "email": { "type": "string", "format": "email" },
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" },
+    "subteam": { "type": "string" },
+    "day": { "type": "string" },
+    "time": { "type": "string" },
+    "room": { "type": "string" },
+    "zoom_url": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "speaker": { "type": "string" }
+  },
+
+  "required": ["email", "day", "time"]
+}
