@@ -1,0 +1,10 @@
+day,date,team,staff_id,staff_name,role,shift_title,start_time,end_time,location,source,notes
+Day 1,2025-06-13,hospitality,leo-carter,Leo Carter,VIP liaison,Morning coverage,07:30,09:30,VIP arrival port,upload,Greet early VIP drop-offs and confirm escorts
+Day 1,2025-06-13,hospitality,sara-ng,Sara Ng,Suite management,Midday activation,10:00,13:00,Suite level 4,manual,Rotate suite stewards and refresh amenities
+Day 1,2025-06-13,hospitality,ivy-lam,Ivy Lam,Culinary liaison,Afternoon reset,14:00,17:00,Culinary staging,hold,Approve menu swaps with catering
+Day 2,2025-06-14,hospitality,tariq-farouq,Tariq Farouq,Guest transport,Morning coverage,07:30,09:30,Transport loop,upload,Brief chauffeurs on mid-day routing
+Day 2,2025-06-14,hospitality,leo-carter,Leo Carter,VIP liaison,Midday activation,10:00,13:00,VIP lounge,manual,Host investor meet-and-greet circuit
+Day 2,2025-06-14,hospitality,jamie-bowen,Jamie Bowen,Evening host,Afternoon reset,14:00,17:00,Reception hall,hold,Finalize run of show for gala dinner
+Day 3,2025-06-15,hospitality,sara-ng,Sara Ng,Suite management,Morning coverage,07:30,09:30,Suite level 4,upload,Audit check-out inventory with housekeeping
+Day 3,2025-06-15,hospitality,ivy-lam,Ivy Lam,Culinary liaison,Midday activation,10:00,13:00,Ballroom service lane,manual,Coordinate plated lunch release timings
+Day 3,2025-06-15,hospitality,jamie-bowen,Jamie Bowen,Evening host,Afternoon reset,14:00,17:00,Main ballroom foyer,hold,Lead closing-night greeting rehearsal

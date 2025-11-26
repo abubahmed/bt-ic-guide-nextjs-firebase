@@ -1,0 +1,11 @@
+day,date,team,staff_id,staff_name,role,shift_title,start_time,end_time,location,source,notes
+Day 1,2025-06-13,logistics,luca-ramirez,Luca Ramirez,Transport chief,Morning coverage,07:30,09:30,Motor pool,upload,Dispatch shuttle wave and confirm GPS beacons
+Day 1,2025-06-13,logistics,opal-reed,Opal Reed,Fleet ops,Midday activation,10:00,13:00,Loading dock,manual,Track truck arrival cadence and bay turns
+Day 1,2025-06-13,security,diana-park,Diana Park,Access control,Midday activation,10:00,13:00,Command deck,hold,Spot-audit wristbands at primary gates
+Day 1,2025-06-13,security,kofi-diaz,Kofi Diaz,Perimeter lead,Afternoon reset,14:00,17:00,Perimeter zone C,upload,Rotate bike patrol coverage
+Day 2,2025-06-14,logistics,paxton-ryu,Paxton Ryu,Warehouse manager,Morning coverage,07:30,09:30,Warehouse 2,manual,Release staging pallets to dock teams
+Day 2,2025-06-14,logistics,renee-yang,Renee Yang,Inventory control,Midday activation,10:00,13:00,Inventory cage,hold,Reconcile consumables before noon pushes
+Day 2,2025-06-14,security,lara-cho,Lara Cho,Badge command,Morning coverage,07:30,09:30,Badge ops,upload,Issue onsite print batch 2
+Day 2,2025-06-14,security,miles-porter,Miles Porter,Escort detail,Afternoon reset,14:00,17:00,VIP corridor,manual,Stage escorts for investor dinners
+Day 3,2025-06-15,logistics,samir-holt,Samir Holt,Freight coordinator,Midday activation,10:00,13:00,Loading dock,upload,Sequence outbound freight labels
+Day 3,2025-06-15,security,nina-vasquez,Nina Vasquez,Night shift lead,Afternoon reset,14:00,17:00,Security HQ,hold,Prep night crew turnover and final sweep brief
