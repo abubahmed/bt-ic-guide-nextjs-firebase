@@ -8,12 +8,10 @@
       "type": "string",
       "format": "email"
     },
-    "first_name": {
+    "full_name": {
       "type": "string"
     },
-    "last_name": {
-      "type": "string"
-    },
+    
     "room_number": {
       "type": "string"
     },

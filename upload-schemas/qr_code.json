@@ -9,13 +9,9 @@
       "format": "email",
       "description": "Email of the attendee, staff member, etc"
     },
-    "first_name": {
+    "full_name": {
       "type": "string",
-      "description": "First name"
-    },
-    "last_name": {
-      "type": "string",
-      "description": "Last name"
+      "description": "Full name"
     },
     "url": {
       "type": "string",
