@@ -5,41 +5,17 @@ import string
 from datetime import datetime, timedelta
 from faker import Faker
 import urllib.parse
+from constants import *
 
 fake = Faker()
 
 
-def random_folder_name(length=32):
+def random_folder_name(length=RANDOM_FOLDER_NAME_LENGTH):
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
 
-FOLDER_NAME = "data"
-
-GRADES = [
-    "9",
-    "10",
-    "11",
-    "12",
-    "Freshman",
-    "Sophomore",
-    "Junior",
-    "Senior",
-    "Masters",
-    "PhD",
-]
-
-SUBTEAMS = [
-    "Logistics",
-    "Registration",
-    "Tech Support",
-    "Security",
-    "Operations",
-    "Catering",
-]
-
-
 def random_room_number():
-    building = random.choice(["A", "B", "C", "D", "E", "F"])
+    building = random.choice(string.ascii_uppercase)
     floor = random.randint(1, 6)
     number = random.randint(0, 25)
     return f"{building}{floor}{number:02d}"
@@ -62,23 +38,20 @@ def generate_persons(n):
         email = generate_unique_email(emails)
         emails.add(email)
         phone = fake.phone_number()
+
         role = random.choices(
-            ["attendee", "staff", "admin"],
+            GENERAL_ROLES,
             weights=[70, 25, 5],
             k=1,
         )[0]
         grade = random.choice(GRADES)
-        if grade in ["9", "10", "11", "12"]:
+        if grade in HIGH_SCHOOL_GRADES:
             school = fake.city() + " High School"
         else:
             school = fake.city() + " University"
         company = fake.company()
-        if role == "attendee":
-            subteam = ""
-        elif role == "staff":
-            subteam = random.choice(SUBTEAMS)
-        else:
-            subteam = "Admin"
+        subteam = random.choice(SUBTEAMS) if role == "staff" else ""
+
         persons.append(
             {
                 "full_name": full_name,
@@ -141,17 +114,20 @@ def generate_schedule_events(
         min_slots = max(1, slots_per_day_base - slots_per_day_variation)
         max_slots = max(min_slots, slots_per_day_base + slots_per_day_variation)
         slots_today = random.randint(min_slots, max_slots)
+
         for slot_index in range(slots_today):
             slot_start = base_start + timedelta(minutes=60 * slot_index)
             slot_end = slot_start + timedelta(minutes=50)
             start_time_str = slot_start.strftime("%H:%M")
             end_time_str = slot_end.strftime("%H:%M")
+
             min_events = max(1, events_per_slot_base - events_per_slot_variation)
             max_events = max(
                 min_events, events_per_slot_base + events_per_slot_variation
             )
             num_events = random.randint(min_events, max_events)
             events_for_slot = []
+
             for _ in range(num_events):
                 in_person = random.choice([True, False])
                 if in_person:
@@ -162,9 +138,11 @@ def generate_schedule_events(
                     zoom_url = "https://zoom.example.com/j/" + str(
                         random.randint(1000000000, 9999999999)
                     )
+
                 title = fake.sentence(nb_words=6)
-                description = fake.paragraph(nb_sentences=2)
+                description = fake.sentence(nb_words=20)
                 speaker = fake.name()
+
                 events_for_slot.append(
                     {
                         "day": day_label,
@@ -177,6 +155,7 @@ def generate_schedule_events(
                         "speaker": speaker,
                     }
                 )
+
             for person in persons:
                 event = random.choice(events_for_slot)
                 rows.append(
@@ -205,14 +184,14 @@ def write_csv(path, filename, rows, fieldnames):
 
 
 def main(
-    num_people=500,
-    num_days=3,
-    slots_per_day_base=5,
-    slots_per_day_variation=1,
-    events_per_slot_base=2,
-    events_per_slot_variation=1,
+    num_people=NUM_PERSONS_GEN,
+    num_days=NUM_DAYS_GEN,
+    slots_per_day_base=SLOTS_PER_DAY_BASE_GEN,
+    slots_per_day_variation=SLOTS_PER_DAY_VARIATION_GEN,
+    events_per_slot_base=EVENTS_PER_SLOT_BASE_GEN,
+    events_per_slot_variation=EVENTS_PER_SLOT_VARIATION_GEN,
 ):
-    folder = os.path.join(FOLDER_NAME, random_folder_name())
+    folder = os.path.join(DATA_FOLDER, random_folder_name())
     os.makedirs(folder, exist_ok=True)
     persons = generate_persons(num_people)
     qrcodes = generate_qr_codes(persons)
@@ -225,9 +204,10 @@ def main(
         events_per_slot_base,
         events_per_slot_variation,
     )
+
     write_csv(
         folder,
-        "persons.csv",
+        PERSONS_FILE,
         persons,
         [
             "full_name",
@@ -240,16 +220,16 @@ def main(
             "company",
         ],
     )
-    write_csv(folder, "qrcodes.csv", qrcodes, ["email", "full_name", "url"])
+    write_csv(folder, QRCODES_FILE, qrcodes, ["email", "full_name", "url"])
     write_csv(
         folder,
-        "rooms.csv",
+        ROOMS_FILE,
         rooms,
         ["email", "full_name", "room_number", "details"],
     )
     write_csv(
         folder,
-        "schedule_events.csv",
+        SCHEDULE_EVENTS_FILE,
         schedule_events,
         [
             "email",

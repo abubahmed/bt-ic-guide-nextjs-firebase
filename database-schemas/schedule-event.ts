@@ -1,12 +1,9 @@
 import { z } from "zod";
 
-const scheduleEventAssignmentSchema = z.object({
+const scheduleEventSchema = z.object({
   createdAt: z.number(),
   updatedAt: z.number(),
-
-  email: z.string().email(),
-  fullName: z.string().optional(),
-  subteam: z.string().optional(),
+  uids: z.array(z.string()),
 
   day: z.string(),
   startTime: z.string(),
@@ -19,4 +16,4 @@ const scheduleEventAssignmentSchema = z.object({
   speaker: z.string().optional(),
 });
 
-export type ScheduleEventAssignment = z.infer<typeof scheduleEventAssignmentSchema>;
+export type ScheduleEvent = z.infer<typeof scheduleEventSchema>;

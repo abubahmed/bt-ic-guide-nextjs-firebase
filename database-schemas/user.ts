@@ -19,7 +19,7 @@ const userSchema = z.object({
   grade: z.string().optional(),
   company: z.string().optional(),
 
-  schedule: z.array(z.string()),
+  eventIds: z.array(z.string()),
   roomNumber: z.string().optional(),
   qrCode: z.string().optional(),
   helpRequests: z.array(z.string()),
