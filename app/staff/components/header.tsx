@@ -6,7 +6,7 @@ import { staffProfile, navLinks } from "./data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { signOutActionClient } from "@/actions/client/auth-actions";
+import { signOutActionClient } from "@/actions/auth/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 

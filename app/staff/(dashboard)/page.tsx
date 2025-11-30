@@ -25,9 +25,9 @@ export default function StaffDashboardPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 md:grid-cols-3 md:justify-items-center">
+        <section className="grid gap-6 md:grid-cols-2 md:justify-items-center">
           {quickActions.map((action) => (
-            <div key={action.label} className="w-full md:max-w-sm">
+            <div key={action.label} className="w-full">
               <QuickActionButton action={action} />
             </div>
           ))}
