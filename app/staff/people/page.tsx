@@ -50,6 +50,8 @@ type UploadSectionProps = {
   onTeamChange: (team: TeamId) => void;
   personId: string;
   onPersonChange: (personId: string) => void;
+  onRunValidations: () => void;
+  onStageUpload: () => void;
 };
 
 type RosterFiltersProps = {
@@ -89,6 +91,7 @@ type ExportSectionProps = {
   onPersonChange: (personId: string) => void;
   format: ExportFormat;
   onFormatChange: (format: ExportFormat) => void;
+  onGenerate: () => void;
 };
 
 type AccessDialogProps = {
@@ -99,6 +102,8 @@ type AccessDialogProps = {
   onRoleChange: (role: AccessRole) => void;
   modalStaffType: StaffTypeId;
   onStaffTypeChange: (staffType: StaffTypeId) => void;
+  onRevoke: () => void;
+  onApply: () => void;
 };
 
 export default function StaffPeoplePage() {
@@ -193,6 +198,24 @@ export default function StaffPeoplePage() {
     }
   };
 
+  const handleRunValidations = () => {};
+
+  const handleStageUpload = () => {};
+
+  const handlePrevPage = () => {
+    setGridPage((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setGridPage((prev) => Math.min(pageCount - 1, prev + 1));
+  };
+
+  const handleGenerateExport = () => {};
+
+  const handleRevokeAccess = () => {};
+
+  const handleApplyUpdates = () => {};
+
   return (
     <>
       <main className="min-h-dvh bg-slate-950 text-slate-100">
@@ -205,6 +228,8 @@ export default function StaffPeoplePage() {
             onTeamChange={setUploadTeam}
             personId={uploadPerson}
             onPersonChange={setUploadPerson}
+            onRunValidations={handleRunValidations}
+            onStageUpload={handleStageUpload}
           />
 
           <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
@@ -243,8 +268,8 @@ export default function StaffPeoplePage() {
                   pageCount={filteredRoster.length === 0 ? 0 : pageCount}
                   canGoPrev={gridPage > 0}
                   canGoNext={gridPage < pageCount - 1 && filteredRoster.length > 0}
-                  onPrev={() => setGridPage((prev) => Math.max(0, prev - 1))}
-                  onNext={() => setGridPage((prev) => Math.min(pageCount - 1, prev + 1))}
+                  onPrev={handlePrevPage}
+                  onNext={handleNextPage}
                 />
               </div>
             </div>
@@ -259,6 +284,7 @@ export default function StaffPeoplePage() {
             onPersonChange={setExportPerson}
             format={exportFormat}
             onFormatChange={setExportFormat}
+            onGenerate={handleGenerateExport}
           />
         </div>
         <StaffFooter />
@@ -272,12 +298,23 @@ export default function StaffPeoplePage() {
         onRoleChange={setModalRole}
         modalStaffType={modalStaffType}
         onStaffTypeChange={setModalStaffType}
+        onRevoke={handleRevokeAccess}
+        onApply={handleApplyUpdates}
       />
     </>
   );
 }
 
-function UploadSection({ scope, onScopeChange, team, onTeamChange, personId, onPersonChange }: UploadSectionProps) {
+function UploadSection({
+  scope,
+  onScopeChange,
+  team,
+  onTeamChange,
+  personId,
+  onPersonChange,
+  onRunValidations,
+  onStageUpload,
+}: UploadSectionProps) {
   return (
     <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
       <div className="space-y-3">
@@ -361,10 +398,13 @@ function UploadSection({ scope, onScopeChange, team, onTeamChange, personId, onP
         <div className="grid gap-3 sm:grid-cols-2">
           <Button
             variant="outline"
-            className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+            className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60"
+            onClick={onRunValidations}>
             Run validations
           </Button>
-          <Button className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+          <Button
+            className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
+            onClick={onStageUpload}>
             Stage upload
           </Button>
         </div>
@@ -538,6 +578,7 @@ function ExportSection({
   onPersonChange,
   format,
   onFormatChange,
+  onGenerate,
 }: ExportSectionProps) {
   return (
     <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
@@ -637,7 +678,9 @@ function ExportSection({
               </SelectContent>
             </Select>
           </div>
-          <Button className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+          <Button
+            className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
+            onClick={onGenerate}>
             Generate {format === "csv" ? "CSV roster" : "XLSX roster"}
           </Button>
         </div>
@@ -654,6 +697,8 @@ function AccessDialog({
   onRoleChange,
   modalStaffType,
   onStaffTypeChange,
+  onRevoke,
+  onApply,
 }: AccessDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -716,11 +761,14 @@ function AccessDialog({
             <DialogFooter>
               <Button
                 variant="outline"
-                className="flex-1 rounded-xl border-rose-500/50 bg-rose-500/10 text-sm font-semibold text-rose-200 hover:border-rose-400 hover:bg-rose-500/20">
+                className="flex-1 rounded-xl border-rose-500/50 bg-rose-500/10 text-sm font-semibold text-rose-200 hover:border-rose-400 hover:bg-rose-500/20"
+                onClick={onRevoke}>
                 <ShieldBan className="mr-2 h-4 w-4" />
                 Revoke access
               </Button>
-              <Button className="flex-1 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
+              <Button
+                className="flex-1 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
+                onClick={onApply}>
                 <UserMinus2 className="mr-2 h-4 w-4" />
                 Apply updates
               </Button>
