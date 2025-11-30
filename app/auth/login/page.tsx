@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { signInWithGoogleActionClient, signInWithEmailActionClient } from "@/actions/client/auth-actions";
+import { signInWithGoogleActionClient, signInWithEmailActionClient } from "@/actions/auth/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";

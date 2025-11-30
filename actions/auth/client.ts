@@ -1,7 +1,7 @@
 /**
  * @file auth-actions.ts
  * @description Client-side authentication actions for Firebase Auth.
- * @module actions/client/auth-actions
+ * @module actions/auth/client
  */
 
 "use client";
@@ -14,8 +14,8 @@ import {
   sendEmailVerification,
 } from "@/lib/firebase/client/auth";
 import { STAFF_HOME_ROUTE, ATTENDEE_HOME_ROUTE } from "@/route-config";
-import { getSessionUser } from "@/actions/server/session-actions";
-import { signInWithGoogleActionServer, signInWithEmailActionServer } from "@/actions/server/auth-actions";
+import { getSessionUser } from "@/actions/session-actions";
+import { signInWithGoogleActionServer, signInWithEmailActionServer } from "@/actions/auth/server";
 
 /*
 Perform Google OAuth sign in flow on client side. Checks if user is already signed in, signs in with Google OAuth and requests backend to complete Google OAuth sign in flow.

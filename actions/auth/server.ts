@@ -1,13 +1,13 @@
 /**
  * @file auth-actions.ts
  * @description Server-side authentication actions for Firebase Auth.
- * @module actions/server/auth-actions
+ * @module actions/auth/server
  */
 
 "use server";
 
 import { createUserProfile } from "@/lib/firebase/server/users";
-import { getSessionUser } from "@/actions/server/session-actions";
+import { getSessionUser } from "@/actions/session-actions";
 import { auth } from "@/lib/firebase/server/config";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE_NAME, SESSION_COOKIE_LIFESPAN } from "@/constants";

@@ -18,7 +18,7 @@ export default function StaffDashboardPage() {
               Business Today International Conference Admin Staff Dashboard
             </p>
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
             {stats.map((stat) => {
               return <StatCard key={stat.label} stat={stat} />;
             })}

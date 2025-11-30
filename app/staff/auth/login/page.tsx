@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { signInWithEmailActionClient, signInWithGoogleActionClient } from "@/actions/client/auth-actions";
+import { signInWithEmailActionClient, signInWithGoogleActionClient } from "@/actions/auth/client";
 
 import GoogleButton from "@/components/custom/google-button";
 import AuthInput from "@/components/custom/auth-input";

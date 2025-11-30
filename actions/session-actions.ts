@@ -1,7 +1,7 @@
 /**
  * @file session-actions.ts
  * @description Server-side session actions for Firebase Auth.
- * @module actions/server/session-actions
+ * @module actions/session-actions
  */
 
 "use server";
