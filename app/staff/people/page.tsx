@@ -30,6 +30,17 @@ type AccessRole = "staff" | "attendee";
 type PersonStatus = "active" | "invited" | "revoked";
 type TeamId = (typeof teams)[number]["id"];
 type StaffTypeId = (typeof staffTypes)[number]["id"];
+type IndividualRole = "staff" | "admin" | "attendee";
+type IndividualFormState = {
+  fullName: string;
+  email: string;
+  phone: string;
+  role: IndividualRole;
+  subteam: string;
+  grade: string;
+  company: string;
+  school: string;
+};
 type PersonRecord = (typeof peopleDirectory)[number] & {
   staffType?: StaffTypeId;
 };
@@ -42,16 +53,18 @@ const teamLookup = teams.reduce<Record<TeamId, string>>((acc, team) => {
 const DEFAULT_TEAM: TeamId = teams[0].id;
 const DEFAULT_PERSON = peopleDirectory.find((person) => person.team === DEFAULT_TEAM)?.id ?? peopleDirectory[0].id;
 const PAGE_SIZE = 10;
+const INDIVIDUAL_ROLE_OPTIONS: IndividualRole[] = ["staff", "admin", "attendee"];
+const GRADE_OPTIONS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"];
 
 type UploadSectionProps = {
   scope: UploadScope;
   onScopeChange: (scope: UploadScope) => void;
   team: TeamId;
   onTeamChange: (team: TeamId) => void;
-  personId: string;
-  onPersonChange: (personId: string) => void;
   onRunValidations: () => void;
   onStageUpload: () => void;
+  individualForm: IndividualFormState;
+  onIndividualFormChange: (field: keyof IndividualFormState, value: IndividualFormState[keyof IndividualFormState]) => void;
 };
 
 type RosterFiltersProps = {
@@ -109,7 +122,6 @@ type AccessDialogProps = {
 export default function StaffPeoplePage() {
   const [uploadScope, setUploadScope] = useState<UploadScope>("master");
   const [uploadTeam, setUploadTeam] = useState<TeamId>(DEFAULT_TEAM);
-  const [uploadPerson, setUploadPerson] = useState<string>(DEFAULT_PERSON);
   const [teamFilter, setTeamFilter] = useState<"all" | TeamId>("all");
   const [accessFilter, setAccessFilter] = useState<"all" | AccessRole>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | PersonStatus>("all");
@@ -123,6 +135,16 @@ export default function StaffPeoplePage() {
   const [activePersonId, setActivePersonId] = useState<string | null>(null);
   const [modalRole, setModalRole] = useState<AccessRole>("attendee");
   const [modalStaffType, setModalStaffType] = useState<StaffTypeId>(staffTypes[0].id);
+  const [individualForm, setIndividualForm] = useState<IndividualFormState>({
+    fullName: "",
+    email: "",
+    phone: "",
+    role: "staff",
+    subteam: "",
+    grade: GRADE_OPTIONS[0],
+    company: "",
+    school: "",
+  });
 
   const activePerson = useMemo(
     () => peopleDirectory.find((person) => person.id === activePersonId) ?? null,
@@ -135,13 +157,6 @@ export default function StaffPeoplePage() {
       setModalStaffType(activePerson.staffType ?? staffTypes[0].id);
     }
   }, [activePerson]);
-
-  useEffect(() => {
-    const scopedPeople = peopleDirectory.filter((person) => person.team === uploadTeam);
-    if (!scopedPeople.some((person) => person.id === uploadPerson)) {
-      setUploadPerson(scopedPeople[0]?.id ?? "");
-    }
-  }, [uploadTeam, uploadPerson]);
 
   useEffect(() => {
     const scopedPeople = peopleDirectory.filter((person) => person.team === exportTeam);
@@ -198,7 +213,48 @@ export default function StaffPeoplePage() {
     }
   };
 
-  const handleRunValidations = () => {};
+  const handleIndividualFormChange = <K extends keyof IndividualFormState>(field: K, value: IndividualFormState[K]) => {
+    setIndividualForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleRunValidations = () => {
+    if (uploadScope !== "person") {
+      console.info(`[Validations] ${uploadScope} scope currently relies on external spreadsheet validation.`);
+      return true;
+    }
+
+    const errors: string[] = [];
+    if (!individualForm.fullName.trim()) {
+      errors.push("Full name is required.");
+    }
+    const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    if (!emailPattern.test(individualForm.email.trim())) {
+      errors.push("A valid email address is required.");
+    }
+    if (!individualForm.phone.trim()) {
+      errors.push("Phone number is required.");
+    }
+    if (!individualForm.grade.trim()) {
+      errors.push("Grade selection is required.");
+    }
+    if (!individualForm.company.trim()) {
+      errors.push("Company is required.");
+    }
+    if (!individualForm.school.trim()) {
+      errors.push("School is required.");
+    }
+    if (individualForm.role === "staff" && !individualForm.subteam.trim()) {
+      errors.push("Subteam is required for staff roles.");
+    }
+
+    if (errors.length > 0) {
+      console.warn("Individual upload validation errors:", errors);
+      return false;
+    }
+
+    console.info("Individual upload passed basic validations.");
+    return true;
+  };
 
   const handleStageUpload = () => {};
 
@@ -226,10 +282,10 @@ export default function StaffPeoplePage() {
             onScopeChange={setUploadScope}
             team={uploadTeam}
             onTeamChange={setUploadTeam}
-            personId={uploadPerson}
-            onPersonChange={setUploadPerson}
             onRunValidations={handleRunValidations}
             onStageUpload={handleStageUpload}
+            individualForm={individualForm}
+            onIndividualFormChange={handleIndividualFormChange}
           />
 
           <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
@@ -310,10 +366,10 @@ function UploadSection({
   onScopeChange,
   team,
   onTeamChange,
-  personId,
-  onPersonChange,
   onRunValidations,
   onStageUpload,
+  individualForm,
+  onIndividualFormChange,
 }: UploadSectionProps) {
   return (
     <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
@@ -366,35 +422,117 @@ function UploadSection({
               </Select>
             </div>
           )}
-          {scope === "person" && (
-            <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Individual</Label>
-              <Select value={personId} onValueChange={onPersonChange}>
-                <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                  <SelectValue placeholder="Select person" />
-                </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                  {peopleDirectory
-                    .filter((person) => person.team === team)
-                    .map((person) => (
-                      <SelectItem key={person.id} value={person.id}>
-                        {person.name}
+        </div>
+        {scope === "person" ? (
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Full name</Label>
+                <Input
+                  value={individualForm.fullName}
+                  onChange={(event) => onIndividualFormChange("fullName", event.target.value)}
+                  placeholder="Jane Doe"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Email</Label>
+                <Input
+                  type="email"
+                  value={individualForm.email}
+                  onChange={(event) => onIndividualFormChange("email", event.target.value)}
+                  placeholder="jane@example.com"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Phone</Label>
+                <Input
+                  type="tel"
+                  value={individualForm.phone}
+                  onChange={(event) => onIndividualFormChange("phone", event.target.value)}
+                  placeholder="+1 (555) 123-4567"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
+                <Select
+                  value={individualForm.role}
+                  onValueChange={(value) => onIndividualFormChange("role", value as IndividualRole)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {INDIVIDUAL_ROLE_OPTIONS.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
                       </SelectItem>
                     ))}
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Grade</Label>
+                <Select value={individualForm.grade} onValueChange={(value) => onIndividualFormChange("grade", value)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {GRADE_OPTIONS.map((grade) => (
+                      <SelectItem key={grade} value={grade}>
+                        {grade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          )}
-        </div>
-        <label
-          htmlFor="people-upload"
-          className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
-          <UploadCloud className="h-8 w-8 text-sky-300" />
-          <div>
-            <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
+            {individualForm.role === "staff" && (
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                <Input
+                  value={individualForm.subteam}
+                  onChange={(event) => onIndividualFormChange("subteam", event.target.value)}
+                  placeholder="Ops, Hospitality..."
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+            )}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Company</Label>
+                <Input
+                  value={individualForm.company}
+                  onChange={(event) => onIndividualFormChange("company", event.target.value)}
+                  placeholder="Company name"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">School</Label>
+                <Input
+                  value={individualForm.school}
+                  onChange={(event) => onIndividualFormChange("school", event.target.value)}
+                  placeholder="School name"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+            </div>
           </div>
-          <input id="people-upload" type="file" className="hidden" accept=".csv,.xlsx" />
-        </label>
+        ) : (
+          <label
+            htmlFor="people-upload"
+            className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
+            <UploadCloud className="h-8 w-8 text-sky-300" />
+            <div>
+              <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
+            </div>
+            <input id="people-upload" type="file" className="hidden" accept=".csv,.xlsx" />
+          </label>
+        )}
         <div className="grid gap-3 sm:grid-cols-2">
           <Button
             variant="outline"
