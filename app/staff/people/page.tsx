@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Filter, ShieldBan, UploadCloud, UserMinus2, Users2 } from "lucide-react";
+import { ShieldBan, UploadCloud, UserMinus2, Users2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,27 +31,10 @@ type PersonStatus = "active" | "invited" | "revoked";
 type TeamId = (typeof teams)[number]["id"];
 type StaffTypeId = (typeof staffTypes)[number]["id"];
 
-type PersonRecord = {
-  id: string;
-  name: string;
-  email: string;
-  team: TeamId;
-  accessRole: AccessRole;
-  staffType?: StaffTypeId;
-  status: PersonStatus;
-  source: string;
-  lastUpdate: string;
-};
-
 const teamLookup = teams.reduce<Record<TeamId, string>>((acc, team) => {
   acc[team.id] = team.label;
   return acc;
 }, {} as Record<TeamId, string>);
-
-const staffTypeLookup = staffTypes.reduce<Record<StaffTypeId, string>>((acc, staffType) => {
-  acc[staffType.id] = staffType.label;
-  return acc;
-}, {} as Record<StaffTypeId, string>);
 
 const DEFAULT_TEAM: TeamId = teams[0].id;
 const DEFAULT_PERSON = peopleDirectory.find((person) => person.team === DEFAULT_TEAM)?.id ?? peopleDirectory[0].id;
@@ -74,12 +57,6 @@ export default function StaffPeoplePage() {
   const [activePersonId, setActivePersonId] = useState<string | null>(null);
   const [modalRole, setModalRole] = useState<AccessRole>("attendee");
   const [modalStaffType, setModalStaffType] = useState<StaffTypeId>(staffTypes[0].id);
-
-  const rosterTotals = useMemo(() => {
-    const staffCount = peopleDirectory.filter((person) => person.accessRole === "staff").length;
-    const attendeeCount = peopleDirectory.length - staffCount;
-    return { staffCount, attendeeCount };
-  }, []);
 
   const activePerson = useMemo(
     () => peopleDirectory.find((person) => person.id === activePersonId) ?? null,
