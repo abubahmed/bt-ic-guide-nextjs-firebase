@@ -80,7 +80,7 @@ def update_table(folder, search_value):
         columns=[
             {"name": c, "id": c}
             for c in grouped.columns
-            if c != "emails" or not HIDE_EMAILS_COLUMN
+            if c != "emails" or not HIDE_EVENT_EMAILS_COLUMN
         ],
         data=grouped.to_dict("records"),
         filter_action="native",

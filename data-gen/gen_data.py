@@ -10,10 +10,6 @@ from constants import *
 fake = Faker()
 
 
-def random_folder_name(length=RANDOM_FOLDER_NAME_LENGTH):
-    return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
-
-
 def random_room_number():
     building = random.choice(string.ascii_uppercase)
     floor = random.randint(1, 6)
@@ -21,22 +17,23 @@ def random_room_number():
     return f"{building}{floor}{number:02d}"
 
 
-def generate_unique_email(existing):
+def generate_unique_email(existing_emails):
     while True:
         local_part = fake.user_name()
         domain = fake.free_email_domain()
         email = f"{local_part}@{domain}"
-        if email not in existing:
+        if email not in existing_emails:
             return email
 
 
-def generate_persons(n):
+def generate_persons(num_persons):
     persons = []
-    emails = set()
-    for _ in range(n):
+    existing_emails = set()
+
+    for _ in range(num_persons):
         full_name = fake.name()
-        email = generate_unique_email(emails)
-        emails.add(email)
+        email = generate_unique_email(existing_emails)
+        existing_emails.add(email)
         phone = fake.phone_number()
 
         role = random.choices(
@@ -44,11 +41,13 @@ def generate_persons(n):
             weights=[70, 25, 5],
             k=1,
         )[0]
+
         grade = random.choice(GRADES)
         if grade in HIGH_SCHOOL_GRADES:
             school = fake.city() + " High School"
         else:
             school = fake.city() + " University"
+
         company = fake.company()
         subteam = random.choice(SUBTEAMS) if role == "staff" else ""
 
@@ -67,17 +66,17 @@ def generate_persons(n):
     return persons
 
 
-def generate_qr_codes(people):
+def generate_qr_codes(persons):
     qr_rows = []
-    for p in people:
-        full_name = p["full_name"]
-        encoded = urllib.parse.quote_plus(full_name + " | " + p["email"])
-        url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={encoded}"
+    for person in persons:
+        full_name = person["full_name"]
+        encoded_data = urllib.parse.quote_plus(full_name + " | " + person["email"])
+        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={encoded_data}"
         qr_rows.append(
             {
-                "email": p["email"],
+                "email": person["email"],
                 "full_name": full_name,
-                "url": url,
+                "url": qr_url,
             }
         )
     return qr_rows
@@ -85,13 +84,13 @@ def generate_qr_codes(people):
 
 def generate_rooms(persons):
     rooms = []
-    for p in persons:
+    for person in persons:
         room_number = random_room_number()
-        details = fake.sentence(nb_words=8)
+        details = fake.sentence(nb_words=ROOM_DETAILS_LENGTH)
         rooms.append(
             {
-                "email": p["email"],
-                "full_name": p["full_name"],
+                "email": person["email"],
+                "full_name": person["full_name"],
                 "room_number": room_number,
                 "details": details,
             }
@@ -109,15 +108,18 @@ def generate_schedule_events(
 ):
     rows = []
     base_start = datetime(2000, 1, 1, 9, 0)
+
     for day_index in range(num_days):
         day_label = f"Day {day_index + 1}"
+
         min_slots = max(1, slots_per_day_base - slots_per_day_variation)
         max_slots = max(min_slots, slots_per_day_base + slots_per_day_variation)
-        slots_today = random.randint(min_slots, max_slots)
+        slot_count_for_day = random.randint(min_slots, max_slots)
 
-        for slot_index in range(slots_today):
+        for slot_index in range(slot_count_for_day):
             slot_start = base_start + timedelta(minutes=60 * slot_index)
             slot_end = slot_start + timedelta(minutes=50)
+
             start_time_str = slot_start.strftime("%H:%M")
             end_time_str = slot_end.strftime("%H:%M")
 
@@ -125,12 +127,13 @@ def generate_schedule_events(
             max_events = max(
                 min_events, events_per_slot_base + events_per_slot_variation
             )
-            num_events = random.randint(min_events, max_events)
+            event_count = random.randint(min_events, max_events)
+
             events_for_slot = []
 
-            for _ in range(num_events):
-                in_person = random.choice([True, False])
-                if in_person:
+            for _ in range(event_count):
+                is_in_person = random.choice([True, False])
+                if is_in_person:
                     room = random_room_number()
                     zoom_url = ""
                 else:
@@ -139,8 +142,8 @@ def generate_schedule_events(
                         random.randint(1000000000, 9999999999)
                     )
 
-                title = fake.sentence(nb_words=6)
-                description = fake.sentence(nb_words=20)
+                title = fake.sentence(nb_words=EVENT_TITLE_LENGTH)
+                description = fake.sentence(nb_words=EVENT_DESCRIPTION_LENGTH)
                 speaker = fake.name()
 
                 events_for_slot.append(
@@ -173,6 +176,75 @@ def generate_schedule_events(
                         "speaker": event["speaker"],
                     }
                 )
+
+    return rows
+
+
+def generate_announcements(persons, num_announcements):
+    admins = [person for person in persons if person["role"] == "admin"]
+    rows = []
+    if not admins:
+        return rows
+
+    for _ in range(num_announcements):
+        admin = random.choice(admins)
+        rows.append(
+            {
+                "created_at": int(datetime.now().timestamp() * 1000),
+                "channel": random.choice(CHANNELS),
+                "visibility": random.choice(VISIBILITIES),
+                "title": fake.sentence(nb_words=ANNOUNCEMENT_TITLE_LENGTH),
+                "message": fake.sentence(nb_words=ANNOUNCEMENT_CONTENT_LENGTH),
+                "email": admin["email"],
+                "full_name": admin["full_name"],
+                "role": admin["role"],
+                "subteam": admin["subteam"],
+            }
+        )
+    return rows
+
+
+def generate_resources(persons, num_resources):
+    admins = [person for person in persons if person["role"] == "admin"]
+    rows = []
+    if not admins:
+        return rows
+
+    for _ in range(num_resources):
+        admin = random.choice(admins)
+        rows.append(
+            {
+                "created_at": int(datetime.now().timestamp() * 1000),
+                "title": fake.sentence(nb_words=RESOURCE_TITLE_LENGTH),
+                "type": random.choice(["file", "url"]),
+                "url": fake.url(),
+                "visibility": random.choice(VISIBILITIES),
+                "email": admin["email"],
+                "full_name": admin["full_name"],
+                "role": admin["role"],
+                "subteam": admin["subteam"],
+            }
+        )
+    return rows
+
+
+def generate_help_requests(persons, num_help_requests):
+    rows = []
+    for _ in range(num_help_requests):
+        requester = random.choice(persons)
+        rows.append(
+            {
+                "created_at": int(datetime.now().timestamp() * 1000),
+                "help_type": random.choice(HELP_TYPES),
+                "priority": random.choice(HELP_PRIORITIES),
+                "status": random.choice(HELP_STATUSES),
+                "details": fake.sentence(nb_words=HELP_DETAILS_LENGTH),
+                "email": requester["email"],
+                "full_name": requester["full_name"],
+                "role": requester["role"],
+                "subteam": requester["subteam"],
+            }
+        )
     return rows
 
 
@@ -190,9 +262,14 @@ def main(
     slots_per_day_variation=SLOTS_PER_DAY_VARIATION_GEN,
     events_per_slot_base=EVENTS_PER_SLOT_BASE_GEN,
     events_per_slot_variation=EVENTS_PER_SLOT_VARIATION_GEN,
+    num_announcements=NUM_ANNOUNCEMENTS_GEN,
+    num_resources=NUM_RESOURCES_GEN,
+    num_help_requests=NUM_HELP_REQUESTS_GEN,
 ):
-    folder = os.path.join(DATA_FOLDER, random_folder_name())
+    timestamp_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    folder = os.path.join(DATA_FOLDER, timestamp_str)
     os.makedirs(folder, exist_ok=True)
+
     persons = generate_persons(num_people)
     qrcodes = generate_qr_codes(persons)
     rooms = generate_rooms(persons)
@@ -204,6 +281,9 @@ def main(
         events_per_slot_base,
         events_per_slot_variation,
     )
+    announcements = generate_announcements(persons, num_announcements)
+    resources = generate_resources(persons, num_resources)
+    help_requests = generate_help_requests(persons, num_help_requests)
 
     write_csv(
         folder,
@@ -245,6 +325,55 @@ def main(
             "speaker",
         ],
     )
+    write_csv(
+        folder,
+        ANNOUNCEMENT_FILE,
+        announcements,
+        [
+            "created_at",
+            "channel",
+            "visibility",
+            "title",
+            "message",
+            "email",
+            "full_name",
+            "role",
+            "subteam",
+        ],
+    )
+    write_csv(
+        folder,
+        RESOURCE_FILE,
+        resources,
+        [
+            "created_at",
+            "title",
+            "type",
+            "url",
+            "visibility",
+            "email",
+            "full_name",
+            "role",
+            "subteam",
+        ],
+    )
+    write_csv(
+        folder,
+        HELP_REQUEST_FILE,
+        help_requests,
+        [
+            "created_at",
+            "help_type",
+            "priority",
+            "status",
+            "details",
+            "email",
+            "full_name",
+            "role",
+            "subteam",
+        ],
+    )
+
     print("Generated folder:", folder)
 
 
