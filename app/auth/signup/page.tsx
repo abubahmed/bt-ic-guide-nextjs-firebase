@@ -131,16 +131,6 @@ export default function SignUpPage() {
                     and manage programming.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
-                  <p className="font-semibold text-sky-700">Need access?</p>
-                  <p>
-                    Waiting on approval or missing an invite? Submit a quick{" "}
-                    <Link href="/auth/invite-request" className="font-semibold text-black hover:text-sky-700">
-                      invite request
-                    </Link>{" "}
-                    and our team will review it.
-                  </p>
-                </div>
               </div>
             </aside>
           </div>

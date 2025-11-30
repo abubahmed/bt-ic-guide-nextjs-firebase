@@ -105,21 +105,11 @@ export default function StaffLoginPage() {
                 <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
                   <p className="font-semibold text-white">Attendee portal?</p>
                   <p>
-                    Just helping with check-in? Hop over to the{" "}
+                    Looking for the attendee portal? Hop over to the{" "}
                     <Link href="/auth/login" className="font-semibold text-sky-300 hover:text-white">
                       attendee login
                     </Link>{" "}
                     instead.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
-                  <p className="font-semibold text-white">Missing invite?</p>
-                  <p>
-                    Request or resend your admin access through a{" "}
-                    <Link href="/staff/auth/invite-request" className="font-semibold text-sky-300 hover:text-white">
-                      staff invite
-                    </Link>
-                    .
                   </p>
                 </div>
                 <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">

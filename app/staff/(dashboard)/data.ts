@@ -66,7 +66,7 @@ const quickActions = [
     slug: "roles",
     label: "Manage people & access",
     icon: ShieldCheck,
-    href: "/staff/roles",
+    href: "/staff/people",
   },
   {
     slug: "map",

@@ -8,6 +8,7 @@ import {
   ATTENDEE_LOGIN_ROUTE,
   STAFF_HOME_ROUTE,
   ATTENDEE_HOME_ROUTE,
+  EXISTING_ROUTES,
 } from "./route-config";
 
 const staffOrAttendee = () => {
@@ -20,6 +21,24 @@ export default function middleware(request: NextRequest) {
   const session = request.cookies.get(SESSION_COOKIE_NAME)?.value || "";
   const sessionRole = session ? staffOrAttendee() : null;
   const currentRoute = request.nextUrl.pathname;
+
+  if (
+    currentRoute.startsWith("/_next") ||
+    currentRoute.startsWith("/static") ||
+    currentRoute.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2)$/)
+  ) {
+    return NextResponse.next();
+  }
+
+  if (!EXISTING_ROUTES.includes(currentRoute)) {
+    if (sessionRole === "STAFF") {
+      return NextResponse.redirect(new URL(STAFF_HOME_ROUTE, request.url));
+    } else if (sessionRole === "ATTENDEE") {
+      return NextResponse.redirect(new URL(ATTENDEE_HOME_ROUTE, request.url));
+    } else {
+      return NextResponse.rewrite(new URL("/404", request.url));
+    }
+  }
 
   if (PUBLIC_ROUTES.includes(currentRoute)) {
     if (sessionRole === "STAFF") {

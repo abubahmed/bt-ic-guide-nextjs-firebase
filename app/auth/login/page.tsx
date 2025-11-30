@@ -98,16 +98,6 @@ export default function LoginPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-900">Need help?</p>
               <div className="space-y-3">
                 <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
-                  <p className="font-semibold text-sky-700">No invite yet?</p>
-                  <p>
-                    Make sure your email is in our approved spreadsheet. Otherwise, submit a quick{" "}
-                    <Link href="/auth/invite-request" className="font-semibold text-black hover:text-sky-700">
-                      request for approval
-                    </Link>
-                    .
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-sky-100 bg-white/80 px-4 py-3">
                   <p className="font-semibold text-sky-700">First-timer?</p>
                   <p>
                     Create your attendee profile through the{" "}

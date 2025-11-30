@@ -124,16 +124,6 @@ export default function StaffSignUpPage() {
                   </p>
                 </div>
                 <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
-                  <p className="font-semibold text-white">Request approval</p>
-                  <p>
-                    Missing credentials or need an invite? Submit a{" "}
-                    <Link href="/staff/auth/invite-request" className="font-semibold text-sky-300 hover:text-white">
-                      staff approval request
-                    </Link>{" "}
-                    for the ops team.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
                   <p className="font-semibold text-white">Already approved</p>
                   <p>
                     When your account is confirmed, continue straight to{" "}

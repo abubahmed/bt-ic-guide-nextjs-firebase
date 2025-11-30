@@ -5,7 +5,6 @@ interface QuickAction {
   label: string;
   href: string;
   icon: React.ElementType;
-  description: string;
 }
 
 export default function QuickActionButton({ action }: { action: QuickAction }) {

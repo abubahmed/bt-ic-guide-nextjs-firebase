@@ -14,8 +14,26 @@ const PUBLIC_ROUTES = [
 
 const ATTENDEE_LOGIN_ROUTE = `${ATTENDEE_AUTH_ROUTE_PREFIX}/login`;
 const STAFF_LOGIN_ROUTE = `${STAFF_AUTH_ROUTE_PREFIX}/login`;
-const STAFF_HOME_ROUTE = `${STAFF_ROUTE_PREFIX}/`;
-const ATTENDEE_HOME_ROUTE = `${ATTENDEE_ROUTE_PREFIX}/`;
+const STAFF_HOME_ROUTE = `${STAFF_ROUTE_PREFIX}`;
+const ATTENDEE_HOME_ROUTE = `${ATTENDEE_ROUTE_PREFIX}`;
+
+const EXISTING_ROUTES = [
+  ATTENDEE_LOGIN_ROUTE,
+  STAFF_LOGIN_ROUTE,
+  STAFF_HOME_ROUTE,
+  ATTENDEE_HOME_ROUTE,
+  "/staff",
+  "/staff/people",
+  "/staff/rooms",
+  "/staff/qrcodes",
+  "/staff/resources",
+  "/staff/map",
+  "/staff/announcements",
+  "/staff/schedules",
+  "/staff/resources",
+  "/staff/help",
+  "/attendee",
+];
 
 export {
   STAFF_ROUTE_PREFIX,
@@ -27,4 +45,5 @@ export {
   STAFF_LOGIN_ROUTE,
   STAFF_HOME_ROUTE,
   ATTENDEE_HOME_ROUTE,
+  EXISTING_ROUTES,
 };
