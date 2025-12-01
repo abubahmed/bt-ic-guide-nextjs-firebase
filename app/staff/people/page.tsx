@@ -56,20 +56,6 @@ const PAGE_SIZE = 10;
 const INDIVIDUAL_ROLE_OPTIONS: IndividualRole[] = ["staff", "admin", "attendee"];
 const GRADE_OPTIONS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"];
 
-type UploadSectionProps = {
-  scope: UploadScope;
-  onScopeChange: (scope: UploadScope) => void;
-  team: TeamId;
-  onTeamChange: (team: TeamId) => void;
-  onRunValidations: () => void;
-  onStageUpload: () => void;
-  individualForm: IndividualFormState;
-  onIndividualFormChange: (
-    field: keyof IndividualFormState,
-    value: IndividualFormState[keyof IndividualFormState]
-  ) => void;
-};
-
 type RosterFiltersProps = {
   teamFilter: "all" | TeamId;
   accessFilter: "all" | AccessRole;
@@ -98,18 +84,6 @@ type PaginationControlsProps = {
   onNext: () => void;
 };
 
-type ExportSectionProps = {
-  scope: ExportScope;
-  onScopeChange: (scope: ExportScope) => void;
-  team: TeamId;
-  onTeamChange: (team: TeamId) => void;
-  personId: string;
-  onPersonChange: (personId: string) => void;
-  format: ExportFormat;
-  onFormatChange: (format: ExportFormat) => void;
-  onGenerate: () => void;
-};
-
 type AccessDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -123,21 +97,24 @@ type AccessDialogProps = {
 };
 
 export default function StaffPeoplePage() {
-  const [uploadScope, setUploadScope] = useState<UploadScope>("master");
-  const [uploadTeam, setUploadTeam] = useState<TeamId>(DEFAULT_TEAM);
-  const [teamFilter, setTeamFilter] = useState<"all" | TeamId>("all");
-  const [accessFilter, setAccessFilter] = useState<"all" | AccessRole>("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | PersonStatus>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [gridPage, setGridPage] = useState(0);
-  const [exportScope, setExportScope] = useState<ExportScope>("all");
-  const [exportTeam, setExportTeam] = useState<TeamId>(DEFAULT_TEAM);
-  const [exportPerson, setExportPerson] = useState<string>(DEFAULT_PERSON);
-  const [exportFormat, setExportFormat] = useState<ExportFormat>("csv");
-  const [accessDialogOpen, setAccessDialogOpen] = useState(false);
-  const [activePersonId, setActivePersonId] = useState<string | null>(null);
-  const [modalRole, setModalRole] = useState<AccessRole>("attendee");
-  const [modalStaffType, setModalStaffType] = useState<StaffTypeId>(staffTypes[0].id);
+  return (
+    <>
+      <main className="min-h-dvh bg-slate-950 text-slate-100">
+        <StaffHeader currentPage="people" />
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
+          <UploadPanel />
+          <RosterViewer />
+          <ExportPanel />
+        </div>
+        <StaffFooter />
+      </main>
+    </>
+  );
+}
+
+function UploadPanel() {
+  const [scope, setScope] = useState<UploadScope>("master");
+  const [team, setTeam] = useState<TeamId>(DEFAULT_TEAM);
   const [individualForm, setIndividualForm] = useState<IndividualFormState>({
     fullName: "",
     email: "",
@@ -149,28 +126,207 @@ export default function StaffPeoplePage() {
     school: "",
   });
 
-  const activePerson = useMemo(
-    () => peopleDirectory.find((person) => person.id === activePersonId) ?? null,
-    [activePersonId]
+  const handleIndividualFormChange = <K extends keyof IndividualFormState>(field: K, value: IndividualFormState[K]) => {
+    setIndividualForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleRunValidations = () => {};
+
+  const handleStageUpload = () => {};
+
+  return (
+    <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+      <div className="space-y-3">
+        <div>
+          <h1 className="text-3xl font-semibold text-white">Upload people data</h1>
+          <p className="mt-2 text-base text-slate-400">
+            Upload people data via spreadsheet to the system. Ensure it matches the required format and headers.
+          </p>
+        </div>
+      </div>
+      <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
+        <div className="space-y-3">
+          <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload scope</p>
+          <Tabs value={scope} onValueChange={(value) => setScope(value as UploadScope)}>
+            <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60 text-white">
+              <TabsTrigger
+                value="master"
+                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                Master
+              </TabsTrigger>
+              <TabsTrigger
+                value="team"
+                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                Team
+              </TabsTrigger>
+              <TabsTrigger
+                value="person"
+                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                Individual
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {scope !== "master" && (
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+              <Select value={team} onValueChange={(value) => setTeam(value as TeamId)}>
+                <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                  <SelectValue placeholder="Choose team" />
+                </SelectTrigger>
+                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                  {teams.map((teamOption) => (
+                    <SelectItem key={teamOption.id} value={teamOption.id}>
+                      {teamOption.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+        {scope === "person" ? (
+          <div className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Full name</Label>
+                <Input
+                  value={individualForm.fullName}
+                  onChange={(event) => handleIndividualFormChange("fullName", event.target.value)}
+                  placeholder="Jane Doe"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Email</Label>
+                <Input
+                  type="email"
+                  value={individualForm.email}
+                  onChange={(event) => handleIndividualFormChange("email", event.target.value)}
+                  placeholder="jane@example.com"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Phone</Label>
+                <Input
+                  type="tel"
+                  value={individualForm.phone}
+                  onChange={(event) => handleIndividualFormChange("phone", event.target.value)}
+                  placeholder="+1 (555) 123-4567"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
+                <Select
+                  value={individualForm.role}
+                  onValueChange={(value) => handleIndividualFormChange("role", value as IndividualRole)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {INDIVIDUAL_ROLE_OPTIONS.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Grade</Label>
+                <Select
+                  value={individualForm.grade}
+                  onValueChange={(value) => handleIndividualFormChange("grade", value)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {GRADE_OPTIONS.map((grade) => (
+                      <SelectItem key={grade} value={grade}>
+                        {grade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {individualForm.role === "staff" && (
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                <Input
+                  value={individualForm.subteam}
+                  onChange={(event) => handleIndividualFormChange("subteam", event.target.value)}
+                  placeholder="Ops, Hospitality..."
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+            )}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Company</Label>
+                <Input
+                  value={individualForm.company}
+                  onChange={(event) => handleIndividualFormChange("company", event.target.value)}
+                  placeholder="Company name"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">School</Label>
+                <Input
+                  value={individualForm.school}
+                  onChange={(event) => handleIndividualFormChange("school", event.target.value)}
+                  placeholder="School name"
+                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <label
+            htmlFor="people-upload"
+            className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
+            <UploadCloud className="h-8 w-8 text-sky-300" />
+            <div>
+              <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
+            </div>
+            <input id="people-upload" type="file" className="hidden" accept=".csv,.xlsx" />
+          </label>
+        )}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button
+            variant="outline"
+            className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60"
+            onClick={handleRunValidations}>
+            Run validations
+          </Button>
+          <Button
+            className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
+            onClick={handleStageUpload}>
+            Stage upload
+          </Button>
+        </div>
+      </div>
+    </section>
   );
+}
 
-  useEffect(() => {
-    if (activePerson) {
-      setModalRole(activePerson.accessRole);
-      setModalStaffType(activePerson.staffType ?? staffTypes[0].id);
-    }
-  }, [activePerson]);
+function RosterViewer() {
+  const [teamFilter, setTeamFilter] = useState<"all" | TeamId>("all");
+  const [accessFilter, setAccessFilter] = useState<"all" | AccessRole>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | PersonStatus>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [gridPage, setGridPage] = useState(0);
 
-  useEffect(() => {
-    const scopedPeople = peopleDirectory.filter((person) => person.team === exportTeam);
-    if (!scopedPeople.some((person) => person.id === exportPerson)) {
-      setExportPerson(scopedPeople[0]?.id ?? "");
-    }
-  }, [exportTeam, exportPerson]);
-
-  useEffect(() => {
-    setGridPage(0);
-  }, [teamFilter, accessFilter, statusFilter, searchQuery]);
+  const [accessDialogOpen, setAccessDialogOpen] = useState(false);
+  const [activePersonId, setActivePersonId] = useState<string | null>(null);
+  const [modalRole, setModalRole] = useState<AccessRole>("attendee");
+  const [modalStaffType, setModalStaffType] = useState<StaffTypeId>(staffTypes[0].id);
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
@@ -195,6 +351,10 @@ export default function StaffPeoplePage() {
   }, [teamFilter, accessFilter, statusFilter, searchQuery]);
 
   useEffect(() => {
+    setGridPage(0);
+  }, [teamFilter, accessFilter, statusFilter, searchQuery]);
+
+  useEffect(() => {
     const maxPageIndex = Math.max(0, Math.ceil(filteredRoster.length / PAGE_SIZE) - 1);
     setGridPage((prev) => Math.min(prev, maxPageIndex));
   }, [filteredRoster.length]);
@@ -203,6 +363,18 @@ export default function StaffPeoplePage() {
   const pageCount = Math.max(1, Math.ceil(filteredRoster.length / PAGE_SIZE));
   const pageStart = filteredRoster.length === 0 ? 0 : gridPage * PAGE_SIZE + 1;
   const pageEnd = Math.min(filteredRoster.length, (gridPage + 1) * PAGE_SIZE);
+
+  const activePerson = useMemo(
+    () => peopleDirectory.find((person) => person.id === activePersonId) ?? null,
+    [activePersonId]
+  );
+
+  useEffect(() => {
+    if (activePerson) {
+      setModalRole(activePerson.accessRole);
+      setModalStaffType(activePerson.staffType ?? staffTypes[0].id);
+    }
+  }, [activePerson]);
 
   const handleOpenDialog = (personId: string) => {
     setActivePersonId(personId);
@@ -216,51 +388,6 @@ export default function StaffPeoplePage() {
     }
   };
 
-  const handleIndividualFormChange = <K extends keyof IndividualFormState>(field: K, value: IndividualFormState[K]) => {
-    setIndividualForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleRunValidations = () => {
-    if (uploadScope !== "person") {
-      console.info(`[Validations] ${uploadScope} scope currently relies on external spreadsheet validation.`);
-      return true;
-    }
-
-    const errors: string[] = [];
-    if (!individualForm.fullName.trim()) {
-      errors.push("Full name is required.");
-    }
-    const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-    if (!emailPattern.test(individualForm.email.trim())) {
-      errors.push("A valid email address is required.");
-    }
-    if (!individualForm.phone.trim()) {
-      errors.push("Phone number is required.");
-    }
-    if (!individualForm.grade.trim()) {
-      errors.push("Grade selection is required.");
-    }
-    if (!individualForm.company.trim()) {
-      errors.push("Company is required.");
-    }
-    if (!individualForm.school.trim()) {
-      errors.push("School is required.");
-    }
-    if (individualForm.role === "staff" && !individualForm.subteam.trim()) {
-      errors.push("Subteam is required for staff roles.");
-    }
-
-    if (errors.length > 0) {
-      console.warn("Individual upload validation errors:", errors);
-      return false;
-    }
-
-    console.info("Individual upload passed basic validations.");
-    return true;
-  };
-
-  const handleStageUpload = () => {};
-
   const handlePrevPage = () => {
     setGridPage((prev) => Math.max(0, prev - 1));
   };
@@ -269,85 +396,53 @@ export default function StaffPeoplePage() {
     setGridPage((prev) => Math.min(pageCount - 1, prev + 1));
   };
 
-  const handleGenerateExport = () => {};
-
   const handleRevokeAccess = () => {};
-
   const handleApplyUpdates = () => {};
 
   return (
     <>
-      <main className="min-h-dvh bg-slate-950 text-slate-100">
-        <StaffHeader currentPage="people" />
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-          <UploadSection
-            scope={uploadScope}
-            onScopeChange={setUploadScope}
-            team={uploadTeam}
-            onTeamChange={setUploadTeam}
-            onRunValidations={handleRunValidations}
-            onStageUpload={handleStageUpload}
-            individualForm={individualForm}
-            onIndividualFormChange={handleIndividualFormChange}
-          />
-
-          <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
-            <div className="space-y-3">
-              <div>
-                <h2 className="text-3xl font-semibold text-white">People viewer</h2>
-                <p className="mt-2 text-base text-slate-400">
-                  Review or manage people data for all teams. Filter by team, role, or status to find specific people.
-                </p>
-              </div>
-            </div>
-            <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
-              <RosterFilters
-                teamFilter={teamFilter}
-                accessFilter={accessFilter}
-                statusFilter={statusFilter}
-                searchQuery={searchQuery}
-                onTeamChange={setTeamFilter}
-                onAccessChange={setAccessFilter}
-                onStatusChange={setStatusFilter}
-                onSearchChange={setSearchQuery}
-              />
-              <div className="mt-4">
-                {pagedRoster.length > 0 ? (
-                  <RosterTable pagedRoster={pagedRoster} onManage={handleOpenDialog} />
-                ) : (
-                  <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
-                    No people match the applied filters.
-                  </div>
-                )}
-                <PaginationControls
-                  pageStart={pageStart}
-                  pageEnd={pageEnd}
-                  totalCount={filteredRoster.length}
-                  gridPage={filteredRoster.length === 0 ? 0 : gridPage}
-                  pageCount={filteredRoster.length === 0 ? 0 : pageCount}
-                  canGoPrev={gridPage > 0}
-                  canGoNext={gridPage < pageCount - 1 && filteredRoster.length > 0}
-                  onPrev={handlePrevPage}
-                  onNext={handleNextPage}
-                />
-              </div>
-            </div>
-          </section>
-
-          <ExportSection
-            scope={exportScope}
-            onScopeChange={setExportScope}
-            team={exportTeam}
-            onTeamChange={setExportTeam}
-            personId={exportPerson}
-            onPersonChange={setExportPerson}
-            format={exportFormat}
-            onFormatChange={setExportFormat}
-            onGenerate={handleGenerateExport}
-          />
+      <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <div className="space-y-3">
+          <div>
+            <h2 className="text-3xl font-semibold text-white">People viewer</h2>
+            <p className="mt-2 text-base text-slate-400">
+              Review or manage people data for all teams. Filter by team, role, or status to find specific people.
+            </p>
+          </div>
         </div>
-        <StaffFooter />
-      </main>
+        <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
+          <RosterFilters
+            teamFilter={teamFilter}
+            accessFilter={accessFilter}
+            statusFilter={statusFilter}
+            searchQuery={searchQuery}
+            onTeamChange={setTeamFilter}
+            onAccessChange={setAccessFilter}
+            onStatusChange={setStatusFilter}
+            onSearchChange={setSearchQuery}
+          />
+          <div className="mt-4">
+            {pagedRoster.length > 0 ? (
+              <RosterTable pagedRoster={pagedRoster} onManage={handleOpenDialog} />
+            ) : (
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
+                No people match the applied filters.
+              </div>
+            )}
+            <PaginationControls
+              pageStart={pageStart}
+              pageEnd={pageEnd}
+              totalCount={filteredRoster.length}
+              gridPage={filteredRoster.length === 0 ? 0 : gridPage}
+              pageCount={filteredRoster.length === 0 ? 0 : pageCount}
+              canGoPrev={gridPage > 0}
+              canGoNext={gridPage < pageCount - 1 && filteredRoster.length > 0}
+              onPrev={handlePrevPage}
+              onNext={handleNextPage}
+            />
+          </div>
+        </div>
+      </section>
 
       <AccessDialog
         open={accessDialogOpen}
@@ -364,35 +459,37 @@ export default function StaffPeoplePage() {
   );
 }
 
-function UploadSection({
-  scope,
-  onScopeChange,
-  team,
-  onTeamChange,
-  onRunValidations,
-  onStageUpload,
-  individualForm,
-  onIndividualFormChange,
-}: UploadSectionProps) {
+function ExportPanel() {
+  const [scope, setScope] = useState<ExportScope>("all");
+  const [team, setTeam] = useState<TeamId>(DEFAULT_TEAM);
+  const [personId, setPersonId] = useState<string>(DEFAULT_PERSON);
+  const [format, setFormat] = useState<ExportFormat>("csv");
+
+  useEffect(() => {
+    const scopedPeople = peopleDirectory.filter((person) => person.team === team);
+    if (!scopedPeople.some((person) => person.id === personId)) {
+      setPersonId(scopedPeople[0]?.id ?? "");
+    }
+  }, [team, personId]);
+
+  const handleGenerate = () => {};
+
   return (
-    <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
-      <div className="space-y-3">
+    <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-white">Upload people data</h1>
-          <p className="mt-2 text-base text-slate-400">
-            Upload people data via spreadsheet to the system. Ensure it matches the required format and headers.
-          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-white">Export people data</h2>
+          <p className="text-slate-400">Export people data for all or specific teams in CSV or XLSX format.</p>
         </div>
       </div>
-      <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
-        <div className="space-y-3">
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload scope</p>
-          <Tabs value={scope} onValueChange={(value) => onScopeChange(value as UploadScope)}>
-            <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60 text-white">
+      <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+          <Tabs value={scope} onValueChange={(value) => setScope(value as ExportScope)}>
+            <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
               <TabsTrigger
-                value="master"
+                value="all"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Master
+                Everyone
               </TabsTrigger>
               <TabsTrigger
                 value="team"
@@ -405,148 +502,80 @@ function UploadSection({
                 Individual
               </TabsTrigger>
             </TabsList>
+            <div className="mt-6 space-y-4">
+              <TabsContent value="team" className="space-y-3">
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+                  <Select value={team} onValueChange={(value) => setTeam(value as TeamId)}>
+                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                      <SelectValue placeholder="Choose team" />
+                    </SelectTrigger>
+                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                      {teams.map((teamOption) => (
+                        <SelectItem key={teamOption.id} value={teamOption.id}>
+                          {teamOption.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </TabsContent>
+              <TabsContent value="person" className="space-y-3">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
+                    <Select value={team} onValueChange={(value) => setTeam(value as TeamId)}>
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                        <SelectValue placeholder="Team" />
+                      </SelectTrigger>
+                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                        {teams.map((teamOption) => (
+                          <SelectItem key={teamOption.id} value={teamOption.id}>
+                            {teamOption.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Person</Label>
+                    <Select value={personId} onValueChange={setPersonId}>
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                        <SelectValue placeholder="Person" />
+                      </SelectTrigger>
+                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                        {peopleDirectory
+                          .filter((person) => person.team === team)
+                          .map((person) => (
+                            <SelectItem key={person.id} value={person.id}>
+                              {person.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {scope !== "master" && (
-            <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-              <Select value={team} onValueChange={(value) => onTeamChange(value as TeamId)}>
-                <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                  <SelectValue placeholder="Choose team" />
-                </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                  {teams.map((teamOption) => (
-                    <SelectItem key={teamOption.id} value={teamOption.id}>
-                      {teamOption.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
-        {scope === "person" ? (
-          <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Full name</Label>
-                <Input
-                  value={individualForm.fullName}
-                  onChange={(event) => onIndividualFormChange("fullName", event.target.value)}
-                  placeholder="Jane Doe"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Email</Label>
-                <Input
-                  type="email"
-                  value={individualForm.email}
-                  onChange={(event) => onIndividualFormChange("email", event.target.value)}
-                  placeholder="jane@example.com"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
-              </div>
-            </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Phone</Label>
-                <Input
-                  type="tel"
-                  value={individualForm.phone}
-                  onChange={(event) => onIndividualFormChange("phone", event.target.value)}
-                  placeholder="+1 (555) 123-4567"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
-                <Select
-                  value={individualForm.role}
-                  onValueChange={(value) => onIndividualFormChange("role", value as IndividualRole)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {INDIVIDUAL_ROLE_OPTIONS.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role.charAt(0).toUpperCase() + role.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Grade</Label>
-                <Select value={individualForm.grade} onValueChange={(value) => onIndividualFormChange("grade", value)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Select grade" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {GRADE_OPTIONS.map((grade) => (
-                      <SelectItem key={grade} value={grade}>
-                        {grade}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            {individualForm.role === "staff" && (
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
-                <Input
-                  value={individualForm.subteam}
-                  onChange={(event) => onIndividualFormChange("subteam", event.target.value)}
-                  placeholder="Ops, Hospitality..."
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
-              </div>
-            )}
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Company</Label>
-                <Input
-                  value={individualForm.company}
-                  onChange={(event) => onIndividualFormChange("company", event.target.value)}
-                  placeholder="Company name"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">School</Label>
-                <Input
-                  value={individualForm.school}
-                  onChange={(event) => onIndividualFormChange("school", event.target.value)}
-                  placeholder="School name"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
-              </div>
-            </div>
+        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+          <div className="space-y-2">
+            <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Format</Label>
+            <Select value={format} onValueChange={(value) => setFormat(value as ExportFormat)}>
+              <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                <SelectValue placeholder="Choose format" />
+              </SelectTrigger>
+              <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectItem value="csv">CSV (spreadsheet ready)</SelectItem>
+                <SelectItem value="xlsx">Excel spreadsheet (.xlsx)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        ) : (
-          <label
-            htmlFor="people-upload"
-            className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
-            <UploadCloud className="h-8 w-8 text-sky-300" />
-            <div>
-              <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
-            </div>
-            <input id="people-upload" type="file" className="hidden" accept=".csv,.xlsx" />
-          </label>
-        )}
-        <div className="grid gap-3 sm:grid-cols-2">
           <Button
-            variant="outline"
-            className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60"
-            onClick={onRunValidations}>
-            Run validations
-          </Button>
-          <Button
-            className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
-            onClick={onStageUpload}>
-            Stage upload
+            className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
+            onClick={handleGenerate}>
+            Generate {format === "csv" ? "CSV roster" : "XLSX roster"}
           </Button>
         </div>
       </div>
@@ -707,126 +736,6 @@ function PaginationControls({
         </Button>
       </div>
     </div>
-  );
-}
-
-function ExportSection({
-  scope,
-  onScopeChange,
-  team,
-  onTeamChange,
-  personId,
-  onPersonChange,
-  format,
-  onFormatChange,
-  onGenerate,
-}: ExportSectionProps) {
-  return (
-    <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Export people data</h2>
-          <p className="text-slate-400">Export people data for all or specific teams in CSV or XLSX format.</p>
-        </div>
-      </div>
-      <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
-          <Tabs value={scope} onValueChange={(value) => onScopeChange(value as ExportScope)}>
-            <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
-              <TabsTrigger
-                value="all"
-                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Everyone
-              </TabsTrigger>
-              <TabsTrigger
-                value="team"
-                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Team
-              </TabsTrigger>
-              <TabsTrigger
-                value="person"
-                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Individual
-              </TabsTrigger>
-            </TabsList>
-            <div className="mt-6 space-y-4">
-              <TabsContent value="team" className="space-y-3">
-                <div className="space-y-2">
-                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-                  <Select value={team} onValueChange={(value) => onTeamChange(value as TeamId)}>
-                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                      <SelectValue placeholder="Choose team" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                      {teams.map((teamOption) => (
-                        <SelectItem key={teamOption.id} value={teamOption.id}>
-                          {teamOption.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </TabsContent>
-              <TabsContent value="person" className="space-y-3">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-                    <Select value={team} onValueChange={(value) => onTeamChange(value as TeamId)}>
-                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                        <SelectValue placeholder="Team" />
-                      </SelectTrigger>
-                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                        {teams.map((teamOption) => (
-                          <SelectItem key={teamOption.id} value={teamOption.id}>
-                            {teamOption.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Person</Label>
-                    <Select value={personId} onValueChange={onPersonChange}>
-                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                        <SelectValue placeholder="Person" />
-                      </SelectTrigger>
-                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                        {peopleDirectory
-                          .filter((person) => person.team === team)
-                          .map((person) => (
-                            <SelectItem key={person.id} value={person.id}>
-                              {person.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </TabsContent>
-            </div>
-          </Tabs>
-        </div>
-        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
-          <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Format</Label>
-            <Select value={format} onValueChange={(value) => onFormatChange(value as ExportFormat)}>
-              <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                <SelectValue placeholder="Choose format" />
-              </SelectTrigger>
-              <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                <SelectItem value="csv">CSV (spreadsheet ready)</SelectItem>
-                <SelectItem value="xlsx">Excel spreadsheet (.xlsx)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button
-            className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
-            onClick={onGenerate}>
-            Generate {format === "csv" ? "CSV roster" : "XLSX roster"}
-          </Button>
-        </div>
-      </div>
-    </section>
   );
 }
 
