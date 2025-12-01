@@ -27,24 +27,17 @@ export default function QuickActionButton({ action }: { action: QuickAction }) {
         <p className="mt-2 text-sm leading-relaxed text-slate-400">{action.description}</p>
       </div>
 
-      <div className="mt-6 flex items-center justify-between text-sm font-medium text-slate-400">
-        <Link
-          href={action.href}
-          aria-label={`Open ${action.label}`}
-          target="_blank"
-          className="text-slate-300 underline-offset-4 transition-colors hover:text-white focus-visible:text-white"
-        >
-          Launch workspace
-        </Link>
-        <Link
-          href={action.href}
-          aria-label={`Open ${action.label}`}
-          target="_blank"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800/60 bg-slate-900/60 text-slate-300 transition-colors hover:border-slate-700 hover:text-white focus-visible:border-slate-600 focus-visible:text-white"
-        >
+      <Link
+        href={action.href}
+        aria-label={`Open ${action.label}`}
+        target="_blank"
+        className="mt-6 flex items-center justify-between rounded-2xl border border-transparent p-1 text-sm font-medium text-slate-300 transition-colors hover:border-slate-700 hover:bg-slate-900/40 hover:text-white focus-visible:border-slate-600 focus-visible:bg-slate-900/40 focus-visible:text-white"
+      >
+        <div className="pl-1">Launch workspace</div>
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800/60 bg-slate-900/60 text-inherit transition-colors">
           <ArrowUpRight className="h-5 w-5" />
-        </Link>
-      </div>
+        </div>
+      </Link>
     </div>
   );
 }
