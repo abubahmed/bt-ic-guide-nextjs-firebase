@@ -21,7 +21,7 @@ export default function StaffHeader({ currentPage }: { currentPage: string }) {
   const [quickLinkValue, setQuickLinkValue] = useState(navLinks[0].label);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-900/70 bg-slate-950/85 backdrop-blur">
+    <header className="top-0 z-20 border-b border-slate-900/70 bg-slate-950/85 backdrop-blur">
       <div className="mx-auto w-full max-w-6xl px-4 py-4 text-xs text-slate-300 lg:px-0">
         <div className="mt-4 flex flex-wrap items-center gap-4">
           <nav className="hidden flex-1 flex-wrap items-center gap-2 md:flex">
