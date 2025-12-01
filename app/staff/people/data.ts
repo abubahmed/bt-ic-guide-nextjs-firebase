@@ -19,7 +19,7 @@ const staffTypes = [
 const peopleDirectory = [
   {
     id: "alex-chen",
-    name: "Alex Chen",
+    full_name: "Alex Chen",
     email: "alex.chen@btic.co",
     team: "operations",
     accessRole: "staff",
@@ -30,7 +30,7 @@ const peopleDirectory = [
   },
   {
     id: "maya-patel",
-    name: "Maya Patel",
+    full_name: "Maya Patel",
     email: "maya.patel@btic.co",
     team: "programming",
     accessRole: "staff",
@@ -41,7 +41,7 @@ const peopleDirectory = [
   },
   {
     id: "leo-carter",
-    name: "Leo Carter",
+    full_name: "Leo Carter",
     email: "leo.carter@btic.co",
     team: "hospitality",
     accessRole: "staff",
@@ -52,7 +52,7 @@ const peopleDirectory = [
   },
   {
     id: "lara-cho",
-    name: "Lara Cho",
+    full_name: "Lara Cho",
     email: "lara.cho@btic.co",
     team: "security",
     accessRole: "staff",
@@ -63,7 +63,7 @@ const peopleDirectory = [
   },
   {
     id: "opal-reed",
-    name: "Opal Reed",
+    full_name: "Opal Reed",
     email: "opal.reed@btic.co",
     team: "logistics",
     accessRole: "staff",
@@ -74,7 +74,7 @@ const peopleDirectory = [
   },
   {
     id: "natalie-young",
-    name: "Natalie Young",
+    full_name: "Natalie Young",
     email: "natalie.young@btic.co",
     team: "programming",
     accessRole: "attendee",
@@ -84,7 +84,7 @@ const peopleDirectory = [
   },
   {
     id: "jamie-bowen",
-    name: "Jamie Bowen",
+    full_name: "Jamie Bowen",
     email: "jamie.bowen@btic.co",
     team: "hospitality",
     accessRole: "attendee",
@@ -94,7 +94,7 @@ const peopleDirectory = [
   },
   {
     id: "dahlia-ortiz",
-    name: "Dahlia Ortiz",
+    full_name: "Dahlia Ortiz",
     email: "dahlia.ortiz@btic.co",
     team: "operations",
     accessRole: "staff",
@@ -105,7 +105,7 @@ const peopleDirectory = [
   },
   {
     id: "kofi-diaz",
-    name: "Kofi Diaz",
+    full_name: "Kofi Diaz",
     email: "kofi.diaz@btic.co",
     team: "security",
     accessRole: "staff",
@@ -116,7 +116,7 @@ const peopleDirectory = [
   },
   {
     id: "priya-iyer",
-    name: "Priya Iyer",
+    full_name: "Priya Iyer",
     email: "priya.iyer@btic.co",
     team: "programming",
     accessRole: "attendee",
@@ -126,7 +126,7 @@ const peopleDirectory = [
   },
   {
     id: "renee-yang",
-    name: "Renee Yang",
+    full_name: "Renee Yang",
     email: "renee.yang@btic.co",
     team: "logistics",
     accessRole: "attendee",
@@ -136,7 +136,7 @@ const peopleDirectory = [
   },
   {
     id: "samir-holt",
-    name: "Samir Holt",
+    full_name: "Samir Holt",
     email: "samir.holt@btic.co",
     team: "logistics",
     accessRole: "staff",
@@ -147,7 +147,7 @@ const peopleDirectory = [
   },
   {
     id: "ivy-lam",
-    name: "Ivy Lam",
+    full_name: "Ivy Lam",
     email: "ivy.lam@btic.co",
     team: "hospitality",
     accessRole: "attendee",
@@ -157,7 +157,7 @@ const peopleDirectory = [
   },
   {
     id: "ethan-brooks",
-    name: "Ethan Brooks",
+    full_name: "Ethan Brooks",
     email: "ethan.brooks@btic.co",
     team: "operations",
     accessRole: "staff",
@@ -168,7 +168,7 @@ const peopleDirectory = [
   },
   {
     id: "noor-kamal",
-    name: "Noor Kamal",
+    full_name: "Noor Kamal",
     email: "noor.kamal@btic.co",
     team: "programming",
     accessRole: "attendee",

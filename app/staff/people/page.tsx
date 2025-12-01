@@ -32,7 +32,7 @@ type TeamId = (typeof teams)[number]["id"];
 type StaffTypeId = (typeof staffTypes)[number]["id"];
 type IndividualRole = "staff" | "admin" | "attendee";
 type IndividualFormState = {
-  fullName: string;
+  full_name: string;
   email: string;
   phone: string;
   role: IndividualRole;
@@ -139,7 +139,7 @@ export default function StaffPeoplePage() {
   const [modalRole, setModalRole] = useState<AccessRole>("attendee");
   const [modalStaffType, setModalStaffType] = useState<StaffTypeId>(staffTypes[0].id);
   const [individualForm, setIndividualForm] = useState<IndividualFormState>({
-    fullName: "",
+    full_name: "",
     email: "",
     phone: "",
     role: "staff",
@@ -185,7 +185,7 @@ export default function StaffPeoplePage() {
         return false;
       }
       if (normalizedSearch.length > 0) {
-        const haystack = `${person.name} ${person.email}`.toLowerCase();
+        const haystack = `${person.full_name} ${person.email}`.toLowerCase();
         if (!haystack.includes(normalizedSearch)) {
           return false;
         }
@@ -227,7 +227,7 @@ export default function StaffPeoplePage() {
     }
 
     const errors: string[] = [];
-    if (!individualForm.fullName.trim()) {
+    if (!individualForm.full_name.trim()) {
       errors.push("Full name is required.");
     }
     const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
@@ -432,8 +432,8 @@ function UploadSection({
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Full name</Label>
                 <Input
-                  value={individualForm.fullName}
-                  onChange={(event) => onIndividualFormChange("fullName", event.target.value)}
+                  value={individualForm.full_name}
+                  onChange={(event) => onIndividualFormChange("full_name", event.target.value)}
                   placeholder="Jane Doe"
                   className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
                 />
@@ -632,7 +632,7 @@ function RosterTable({ pagedRoster, onManage }: RosterTableProps) {
           return (
             <TableRow key={person.id} className="border border-slate-800/60">
               <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
-                <p className="font-semibold text-white">{person.name}</p>
+                <p className="font-semibold text-white">{person.full_name}</p>
               </TableCell>
               <TableCell className="border border-slate-800/60 p-3">
                 <p className="text-sm font-medium text-white">{person.email}</p>
@@ -795,7 +795,7 @@ function ExportSection({
                           .filter((person) => person.team === team)
                           .map((person) => (
                             <SelectItem key={person.id} value={person.id}>
-                              {person.name}
+                              {person.full_name}
                             </SelectItem>
                           ))}
                       </SelectContent>
@@ -847,7 +847,7 @@ function AccessDialog({
         {activePerson ? (
           <>
             <DialogHeader className="gap-3">
-              <DialogTitle className="text-2xl text-white">{activePerson.name}</DialogTitle>
+              <DialogTitle className="text-2xl text-white">{activePerson.full_name}</DialogTitle>
               <DialogDescription className="text-slate-400">{activePerson.email}</DialogDescription>
             </DialogHeader>
             <div className="space-y-5">
