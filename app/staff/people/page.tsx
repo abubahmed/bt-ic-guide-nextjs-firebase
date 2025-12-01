@@ -1,24 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ShieldBan, UploadCloud, UserMinus2, Users2 } from "lucide-react";
+import { UploadCloud } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { teams, staffTypes, peopleDirectory, statusStyles, accessStyles } from "@/app/staff/people/data";
+
+import { teams, peopleDirectory } from "@/app/staff/people/data";
 
 import StaffFooter from "../components/footer";
 import StaffHeader from "../components/header";
@@ -26,23 +18,16 @@ import StaffHeader from "../components/header";
 type UploadScope = "master" | "team" | "person";
 type ExportScope = "all" | "team" | "person";
 type ExportFormat = "csv" | "xlsx";
-type AccessRole = "staff" | "attendee";
-type PersonStatus = "active" | "invited" | "revoked";
 type TeamId = (typeof teams)[number]["id"];
-type StaffTypeId = (typeof staffTypes)[number]["id"];
-type IndividualRole = "staff" | "admin" | "attendee";
+type PersonRecord = (typeof peopleDirectory)[number];
+type PersonRole = PersonRecord["role"];
+type IndividualRole = Exclude<PersonRole, "admin">;
 type IndividualFormState = {
   fullName: string;
   email: string;
   phone: string;
   role: IndividualRole;
-  subteam: string;
-  grade: string;
-  company: string;
-  school: string;
-};
-type PersonRecord = (typeof peopleDirectory)[number] & {
-  staffType?: StaffTypeId;
+  subteam: TeamId | "";
 };
 
 const teamLookup = teams.reduce<Record<TeamId, string>>((acc, team) => {
@@ -51,10 +36,11 @@ const teamLookup = teams.reduce<Record<TeamId, string>>((acc, team) => {
 }, {} as Record<TeamId, string>);
 
 const DEFAULT_TEAM: TeamId = teams[0].id;
-const DEFAULT_PERSON = peopleDirectory.find((person) => person.team === DEFAULT_TEAM)?.id ?? peopleDirectory[0].id;
+const DEFAULT_PERSON_EMAIL =
+  peopleDirectory.find((person) => person.subteam === DEFAULT_TEAM)?.email ?? peopleDirectory[0].email;
 const PAGE_SIZE = 10;
-const INDIVIDUAL_ROLE_OPTIONS: IndividualRole[] = ["staff", "admin", "attendee"];
-const GRADE_OPTIONS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"];
+const INDIVIDUAL_ROLE_OPTIONS: IndividualRole[] = ["staff", "attendee"];
+const ROLE_FILTER_OPTIONS: PersonRole[] = ["staff", "attendee", "admin"];
 
 type UploadSectionProps = {
   scope: UploadScope;
@@ -72,18 +58,15 @@ type UploadSectionProps = {
 
 type RosterFiltersProps = {
   teamFilter: "all" | TeamId;
-  accessFilter: "all" | AccessRole;
-  statusFilter: "all" | PersonStatus;
+  roleFilter: "all" | PersonRole;
   searchQuery: string;
   onTeamChange: (value: "all" | TeamId) => void;
-  onAccessChange: (value: "all" | AccessRole) => void;
-  onStatusChange: (value: "all" | PersonStatus) => void;
+  onRoleChange: (value: "all" | PersonRole) => void;
   onSearchChange: (value: string) => void;
 };
 
 type RosterTableProps = {
   pagedRoster: PersonRecord[];
-  onManage: (personId: string) => void;
 };
 
 type PaginationControlsProps = {
@@ -103,96 +86,61 @@ type ExportSectionProps = {
   onScopeChange: (scope: ExportScope) => void;
   team: TeamId;
   onTeamChange: (team: TeamId) => void;
-  personId: string;
-  onPersonChange: (personId: string) => void;
+  personEmail: string;
+  onPersonChange: (personEmail: string) => void;
   format: ExportFormat;
   onFormatChange: (format: ExportFormat) => void;
   onGenerate: () => void;
-};
-
-type AccessDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  activePerson: PersonRecord | null;
-  modalRole: AccessRole;
-  onRoleChange: (role: AccessRole) => void;
-  modalStaffType: StaffTypeId;
-  onStaffTypeChange: (staffType: StaffTypeId) => void;
-  onRevoke: () => void;
-  onApply: () => void;
 };
 
 export default function StaffPeoplePage() {
   const [uploadScope, setUploadScope] = useState<UploadScope>("master");
   const [uploadTeam, setUploadTeam] = useState<TeamId>(DEFAULT_TEAM);
   const [teamFilter, setTeamFilter] = useState<"all" | TeamId>("all");
-  const [accessFilter, setAccessFilter] = useState<"all" | AccessRole>("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | PersonStatus>("all");
+  const [roleFilter, setRoleFilter] = useState<"all" | PersonRole>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [gridPage, setGridPage] = useState(0);
   const [exportScope, setExportScope] = useState<ExportScope>("all");
   const [exportTeam, setExportTeam] = useState<TeamId>(DEFAULT_TEAM);
-  const [exportPerson, setExportPerson] = useState<string>(DEFAULT_PERSON);
+  const [exportPersonEmail, setExportPersonEmail] = useState<string>(DEFAULT_PERSON_EMAIL);
   const [exportFormat, setExportFormat] = useState<ExportFormat>("csv");
-  const [accessDialogOpen, setAccessDialogOpen] = useState(false);
-  const [activePersonId, setActivePersonId] = useState<string | null>(null);
-  const [modalRole, setModalRole] = useState<AccessRole>("attendee");
-  const [modalStaffType, setModalStaffType] = useState<StaffTypeId>(staffTypes[0].id);
   const [individualForm, setIndividualForm] = useState<IndividualFormState>({
     fullName: "",
     email: "",
     phone: "",
     role: "staff",
-    subteam: "",
-    grade: GRADE_OPTIONS[0],
-    company: "",
-    school: "",
+    subteam: DEFAULT_TEAM,
   });
 
-  const activePerson = useMemo(
-    () => peopleDirectory.find((person) => person.id === activePersonId) ?? null,
-    [activePersonId]
-  );
-
   useEffect(() => {
-    if (activePerson) {
-      setModalRole(activePerson.accessRole);
-      setModalStaffType(activePerson.staffType ?? staffTypes[0].id);
+    const scopedPeople = peopleDirectory.filter((person) => person.subteam === exportTeam);
+    if (!scopedPeople.some((person) => person.email === exportPersonEmail)) {
+      setExportPersonEmail(scopedPeople[0]?.email ?? peopleDirectory[0].email);
     }
-  }, [activePerson]);
-
-  useEffect(() => {
-    const scopedPeople = peopleDirectory.filter((person) => person.team === exportTeam);
-    if (!scopedPeople.some((person) => person.id === exportPerson)) {
-      setExportPerson(scopedPeople[0]?.id ?? "");
-    }
-  }, [exportTeam, exportPerson]);
+  }, [exportTeam, exportPersonEmail]);
 
   useEffect(() => {
     setGridPage(0);
-  }, [teamFilter, accessFilter, statusFilter, searchQuery]);
+  }, [teamFilter, roleFilter, searchQuery]);
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
     return peopleDirectory.filter((person) => {
-      if (teamFilter !== "all" && person.team !== teamFilter) {
+      if (teamFilter !== "all" && person.subteam !== teamFilter) {
         return false;
       }
-      if (accessFilter !== "all" && person.accessRole !== accessFilter) {
-        return false;
-      }
-      if (statusFilter !== "all" && person.status !== statusFilter) {
+      if (roleFilter !== "all" && person.role !== roleFilter) {
         return false;
       }
       if (normalizedSearch.length > 0) {
-        const haystack = `${person.name} ${person.email}`.toLowerCase();
+        const haystack = `${person.full_name} ${person.email}`.toLowerCase();
         if (!haystack.includes(normalizedSearch)) {
           return false;
         }
       }
       return true;
     });
-  }, [teamFilter, accessFilter, statusFilter, searchQuery]);
+  }, [teamFilter, roleFilter, searchQuery]);
 
   useEffect(() => {
     const maxPageIndex = Math.max(0, Math.ceil(filteredRoster.length / PAGE_SIZE) - 1);
@@ -204,20 +152,18 @@ export default function StaffPeoplePage() {
   const pageStart = filteredRoster.length === 0 ? 0 : gridPage * PAGE_SIZE + 1;
   const pageEnd = Math.min(filteredRoster.length, (gridPage + 1) * PAGE_SIZE);
 
-  const handleOpenDialog = (personId: string) => {
-    setActivePersonId(personId);
-    setAccessDialogOpen(true);
-  };
-
-  const handleDialogChange = (open: boolean) => {
-    setAccessDialogOpen(open);
-    if (!open) {
-      setActivePersonId(null);
-    }
-  };
-
   const handleIndividualFormChange = <K extends keyof IndividualFormState>(field: K, value: IndividualFormState[K]) => {
-    setIndividualForm((prev) => ({ ...prev, [field]: value }));
+    setIndividualForm((prev) => {
+      if (field === "role") {
+        const nextRole = value as IndividualRole;
+        return {
+          ...prev,
+          role: nextRole,
+          subteam: nextRole === "staff" ? (prev.subteam || DEFAULT_TEAM) : "",
+        };
+      }
+      return { ...prev, [field]: value };
+    });
   };
 
   const handleRunValidations = () => {
@@ -237,17 +183,11 @@ export default function StaffPeoplePage() {
     if (!individualForm.phone.trim()) {
       errors.push("Phone number is required.");
     }
-    if (!individualForm.grade.trim()) {
-      errors.push("Grade selection is required.");
-    }
-    if (!individualForm.company.trim()) {
-      errors.push("Company is required.");
-    }
-    if (!individualForm.school.trim()) {
-      errors.push("School is required.");
-    }
-    if (individualForm.role === "staff" && !individualForm.subteam.trim()) {
+    if (individualForm.role === "staff" && !individualForm.subteam) {
       errors.push("Subteam is required for staff roles.");
+    }
+    if (individualForm.role === "admin") {
+      errors.push("Admin role assignments are not allowed via this form.");
     }
 
     if (errors.length > 0) {
@@ -271,10 +211,6 @@ export default function StaffPeoplePage() {
 
   const handleGenerateExport = () => {};
 
-  const handleRevokeAccess = () => {};
-
-  const handleApplyUpdates = () => {};
-
   return (
     <>
       <main className="min-h-dvh bg-slate-950 text-slate-100">
@@ -296,24 +232,22 @@ export default function StaffPeoplePage() {
               <div>
                 <h2 className="text-3xl font-semibold text-white">People viewer</h2>
                 <p className="mt-2 text-base text-slate-400">
-                  Review or manage people data for all teams. Filter by team, role, or status to find specific people.
+                  Review or manage people data for all teams. Filter by subteam or role to find specific people.
                 </p>
               </div>
             </div>
             <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
               <RosterFilters
                 teamFilter={teamFilter}
-                accessFilter={accessFilter}
-                statusFilter={statusFilter}
+                roleFilter={roleFilter}
                 searchQuery={searchQuery}
                 onTeamChange={setTeamFilter}
-                onAccessChange={setAccessFilter}
-                onStatusChange={setStatusFilter}
+                onRoleChange={setRoleFilter}
                 onSearchChange={setSearchQuery}
               />
               <div className="mt-4">
                 {pagedRoster.length > 0 ? (
-                  <RosterTable pagedRoster={pagedRoster} onManage={handleOpenDialog} />
+                  <RosterTable pagedRoster={pagedRoster} />
                 ) : (
                   <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
                     No people match the applied filters.
@@ -339,8 +273,8 @@ export default function StaffPeoplePage() {
             onScopeChange={setExportScope}
             team={exportTeam}
             onTeamChange={setExportTeam}
-            personId={exportPerson}
-            onPersonChange={setExportPerson}
+            personEmail={exportPersonEmail}
+            onPersonChange={setExportPersonEmail}
             format={exportFormat}
             onFormatChange={setExportFormat}
             onGenerate={handleGenerateExport}
@@ -349,17 +283,6 @@ export default function StaffPeoplePage() {
         <StaffFooter />
       </main>
 
-      <AccessDialog
-        open={accessDialogOpen}
-        onOpenChange={handleDialogChange}
-        activePerson={activePerson}
-        modalRole={modalRole}
-        onRoleChange={setModalRole}
-        modalStaffType={modalStaffType}
-        onStaffTypeChange={setModalStaffType}
-        onRevoke={handleRevokeAccess}
-        onApply={handleApplyUpdates}
-      />
     </>
   );
 }
@@ -449,7 +372,7 @@ function UploadSection({
                 />
               </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Phone</Label>
                 <Input
@@ -477,53 +400,24 @@ function UploadSection({
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            {individualForm.role === "staff" && (
               <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Grade</Label>
-                <Select value={individualForm.grade} onValueChange={(value) => onIndividualFormChange("grade", value)}>
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                <Select value={individualForm.subteam} onValueChange={(value) => onIndividualFormChange("subteam", value as TeamId)}>
                   <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Select grade" />
+                    <SelectValue placeholder="Select subteam" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {GRADE_OPTIONS.map((grade) => (
-                      <SelectItem key={grade} value={grade}>
-                        {grade}
+                    {teams.map((teamOption) => (
+                      <SelectItem key={teamOption.id} value={teamOption.id}>
+                        {teamOption.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            {individualForm.role === "staff" && (
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
-                <Input
-                  value={individualForm.subteam}
-                  onChange={(event) => onIndividualFormChange("subteam", event.target.value)}
-                  placeholder="Ops, Hospitality..."
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
-              </div>
             )}
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Company</Label>
-                <Input
-                  value={individualForm.company}
-                  onChange={(event) => onIndividualFormChange("company", event.target.value)}
-                  placeholder="Company name"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">School</Label>
-                <Input
-                  value={individualForm.school}
-                  onChange={(event) => onIndividualFormChange("school", event.target.value)}
-                  placeholder="School name"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
-              </div>
-            </div>
           </div>
         ) : (
           <label
@@ -556,22 +450,20 @@ function UploadSection({
 
 function RosterFilters({
   teamFilter,
-  accessFilter,
-  statusFilter,
+  roleFilter,
   searchQuery,
   onTeamChange,
-  onAccessChange,
-  onStatusChange,
+  onRoleChange,
   onSearchChange,
 }: RosterFiltersProps) {
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
       <Select value={teamFilter} onValueChange={(value) => onTeamChange(value as "all" | TeamId)}>
         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-          <SelectValue placeholder="Team filter" />
+          <SelectValue placeholder="Subteam filter" />
         </SelectTrigger>
         <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-          <SelectItem value="all">All teams</SelectItem>
+          <SelectItem value="all">All subteams</SelectItem>
           {teams.map((team) => (
             <SelectItem key={team.id} value={team.id}>
               {team.label}
@@ -579,25 +471,17 @@ function RosterFilters({
           ))}
         </SelectContent>
       </Select>
-      <Select value={accessFilter} onValueChange={(value) => onAccessChange(value as "all" | AccessRole)}>
+      <Select value={roleFilter} onValueChange={(value) => onRoleChange(value as "all" | PersonRole)}>
         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-          <SelectValue placeholder="Access filter" />
+          <SelectValue placeholder="Role filter" />
         </SelectTrigger>
         <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
           <SelectItem value="all">Staff + Attendees</SelectItem>
-          <SelectItem value="staff">Staff</SelectItem>
-          <SelectItem value="attendee">Attendees</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select value={statusFilter} onValueChange={(value) => onStatusChange(value as "all" | PersonStatus)}>
-        <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-          <SelectValue placeholder="Status filter" />
-        </SelectTrigger>
-        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-          <SelectItem value="all">All statuses</SelectItem>
-          <SelectItem value="active">Active</SelectItem>
-          <SelectItem value="invited">Invited</SelectItem>
-          <SelectItem value="revoked">Revoked</SelectItem>
+          {ROLE_FILTER_OPTIONS.map((role) => (
+            <SelectItem key={role} value={role}>
+              {role.charAt(0).toUpperCase() + role.slice(1)}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
       <Input
@@ -610,7 +494,7 @@ function RosterFilters({
   );
 }
 
-function RosterTable({ pagedRoster, onManage }: RosterTableProps) {
+function RosterTable({ pagedRoster }: RosterTableProps) {
   return (
     <Table className="border-collapse text-sm text-slate-200 [&_td]:align-top">
       <TableHeader>
@@ -619,53 +503,33 @@ function RosterTable({ pagedRoster, onManage }: RosterTableProps) {
             Person
           </TableHead>
           <TableHead className="border border-slate-800/60 text-slate-400">Email</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Team</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Access</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Status</TableHead>
-          <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
+          <TableHead className="border border-slate-800/60 text-slate-400">Phone</TableHead>
+          <TableHead className="border border-slate-800/60 text-slate-400">Role</TableHead>
+          <TableHead className="border border-slate-800/60 text-slate-400">Subteam</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {pagedRoster.map((person) => {
-          const statusStyle = statusStyles[person.status];
-          const accessStyle = accessStyles[person.accessRole];
-          return (
-            <TableRow key={person.id} className="border border-slate-800/60">
-              <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
-                <p className="font-semibold text-white">{person.name}</p>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <p className="text-sm font-medium text-white">{person.email}</p>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <p className="text-sm font-medium text-white">{teamLookup[person.team]}</p>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <div className="flex flex-wrap gap-2">
-                  <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyle.badge}`}>
-                    {accessStyle.label}
-                  </Badge>
-                </div>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <div className="space-y-1">
-                  <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyle.badge}`}>
-                    {statusStyle.label}
-                  </Badge>
-                </div>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3 text-right">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60"
-                  onClick={() => onManage(person.id)}>
-                  Manage
-                </Button>
-              </TableCell>
-            </TableRow>
-          );
-        })}
+        {pagedRoster.map((person) => (
+          <TableRow key={person.email} className="border border-slate-800/60">
+            <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
+              <p className="font-semibold text-white">{person.full_name}</p>
+            </TableCell>
+            <TableCell className="border border-slate-800/60 p-3">
+              <p className="text-sm font-medium text-white">{person.email}</p>
+            </TableCell>
+            <TableCell className="border border-slate-800/60 p-3">
+              <p className="text-sm font-medium text-white">{person.phone}</p>
+            </TableCell>
+            <TableCell className="border border-slate-800/60 p-3 capitalize">
+              {person.role}
+            </TableCell>
+            <TableCell className="border border-slate-800/60 p-3">
+              <p className="text-sm font-medium text-white">
+                {person.subteam ? teamLookup[person.subteam] : "—"}
+              </p>
+            </TableCell>
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );
@@ -715,7 +579,7 @@ function ExportSection({
   onScopeChange,
   team,
   onTeamChange,
-  personId,
+  personEmail,
   onPersonChange,
   format,
   onFormatChange,
@@ -786,16 +650,16 @@ function ExportSection({
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Person</Label>
-                    <Select value={personId} onValueChange={onPersonChange}>
+                    <Select value={personEmail} onValueChange={onPersonChange}>
                       <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                         <SelectValue placeholder="Person" />
                       </SelectTrigger>
                       <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
                         {peopleDirectory
-                          .filter((person) => person.team === team)
+                          .filter((person) => person.subteam === team)
                           .map((person) => (
-                            <SelectItem key={person.id} value={person.id}>
-                              {person.name}
+                            <SelectItem key={person.email} value={person.email}>
+                              {person.full_name}
                             </SelectItem>
                           ))}
                       </SelectContent>
@@ -830,98 +694,3 @@ function ExportSection({
   );
 }
 
-function AccessDialog({
-  open,
-  onOpenChange,
-  activePerson,
-  modalRole,
-  onRoleChange,
-  modalStaffType,
-  onStaffTypeChange,
-  onRevoke,
-  onApply,
-}: AccessDialogProps) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-slate-800 bg-slate-950 text-slate-100">
-        {activePerson ? (
-          <>
-            <DialogHeader className="gap-3">
-              <DialogTitle className="text-2xl text-white">{activePerson.name}</DialogTitle>
-              <DialogDescription className="text-slate-400">{activePerson.email}</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role type</Label>
-                <Tabs value={modalRole} onValueChange={(value) => onRoleChange(value as AccessRole)}>
-                  <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-900/60">
-                    <TabsTrigger
-                      value="staff"
-                      className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                      Staff
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="attendee"
-                      className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                      Attendee
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-              {modalRole === "staff" && (
-                <div className="space-y-2">
-                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Staff type</Label>
-                  <Select value={modalStaffType} onValueChange={(value) => onStaffTypeChange(value as StaffTypeId)}>
-                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                      <SelectValue placeholder="Select staff type" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                      {staffTypes.map((staffType) => (
-                        <SelectItem key={staffType.id} value={staffType.id}>
-                          {staffType.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-4">
-                <p className="text-sm font-semibold text-white">Current status</p>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyles[activePerson.status].badge}`}>
-                    {statusStyles[activePerson.status].label}
-                  </Badge>
-                  <Badge
-                    className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyles[activePerson.accessRole].badge}`}>
-                    {accessStyles[activePerson.accessRole].label}
-                  </Badge>
-                </div>
-                <p className="mt-3 text-xs text-slate-400">{statusStyles[activePerson.status].copy}</p>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                className="flex-1 rounded-xl border-rose-500/50 bg-rose-500/10 text-sm font-semibold text-rose-200 hover:border-rose-400 hover:bg-rose-500/20"
-                onClick={onRevoke}>
-                <ShieldBan className="mr-2 h-4 w-4" />
-                Revoke access
-              </Button>
-              <Button
-                className="flex-1 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
-                onClick={onApply}>
-                <UserMinus2 className="mr-2 h-4 w-4" />
-                Apply updates
-              </Button>
-            </DialogFooter>
-          </>
-        ) : (
-          <div className="space-y-4 text-center">
-            <Users2 className="mx-auto h-10 w-10 text-slate-500" />
-            <p className="text-sm text-slate-400">Select a person from the roster to manage their access.</p>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
