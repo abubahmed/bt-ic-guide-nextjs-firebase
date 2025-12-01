@@ -7,6 +7,7 @@ import {
   ClipboardList,
   ShieldCheck,
   Map,
+  User,
 } from "lucide-react";
 
 const stats = [
@@ -39,59 +40,60 @@ const stats = [
 const quickActions = [
   {
     slug: "schedules",
-    label: "Manage personal schedules",
+    label: "Personal schedules",
     icon: CalendarClock,
     href: "/staff/schedules",
-    description: "View and manage personal schedules for attendees and staff",
+    description: "View and manage personal schedules.",
   },
   {
     slug: "announcements",
-    label: "Manage announcements",
+    label: "Announcements",
     icon: Megaphone,
     href: "/staff/announcements",
-    description: "View, delete, and create announcements with visibility control",
+    description: "View, delete, and create announcements.",
   },
   {
     slug: "help",
-    label: "Open help desk queue",
+    label: "Help desk queue",
     icon: LifeBuoy,
     href: "/staff/help",
-    description: "View and respond to help requests from attendees and staff",
+    description: "View and respond to help requests.",
   },
   {
     slug: "rooms",
-    label: "Manage room assignments",
+    label: "Room assignments",
     icon: QrCode,
     href: "/staff/rooms",
-    description: "View and distribute room assignments for attendees and staff",
+    description:
+      "View and distribute room assignments.",
   },
   {
-    slug: "qrcodes",
-    label: "Manage QR codes",
+    slug: "qr-codes",
+    label: "QR codes",
     icon: QrCode,
     href: "/staff/qrcodes",
-    description: "View and upload digital QR codes for attendees and staff",
+    description: "View and upload digital QR codes.",
   },
   {
     slug: "resources",
-    label: "Manage resource library",
+    label: "Resource library",
     icon: ClipboardList,
     href: "/staff/resources",
-    description: "View, upload, and delete resources for attendees and staff",
+    description: "View, upload, and delete resources.",
   },
   {
     slug: "roles",
-    label: "Manage people & access",
+    label: "People & access",
     icon: ShieldCheck,
     href: "/staff/people",
-    description: "View and manage people, roles, and access",
+    description: "View and manage people, roles, and access.",
   },
   {
-    slug: "map",
-    label: "Manage map",
-    icon: Map,
-    href: "/staff/map",
-    description: "View and manage the official conference map",
+    slug: "attentee ui",
+    label: "Attendee interface",
+    icon: User,
+    href: "/staff/attentee-ui",
+    description: "Interact with the attendee interface.",
   },
 ];
 

@@ -10,21 +10,25 @@ interface QuickAction {
 
 export default function QuickActionButton({ action }: { action: QuickAction }) {
   const Icon = action.icon;
+
   return (
-    <Link
-      key={action.label}
-      href={action.href}
-      aria-label={action.label}
-      target="_blank"
-      className="group flex min-h-[120px] items-center gap-4 rounded-3xl border border-slate-800/60 bg-slate-900/40 p-5 text-left transition hover:-translate-y-0.5 hover:border-sky-500/50 hover:bg-slate-900/80">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/60 text-sky-400">
-        <Icon className="h-5 w-5" />
-      </span>
+    <article className="flex items-center gap-6 border border-slate-800/50 bg-slate-950/30 p-6 h-full">
       <div className="flex-1">
-        <p className="text-sm font-medium text-white">{action.label}</p>
-        <p className="text-sm mt-2 text-slate-400">{action.description}</p>
+        <p className="text-sm mb-1 font-medium text-white">{action.label}</p>
+        <p className="text-sm text-slate-400">{action.description}</p>
       </div>
-      <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:text-sky-400" />
-    </Link>
+      <div>
+        <span className="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-slate-200 ring-1 ring-slate-800">
+          <Icon className="h-4 w-4" />
+        </span>
+        <Link
+          href={action.href}
+          aria-label={`Open ${action.label}`}
+          target="_blank"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800/60 text-slate-300 transition-colors hover:border-slate-600 hover:text-white focus-visible:border-slate-600 focus-visible:text-white">
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </article>
   );
 }
