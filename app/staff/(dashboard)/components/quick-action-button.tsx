@@ -6,38 +6,42 @@ interface QuickAction {
   href: string;
   icon: React.ElementType;
   description: string;
+  slug: string;
 }
 
 export default function QuickActionButton({ action }: { action: QuickAction }) {
   const Icon = action.icon;
 
   return (
-    <div className="flex h-full min-h-[180px] flex-col justify-between rounded-2xl border border-slate-800/50 bg-slate-900/30 p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800/60 text-sky-200 ring-1 ring-slate-700/60">
-          <Icon className="h-5 w-5" />
+    <article className="flex h-full flex-col rounded-[26px] border border-slate-800/70 bg-slate-950/30 p-6 shadow-[0_20px_55px_rgba(2,6,23,0.4)]">
+      <div className="flex items-center justify-between text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-slate-500">
+        <span className="rounded-full border border-slate-800/70 bg-slate-900/40 px-3 py-1 text-[0.55rem] tracking-[0.35em] text-slate-300">
+          {action.slug}
         </span>
-        <span className="rounded-full border border-slate-800/60 bg-slate-900/50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-400">
-          Quick action
-        </span>
+        <span className="text-slate-600">Quick access</span>
       </div>
 
-      <div className="mt-6 flex-1">
-        <p className="text-base font-semibold text-white">{action.label}</p>
-        <p className="mt-2 text-sm leading-relaxed text-slate-400">{action.description}</p>
+      <div className="mt-5 flex gap-4">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 text-sky-200 ring-1 ring-slate-700/70">
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="space-y-2">
+          <p className="text-base font-semibold text-white">{action.label}</p>
+          <p className="text-sm leading-relaxed text-slate-400">{action.description}</p>
+        </div>
       </div>
 
       <Link
         href={action.href}
         aria-label={`Open ${action.label}`}
         target="_blank"
-        className="mt-6 flex items-center justify-between rounded-2xl border border-transparent p-1 text-sm font-medium text-slate-300 transition-colors hover:border-slate-700 hover:bg-slate-900/40 hover:text-white focus-visible:border-slate-600 focus-visible:bg-slate-900/40 focus-visible:text-white"
+        className="mt-6 inline-flex items-center justify-between rounded-2xl border border-slate-800/70 bg-slate-950/40 px-4 py-3 text-sm font-medium text-slate-200 transition-colors hover:border-sky-500/40 hover:text-white focus-visible:border-sky-500/60 focus-visible:text-white"
       >
-        <div className="pl-1">Launch workspace</div>
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-800/60 bg-slate-900/60 text-inherit transition-colors">
+        <span>Open workspace</span>
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900/70 text-inherit">
           <ArrowUpRight className="h-5 w-5" />
-        </div>
+        </span>
       </Link>
-    </div>
+    </article>
   );
 }

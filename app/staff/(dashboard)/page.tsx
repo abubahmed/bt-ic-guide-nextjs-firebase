@@ -25,12 +25,28 @@ export default function StaffDashboardPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 md:grid-cols-2 md:justify-items-center">
-          {quickActions.map((action) => (
-            <div key={action.label} className="w-full">
-              <QuickActionButton action={action} />
+        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-semibold text-white">Quick workspaces</h2>
+              <p className="text-base text-slate-400">
+                Jump straight into the tools your team uses most throughout the day.
+              </p>
             </div>
-          ))}
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
+              {quickActions.length} shortcuts
+            </p>
+          </div>
+
+          <div className="mt-6 rounded-[28px] border border-slate-800/70 bg-slate-950/40 p-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              {quickActions.map((action) => (
+                <div key={action.label} className="w-full">
+                  <QuickActionButton action={action} />
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
       </div>
       <StaffFooter />
