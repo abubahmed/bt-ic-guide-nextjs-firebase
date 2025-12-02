@@ -16,9 +16,14 @@ Get session user from session cookie.
 @returns { User | null }
 */
 export async function getSessionUser() {
-  const sessionCookie = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
-  if (!sessionCookie) return null;
-  const decoded = await auth.verifySessionCookie(sessionCookie, true);
-  const user = await auth.getUser(decoded.uid);
-  return JSON.parse(JSON.stringify(user));
+  try {
+    const sessionCookie = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
+    if (!sessionCookie) return null;
+    const decoded = await auth.verifySessionCookie(sessionCookie, true);
+    const user = await auth.getUser(decoded.uid);
+    return JSON.parse(JSON.stringify(user));
+  } catch (error) {
+    console.error("Error verifying session cookie in getSessionUser:", error);
+    return null;
+  }
 }

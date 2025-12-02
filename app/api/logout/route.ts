@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
+import { ROLE_COOKIE_NAME, SESSION_COOKIE_NAME } from "@/constants";
+import { getSessionUser } from "@/actions/session-actions";
 import { auth } from "@/lib/firebase/server/config";
-import { cookies } from "next/headers";
-import { SESSION_COOKIE_NAME } from "@/constants";
 
 export async function POST() {
-  const session = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
-  if (session) {
-    try {
-      const decoded = await auth.verifySessionCookie(session, false);
-      await auth.revokeRefreshTokens(decoded.sub as string);
-    } catch (error) {
-      console.error("Error verifying or revoking session cookie:", error);
-    }
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    await auth.revokeRefreshTokens(sessionUser.uid);
+  } catch (error) {
+    console.error("Error revoking refresh tokens in logout route:", error);
+    return NextResponse.json({ error: "Failed to logout" }, { status: 500 });
   }
 
   const res = NextResponse.json({ ok: true });
@@ -20,9 +22,19 @@ export async function POST() {
     value: "",
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: 0,
   });
-  return res;
+
+  res.cookies.set({
+    name: ROLE_COOKIE_NAME,
+    value: "",
+    httpOnly: false,
+    secure: true,
+    sameSite: "strict",
+    path: "/",
+    maxAge: 0,
+  });
+  return res
 }

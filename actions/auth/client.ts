@@ -13,7 +13,7 @@ import {
   signOut,
   sendEmailVerification,
 } from "@/lib/firebase/client/auth";
-import { STAFF_HOME_ROUTE, ATTENDEE_HOME_ROUTE } from "@/route-config";
+import { STAFF_HOME_ROUTE, ATTENDEE_HOME_ROUTE, ATTENDEE_LOGIN_ROUTE } from "@/route-config";
 import { getSessionUser } from "@/actions/session-actions";
 import { signInWithGoogleActionServer, signInWithEmailActionServer } from "@/actions/auth/server";
 
@@ -142,7 +142,7 @@ export const signInWithEmailActionClient = async (
 };
 
 /*
-Perform sign out flow on client and server side. Signs out and redirects to root page.
+Perform sign out flow on client and server side. Signs out and redirects to login page.
 
 @param router: any
 @returns { void }
@@ -151,7 +151,7 @@ export const signOutActionClient = async (router: any) => {
   try {
     await fetch("/api/logout", { method: "POST", credentials: "include" });
     await signOut();
-    router.push(STAFF_HOME_ROUTE);
+    router.push(ATTENDEE_LOGIN_ROUTE);
   } catch (error) {
     console.error("Failed to log out in signOutActionClient:", error);
   }

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE_NAME } from "./constants";
+import { SESSION_COOKIE_NAME, ROLE_COOKIE_NAME } from "./constants";
 import {
   PUBLIC_ROUTES,
   STAFF_ROUTE_PREFIX,
@@ -8,37 +8,12 @@ import {
   ATTENDEE_LOGIN_ROUTE,
   STAFF_HOME_ROUTE,
   ATTENDEE_HOME_ROUTE,
-  EXISTING_ROUTES,
 } from "./route-config";
 
-const staffOrAttendee = () => {
-  const values = ["STAFF", "STAFF"];
-  const index = Math.random() < 0.5 ? 0 : 1;
-  return values[index];
-};
-
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const session = request.cookies.get(SESSION_COOKIE_NAME)?.value || "";
-  const sessionRole = session ? staffOrAttendee() : null;
+  const sessionRole = session ? request.cookies.get(ROLE_COOKIE_NAME)?.value : null;
   const currentRoute = request.nextUrl.pathname;
-
-  if (
-    currentRoute.startsWith("/_next") ||
-    currentRoute.startsWith("/static") ||
-    currentRoute.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2)$/)
-  ) {
-    return NextResponse.next();
-  }
-
-  if (!EXISTING_ROUTES.includes(currentRoute)) {
-    if (sessionRole === "STAFF") {
-      return NextResponse.redirect(new URL(STAFF_HOME_ROUTE, request.url));
-    } else if (sessionRole === "ATTENDEE") {
-      return NextResponse.redirect(new URL(ATTENDEE_HOME_ROUTE, request.url));
-    } else {
-      return NextResponse.rewrite(new URL("/404", request.url));
-    }
-  }
 
   if (PUBLIC_ROUTES.includes(currentRoute)) {
     if (sessionRole === "STAFF") {

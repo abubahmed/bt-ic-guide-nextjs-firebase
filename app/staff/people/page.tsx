@@ -208,15 +208,9 @@ const API_LATENCY_MS = 3000;
 
 const simulateNetworkLatency = () => new Promise((resolve) => setTimeout(resolve, API_LATENCY_MS));
 
-async function fetchPeopleDataset(): Promise<{
-  teams: typeof teams;
-  people: PersonRecord[];
-}> {
+async function fetchPeopleDataset() {
   await simulateNetworkLatency();
-  return {
-    teams,
-    people: peopleDirectory as unknown as PersonRecord[],
-  };
+  return peopleDirectory as any;
 }
 
 async function stageMasterUpload(): Promise<void> {
