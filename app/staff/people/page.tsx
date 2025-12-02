@@ -102,10 +102,16 @@ type AccessDialogProps = {
 };
 
 type ColumnVisibility = {
+  person: boolean;
+  email: boolean;
+  subteam: boolean;
+  role: boolean;
   phone: boolean;
   company: boolean;
   school: boolean;
   grade: boolean;
+  status: boolean;
+  actions: boolean;
 };
 
 type ColumnVisibilityControlsProps = {
@@ -113,8 +119,8 @@ type ColumnVisibilityControlsProps = {
   onToggle: (column: keyof ColumnVisibility, checked: boolean) => void;
 };
 
-const OPTIONAL_COLUMN_CONFIGS: Array<{
-  key: keyof ColumnVisibility;
+const TEXT_COLUMN_CONFIGS: Array<{
+  key: "phone" | "company" | "school" | "grade";
   label: string;
   accessor: (person: PersonRecord) => string;
 }> = [
@@ -139,6 +145,32 @@ const OPTIONAL_COLUMN_CONFIGS: Array<{
     accessor: (person) => person.grade ?? "—",
   },
 ];
+
+const COLUMN_CONTROLS: Array<{ key: keyof ColumnVisibility; label: string }> = [
+  { key: "person", label: "Person" },
+  { key: "email", label: "Email" },
+  { key: "subteam", label: "Subteam" },
+  { key: "role", label: "Role" },
+  { key: "phone", label: "Phone" },
+  { key: "company", label: "Company" },
+  { key: "school", label: "School" },
+  { key: "grade", label: "Grade" },
+  { key: "status", label: "Status" },
+  { key: "actions", label: "Actions" },
+];
+
+const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
+  person: true,
+  email: true,
+  subteam: true,
+  role: true,
+  phone: false,
+  company: false,
+  school: false,
+  grade: false,
+  status: true,
+  actions: true,
+};
 
 export default function StaffPeoplePage() {
   return (
@@ -448,12 +480,7 @@ function RosterViewer() {
   const [activePersonId, setActivePersonId] = useState<string | null>(null);
   const [modalRole, setModalRole] = useState<AccessRole>("attendee");
   const [modalSubteam, setModalSubteam] = useState<TeamId>(DEFAULT_TEAM);
-  const [visibleColumns, setVisibleColumns] = useState<ColumnVisibility>({
-    phone: false,
-    company: false,
-    school: false,
-    grade: false,
-  });
+  const [visibleColumns, setVisibleColumns] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
@@ -846,8 +873,8 @@ function RosterFilters({
 function ColumnVisibilityControls({ visibility, onToggle }: ColumnVisibilityControlsProps) {
   return (
     <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-800/60 bg-slate-950/40 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Optional fields</p>
-      {OPTIONAL_COLUMN_CONFIGS.map(({ key, label }) => (
+      <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Visible columns</p>
+      {COLUMN_CONTROLS.map(({ key, label }) => (
         <label key={key} className="flex items-center gap-2 text-sm text-slate-300">
           <Checkbox
             checked={visibility[key]}
@@ -866,13 +893,17 @@ function RosterTable({ pagedRoster, onManage, visibleColumns }: RosterTableProps
     <Table className="border-collapse text-sm text-slate-200 [&_td]:align-top">
       <TableHeader>
         <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-          <TableHead className="min-w-[240px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
-            Person
-          </TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Email</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Subteam</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Role</TableHead>
-          {OPTIONAL_COLUMN_CONFIGS.map(
+          {visibleColumns.person && (
+            <TableHead className="min-w-[240px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
+              Person
+            </TableHead>
+          )}
+          {visibleColumns.email && <TableHead className="border border-slate-800/60 text-slate-400">Email</TableHead>}
+          {visibleColumns.subteam && (
+            <TableHead className="border border-slate-800/60 text-slate-400">Subteam</TableHead>
+          )}
+          {visibleColumns.role && <TableHead className="border border-slate-800/60 text-slate-400">Role</TableHead>}
+          {TEXT_COLUMN_CONFIGS.map(
             ({ key, label }) =>
               visibleColumns[key] && (
                 <TableHead key={key} className="border border-slate-800/60 text-slate-400">
@@ -880,8 +911,10 @@ function RosterTable({ pagedRoster, onManage, visibleColumns }: RosterTableProps
                 </TableHead>
               )
           )}
-          <TableHead className="border border-slate-800/60 text-slate-400">Status</TableHead>
-          <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
+          {visibleColumns.status && <TableHead className="border border-slate-800/60 text-slate-400">Status</TableHead>}
+          {visibleColumns.actions && (
+            <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
+          )}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -891,23 +924,31 @@ function RosterTable({ pagedRoster, onManage, visibleColumns }: RosterTableProps
           const accessStyle = accessStyles[person.accessRole];
           return (
             <TableRow key={person.id} className="border border-slate-800/60">
-              <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
-                <p className="font-semibold text-white">{person.name}</p>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <p className="text-sm font-medium text-white">{person.email}</p>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <p className="text-sm font-medium text-white">{subteamLabel}</p>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <div className="flex flex-wrap gap-2">
-                  <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyle.badge}`}>
-                    {accessStyle.label}
-                  </Badge>
-                </div>
-              </TableCell>
-              {OPTIONAL_COLUMN_CONFIGS.map(
+              {visibleColumns.person && (
+                <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
+                  <p className="font-semibold text-white">{person.name}</p>
+                </TableCell>
+              )}
+              {visibleColumns.email && (
+                <TableCell className="border border-slate-800/60 p-3">
+                  <p className="text-sm font-medium text-white">{person.email}</p>
+                </TableCell>
+              )}
+              {visibleColumns.subteam && (
+                <TableCell className="border border-slate-800/60 p-3">
+                  <p className="text-sm font-medium text-white">{subteamLabel}</p>
+                </TableCell>
+              )}
+              {visibleColumns.role && (
+                <TableCell className="border border-slate-800/60 p-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyle.badge}`}>
+                      {accessStyle.label}
+                    </Badge>
+                  </div>
+                </TableCell>
+              )}
+              {TEXT_COLUMN_CONFIGS.map(
                 ({ key, accessor }) =>
                   visibleColumns[key] && (
                     <TableCell key={`${person.id}-${key}`} className="border border-slate-800/60 p-3">
@@ -915,22 +956,26 @@ function RosterTable({ pagedRoster, onManage, visibleColumns }: RosterTableProps
                     </TableCell>
                   )
               )}
-              <TableCell className="border border-slate-800/60 p-3">
-                <div className="space-y-1">
-                  <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyle.badge}`}>
-                    {statusStyle.label}
-                  </Badge>
-                </div>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3 text-right">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60"
-                  onClick={() => onManage(person.id)}>
-                  Manage
-                </Button>
-              </TableCell>
+              {visibleColumns.status && (
+                <TableCell className="border border-slate-800/60 p-3">
+                  <div className="space-y-1">
+                    <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyle.badge}`}>
+                      {statusStyle.label}
+                    </Badge>
+                  </div>
+                </TableCell>
+              )}
+              {visibleColumns.actions && (
+                <TableCell className="border border-slate-800/60 p-3 text-right">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60"
+                    onClick={() => onManage(person.id)}>
+                    Manage
+                  </Button>
+                </TableCell>
+              )}
             </TableRow>
           );
         })}
