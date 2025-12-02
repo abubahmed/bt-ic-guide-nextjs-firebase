@@ -5,6 +5,7 @@ import { ShieldBan, UploadCloud, UserMinus2, Users2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,31 +19,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { teams, staffTypes, peopleDirectory, statusStyles, accessStyles } from "@/app/staff/people/data";
+import { teams, peopleDirectory, statusStyles, accessStyles } from "@/app/staff/people/data";
 
 import StaffFooter from "../components/footer";
 import StaffHeader from "../components/header";
 
-type UploadScope = "master" | "team" | "person";
-type ExportScope = "all" | "team" | "person";
+type UploadScope = "master" | "group" | "individual";
+type ExportScope = "master" | "group" | "individual";
 type ExportFormat = "csv" | "xlsx";
-type AccessRole = "staff" | "attendee";
+type AccessRole = "admin" | "staff" | "attendee";
 type PersonStatus = "active" | "invited" | "revoked";
 type TeamId = (typeof teams)[number]["id"];
-type StaffTypeId = (typeof staffTypes)[number]["id"];
-type IndividualRole = "staff" | "admin" | "attendee";
+type IndividualRole = AccessRole;
 type IndividualFormState = {
   fullName: string;
   email: string;
   phone: string;
   role: IndividualRole;
-  subteam: string;
+  subteam: TeamId | "";
   grade: string;
   company: string;
   school: string;
 };
 type PersonRecord = (typeof peopleDirectory)[number] & {
-  staffType?: StaffTypeId;
+  staffType?: string;
+  phone?: string;
+  company?: string;
+  school?: string;
+  grade?: string;
 };
 
 const teamLookup = teams.reduce<Record<TeamId, string>>((acc, team) => {
@@ -53,7 +57,7 @@ const teamLookup = teams.reduce<Record<TeamId, string>>((acc, team) => {
 const DEFAULT_TEAM: TeamId = teams[0].id;
 const DEFAULT_PERSON = peopleDirectory.find((person) => person.team === DEFAULT_TEAM)?.id ?? peopleDirectory[0].id;
 const PAGE_SIZE = 10;
-const INDIVIDUAL_ROLE_OPTIONS: IndividualRole[] = ["staff", "admin", "attendee"];
+const ROLE_OPTIONS: AccessRole[] = ["admin", "staff", "attendee"];
 const GRADE_OPTIONS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"];
 
 type RosterFiltersProps = {
@@ -70,6 +74,7 @@ type RosterFiltersProps = {
 type RosterTableProps = {
   pagedRoster: PersonRecord[];
   onManage: (personId: string) => void;
+  visibleColumns: ColumnVisibility;
 };
 
 type PaginationControlsProps = {
@@ -90,10 +95,81 @@ type AccessDialogProps = {
   activePerson: PersonRecord | null;
   modalRole: AccessRole;
   onRoleChange: (role: AccessRole) => void;
-  modalStaffType: StaffTypeId;
-  onStaffTypeChange: (staffType: StaffTypeId) => void;
+  modalSubteam: TeamId;
+  onSubteamChange: (team: TeamId) => void;
   onRevoke: () => void;
   onApply: () => void;
+};
+
+type ColumnVisibility = {
+  person: boolean;
+  email: boolean;
+  subteam: boolean;
+  role: boolean;
+  phone: boolean;
+  company: boolean;
+  school: boolean;
+  grade: boolean;
+  status: boolean;
+  actions: boolean;
+};
+
+type ColumnVisibilityControlsProps = {
+  visibility: ColumnVisibility;
+  onToggle: (column: keyof ColumnVisibility, checked: boolean) => void;
+};
+
+const TEXT_COLUMN_CONFIGS: Array<{
+  key: "phone" | "company" | "school" | "grade";
+  label: string;
+  accessor: (person: PersonRecord) => string;
+}> = [
+  {
+    key: "phone",
+    label: "Phone",
+    accessor: (person) => person.phone ?? "—",
+  },
+  {
+    key: "company",
+    label: "Company",
+    accessor: (person) => person.company ?? "—",
+  },
+  {
+    key: "school",
+    label: "School",
+    accessor: (person) => person.school ?? "—",
+  },
+  {
+    key: "grade",
+    label: "Grade",
+    accessor: (person) => person.grade ?? "—",
+  },
+];
+
+const COLUMN_CONTROLS: Array<{ key: keyof ColumnVisibility; label: string }> = [
+  { key: "person", label: "Person" },
+  { key: "email", label: "Email" },
+  { key: "subteam", label: "Subteam" },
+  { key: "role", label: "Role" },
+  { key: "phone", label: "Phone" },
+  { key: "company", label: "Company" },
+  { key: "school", label: "School" },
+  { key: "grade", label: "Grade" },
+  { key: "status", label: "Status" },
+  { key: "actions", label: "Actions" },
+];
+
+const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
+  person: true,
+  email: true,
+  subteam: true,
+  role: true,
+  phone: false,
+  company: false,
+  school: false,
+  grade: false,
+  status: true,
+  actions: true,
 };
 
 export default function StaffPeoplePage() {
@@ -114,23 +190,77 @@ export default function StaffPeoplePage() {
 
 function UploadPanel() {
   const [scope, setScope] = useState<UploadScope>("master");
-  const [team, setTeam] = useState<TeamId>(DEFAULT_TEAM);
+  const [groupRole, setGroupRole] = useState<AccessRole>("staff");
+  const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
   const [individualForm, setIndividualForm] = useState<IndividualFormState>({
     fullName: "",
     email: "",
     phone: "",
     role: "staff",
-    subteam: "",
+    subteam: DEFAULT_TEAM,
     grade: GRADE_OPTIONS[0],
     company: "",
     school: "",
   });
 
   const handleIndividualFormChange = <K extends keyof IndividualFormState>(field: K, value: IndividualFormState[K]) => {
-    setIndividualForm((prev) => ({ ...prev, [field]: value }));
+    setIndividualForm((prev) => {
+      if (field === "role") {
+        const nextRole = value as IndividualRole;
+        return {
+          ...prev,
+          role: nextRole,
+          subteam: nextRole === "staff" ? prev.subteam || DEFAULT_TEAM : "",
+        };
+      }
+      if (field === "subteam") {
+        return {
+          ...prev,
+          subteam: value as TeamId,
+        };
+      }
+      return { ...prev, [field]: value } as IndividualFormState;
+    });
   };
 
-  const handleRunValidations = () => {};
+  const handleRunValidations = () => {
+    if (scope !== "individual") {
+      console.info(`[Validations] ${scope} scope currently relies on external spreadsheet validation.`);
+      return true;
+    }
+
+    const errors: string[] = [];
+    if (!individualForm.fullName.trim()) {
+      errors.push("Full name is required.");
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(individualForm.email.trim())) {
+      errors.push("A valid email address is required.");
+    }
+    if (!individualForm.phone.trim()) {
+      errors.push("Phone number is required.");
+    }
+    if (!individualForm.grade.trim()) {
+      errors.push("Grade selection is required.");
+    }
+    if (!individualForm.company.trim()) {
+      errors.push("Company is required.");
+    }
+    if (!individualForm.school.trim()) {
+      errors.push("School is required.");
+    }
+    if (individualForm.role === "staff" && !individualForm.subteam) {
+      errors.push("Subteam is required for staff roles.");
+    }
+
+    if (errors.length > 0) {
+      console.warn("Individual upload validation errors:", errors);
+      return false;
+    }
+
+    console.info("Individual upload passed basic validations.");
+    return true;
+  };
 
   const handleStageUpload = () => {};
 
@@ -155,38 +285,55 @@ function UploadPanel() {
                 Master
               </TabsTrigger>
               <TabsTrigger
-                value="team"
+                value="group"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Team
+                Group
               </TabsTrigger>
               <TabsTrigger
-                value="person"
+                value="individual"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                 Individual
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {scope !== "master" && (
+        {scope === "group" && (
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-              <Select value={team} onValueChange={(value) => setTeam(value as TeamId)}>
+              <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
+              <Select value={groupRole} onValueChange={(value) => setGroupRole(value as AccessRole)}>
                 <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                  <SelectValue placeholder="Choose team" />
+                  <SelectValue placeholder="Choose role" />
                 </SelectTrigger>
                 <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                  {teams.map((teamOption) => (
-                    <SelectItem key={teamOption.id} value={teamOption.id}>
-                      {teamOption.label}
+                  {ROLE_OPTIONS.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          )}
-        </div>
-        {scope === "person" ? (
+            {groupRole === "staff" && (
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as TeamId)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Choose subteam" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {teams.map((teamOption) => (
+                      <SelectItem key={teamOption.id} value={teamOption.id}>
+                        {teamOption.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        )}
+        {scope === "individual" ? (
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
@@ -229,7 +376,7 @@ function UploadPanel() {
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {INDIVIDUAL_ROLE_OPTIONS.map((role) => (
+                    {ROLE_OPTIONS.map((role) => (
                       <SelectItem key={role} value={role}>
                         {role.charAt(0).toUpperCase() + role.slice(1)}
                       </SelectItem>
@@ -258,12 +405,20 @@ function UploadPanel() {
             {individualForm.role === "staff" && (
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
-                <Input
+                <Select
                   value={individualForm.subteam}
-                  onChange={(event) => handleIndividualFormChange("subteam", event.target.value)}
-                  placeholder="Ops, Hospitality..."
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
+                  onValueChange={(value) => handleIndividualFormChange("subteam", value as TeamId)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Choose subteam" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {teams.map((teamOption) => (
+                      <SelectItem key={teamOption.id} value={teamOption.id}>
+                        {teamOption.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
             <div className="grid gap-4 md:grid-cols-2">
@@ -326,13 +481,19 @@ function RosterViewer() {
   const [accessDialogOpen, setAccessDialogOpen] = useState(false);
   const [activePersonId, setActivePersonId] = useState<string | null>(null);
   const [modalRole, setModalRole] = useState<AccessRole>("attendee");
-  const [modalStaffType, setModalStaffType] = useState<StaffTypeId>(staffTypes[0].id);
+  const [modalSubteam, setModalSubteam] = useState<TeamId>(DEFAULT_TEAM);
+  const [visibleColumns, setVisibleColumns] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
     return peopleDirectory.filter((person) => {
-      if (teamFilter !== "all" && person.team !== teamFilter) {
-        return false;
+      if (teamFilter !== "all") {
+        if (person.accessRole !== "staff") {
+          return false;
+        }
+        if (person.team !== teamFilter) {
+          return false;
+        }
       }
       if (accessFilter !== "all" && person.accessRole !== accessFilter) {
         return false;
@@ -349,6 +510,12 @@ function RosterViewer() {
       return true;
     });
   }, [teamFilter, accessFilter, statusFilter, searchQuery]);
+
+  useEffect(() => {
+    if (accessFilter !== "staff" && teamFilter !== "all") {
+      setTeamFilter("all");
+    }
+  }, [accessFilter, teamFilter]);
 
   useEffect(() => {
     setGridPage(0);
@@ -372,7 +539,9 @@ function RosterViewer() {
   useEffect(() => {
     if (activePerson) {
       setModalRole(activePerson.accessRole);
-      setModalStaffType(activePerson.staffType ?? staffTypes[0].id);
+      if (activePerson.accessRole === "staff") {
+        setModalSubteam(activePerson.team);
+      }
     }
   }, [activePerson]);
 
@@ -398,6 +567,9 @@ function RosterViewer() {
 
   const handleRevokeAccess = () => {};
   const handleApplyUpdates = () => {};
+  const handleColumnToggle = (column: keyof ColumnVisibility, checked: boolean) => {
+    setVisibleColumns((prev) => ({ ...prev, [column]: checked }));
+  };
 
   return (
     <>
@@ -421,9 +593,10 @@ function RosterViewer() {
             onStatusChange={setStatusFilter}
             onSearchChange={setSearchQuery}
           />
+          <ColumnVisibilityControls visibility={visibleColumns} onToggle={handleColumnToggle} />
           <div className="mt-4">
             {pagedRoster.length > 0 ? (
-              <RosterTable pagedRoster={pagedRoster} onManage={handleOpenDialog} />
+              <RosterTable pagedRoster={pagedRoster} onManage={handleOpenDialog} visibleColumns={visibleColumns} />
             ) : (
               <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
                 No people match the applied filters.
@@ -450,8 +623,8 @@ function RosterViewer() {
         activePerson={activePerson}
         modalRole={modalRole}
         onRoleChange={setModalRole}
-        modalStaffType={modalStaffType}
-        onStaffTypeChange={setModalStaffType}
+        modalSubteam={modalSubteam}
+        onSubteamChange={setModalSubteam}
         onRevoke={handleRevokeAccess}
         onApply={handleApplyUpdates}
       />
@@ -460,17 +633,31 @@ function RosterViewer() {
 }
 
 function ExportPanel() {
-  const [scope, setScope] = useState<ExportScope>("all");
-  const [team, setTeam] = useState<TeamId>(DEFAULT_TEAM);
-  const [personId, setPersonId] = useState<string>(DEFAULT_PERSON);
+  const [scope, setScope] = useState<ExportScope>("master");
+  const [groupRole, setGroupRole] = useState<AccessRole>("staff");
+  const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
+  const [individualRole, setIndividualRole] = useState<AccessRole>("staff");
+  const [individualSubteam, setIndividualSubteam] = useState<TeamId>(DEFAULT_TEAM);
+  const [individualPerson, setIndividualPerson] = useState<string | null>(DEFAULT_PERSON);
   const [format, setFormat] = useState<ExportFormat>("csv");
 
+  const individualPeople = useMemo(() => {
+    return peopleDirectory.filter((person) => {
+      if (person.accessRole !== individualRole) {
+        return false;
+      }
+      if (individualRole === "staff" && person.team !== individualSubteam) {
+        return false;
+      }
+      return true;
+    });
+  }, [individualRole, individualSubteam]);
+
   useEffect(() => {
-    const scopedPeople = peopleDirectory.filter((person) => person.team === team);
-    if (!scopedPeople.some((person) => person.id === personId)) {
-      setPersonId(scopedPeople[0]?.id ?? "");
+    if (!individualPeople.some((person) => person.id === individualPerson)) {
+      setIndividualPerson(individualPeople[0]?.id ?? null);
     }
-  }, [team, personId]);
+  }, [individualPeople, individualPerson]);
 
   const handleGenerate = () => {};
 
@@ -487,70 +674,115 @@ function ExportPanel() {
           <Tabs value={scope} onValueChange={(value) => setScope(value as ExportScope)}>
             <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
               <TabsTrigger
-                value="all"
+                value="master"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Everyone
+                Master
               </TabsTrigger>
               <TabsTrigger
-                value="team"
+                value="group"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Team
+                Group
               </TabsTrigger>
               <TabsTrigger
-                value="person"
+                value="individual"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                 Individual
               </TabsTrigger>
             </TabsList>
             <div className="mt-6 space-y-4">
-              <TabsContent value="team" className="space-y-3">
-                <div className="space-y-2">
-                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-                  <Select value={team} onValueChange={(value) => setTeam(value as TeamId)}>
-                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                      <SelectValue placeholder="Choose team" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                      {teams.map((teamOption) => (
-                        <SelectItem key={teamOption.id} value={teamOption.id}>
-                          {teamOption.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </TabsContent>
-              <TabsContent value="person" className="space-y-3">
+              <TabsContent value="group" className="space-y-3">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-                    <Select value={team} onValueChange={(value) => setTeam(value as TeamId)}>
+                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
+                    <Select value={groupRole} onValueChange={(value) => setGroupRole(value as AccessRole)}>
                       <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                        <SelectValue placeholder="Team" />
+                        <SelectValue placeholder="Choose role" />
                       </SelectTrigger>
                       <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                        {teams.map((teamOption) => (
-                          <SelectItem key={teamOption.id} value={teamOption.id}>
-                            {teamOption.label}
+                        {ROLE_OPTIONS.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
+                  {groupRole === "staff" && (
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                      <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as TeamId)}>
+                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                          <SelectValue placeholder="Choose subteam" />
+                        </SelectTrigger>
+                        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                          {teams.map((teamOption) => (
+                            <SelectItem key={teamOption.id} value={teamOption.id}>
+                              {teamOption.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+              <TabsContent value="individual" className="space-y-3">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
+                    <Select value={individualRole} onValueChange={(value) => setIndividualRole(value as AccessRole)}>
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                        {ROLE_OPTIONS.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {individualRole === "staff" && (
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                      <Select
+                        value={individualSubteam}
+                        onValueChange={(value) => setIndividualSubteam(value as TeamId)}>
+                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                          <SelectValue placeholder="Subteam" />
+                        </SelectTrigger>
+                        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                          {teams.map((teamOption) => (
+                            <SelectItem key={teamOption.id} value={teamOption.id}>
+                              {teamOption.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Person</Label>
-                    <Select value={personId} onValueChange={setPersonId}>
-                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <Select
+                      value={individualPerson ?? undefined}
+                      onValueChange={setIndividualPerson}
+                      disabled={individualPeople.length === 0}>
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 disabled:opacity-40">
                         <SelectValue placeholder="Person" />
                       </SelectTrigger>
                       <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                        {peopleDirectory
-                          .filter((person) => person.team === team)
-                          .map((person) => (
+                        {individualPeople.length > 0 ? (
+                          individualPeople.map((person) => (
                             <SelectItem key={person.id} value={person.id}>
                               {person.name}
                             </SelectItem>
-                          ))}
+                          ))
+                        ) : (
+                          <SelectItem value="no-people" disabled>
+                            No people available
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -595,29 +827,32 @@ function RosterFilters({
 }: RosterFiltersProps) {
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
-      <Select value={teamFilter} onValueChange={(value) => onTeamChange(value as "all" | TeamId)}>
-        <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-          <SelectValue placeholder="Team filter" />
-        </SelectTrigger>
-        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-          <SelectItem value="all">All teams</SelectItem>
-          {teams.map((team) => (
-            <SelectItem key={team.id} value={team.id}>
-              {team.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       <Select value={accessFilter} onValueChange={(value) => onAccessChange(value as "all" | AccessRole)}>
         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-          <SelectValue placeholder="Access filter" />
+          <SelectValue placeholder="Role filter" />
         </SelectTrigger>
         <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-          <SelectItem value="all">Staff + Attendees</SelectItem>
+          <SelectItem value="all">Admins + Staff + Attendees</SelectItem>
+          <SelectItem value="admin">Admins</SelectItem>
           <SelectItem value="staff">Staff</SelectItem>
           <SelectItem value="attendee">Attendees</SelectItem>
         </SelectContent>
       </Select>
+      {accessFilter === "staff" && (
+        <Select value={teamFilter} onValueChange={(value) => onTeamChange(value as "all" | TeamId)}>
+          <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+            <SelectValue placeholder="Subteam filter" />
+          </SelectTrigger>
+          <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+            <SelectItem value="all">All subteams</SelectItem>
+            {teams.map((team) => (
+              <SelectItem key={team.id} value={team.id}>
+                {team.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
       <Select value={statusFilter} onValueChange={(value) => onStatusChange(value as "all" | PersonStatus)}>
         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
           <SelectValue placeholder="Status filter" />
@@ -639,59 +874,111 @@ function RosterFilters({
   );
 }
 
-function RosterTable({ pagedRoster, onManage }: RosterTableProps) {
+function ColumnVisibilityControls({ visibility, onToggle }: ColumnVisibilityControlsProps) {
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-800/60 bg-slate-950/40 p-4">
+      {COLUMN_CONTROLS.map(({ key, label }) => (
+        <label key={key} className="flex items-center gap-2 text-sm text-slate-300">
+          <Checkbox
+            checked={visibility[key]}
+            onCheckedChange={(checked) => onToggle(key, Boolean(checked))}
+            className="border-slate-600 data-[state=checked]:border-sky-500 data-[state=checked]:bg-sky-500"
+          />
+          {label}
+        </label>
+      ))}
+    </div>
+  );
+}
+
+function RosterTable({ pagedRoster, onManage, visibleColumns }: RosterTableProps) {
   return (
     <Table className="border-collapse text-sm text-slate-200 [&_td]:align-top">
       <TableHeader>
         <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-          <TableHead className="min-w-[240px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
-            Person
-          </TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Email</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Team</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Access</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Status</TableHead>
-          <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
+          {visibleColumns.person && (
+            <TableHead className="min-w-[240px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
+              Person
+            </TableHead>
+          )}
+          {visibleColumns.email && <TableHead className="border border-slate-800/60 text-slate-400">Email</TableHead>}
+          {visibleColumns.subteam && (
+            <TableHead className="border border-slate-800/60 text-slate-400">Subteam</TableHead>
+          )}
+          {visibleColumns.role && <TableHead className="border border-slate-800/60 text-slate-400">Role</TableHead>}
+          {TEXT_COLUMN_CONFIGS.map(
+            ({ key, label }) =>
+              visibleColumns[key] && (
+                <TableHead key={key} className="border border-slate-800/60 text-slate-400">
+                  {label}
+                </TableHead>
+              )
+          )}
+          {visibleColumns.status && <TableHead className="border border-slate-800/60 text-slate-400">Status</TableHead>}
+          {visibleColumns.actions && (
+            <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
+          )}
         </TableRow>
       </TableHeader>
       <TableBody>
         {pagedRoster.map((person) => {
+          const subteamLabel = person.accessRole === "staff" ? teamLookup[person.team] : "—";
           const statusStyle = statusStyles[person.status];
           const accessStyle = accessStyles[person.accessRole];
           return (
             <TableRow key={person.id} className="border border-slate-800/60">
-              <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
-                <p className="font-semibold text-white">{person.name}</p>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <p className="text-sm font-medium text-white">{person.email}</p>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <p className="text-sm font-medium text-white">{teamLookup[person.team]}</p>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <div className="flex flex-wrap gap-2">
-                  <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyle.badge}`}>
-                    {accessStyle.label}
-                  </Badge>
-                </div>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3">
-                <div className="space-y-1">
-                  <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyle.badge}`}>
-                    {statusStyle.label}
-                  </Badge>
-                </div>
-              </TableCell>
-              <TableCell className="border border-slate-800/60 p-3 text-right">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60"
-                  onClick={() => onManage(person.id)}>
-                  Manage
-                </Button>
-              </TableCell>
+              {visibleColumns.person && (
+                <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
+                  <p className="font-semibold text-white">{person.name}</p>
+                </TableCell>
+              )}
+              {visibleColumns.email && (
+                <TableCell className="border border-slate-800/60 p-3">
+                  <p className="text-sm font-medium text-white">{person.email}</p>
+                </TableCell>
+              )}
+              {visibleColumns.subteam && (
+                <TableCell className="border border-slate-800/60 p-3">
+                  <p className="text-sm font-medium text-white">{subteamLabel}</p>
+                </TableCell>
+              )}
+              {visibleColumns.role && (
+                <TableCell className="border border-slate-800/60 p-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyle.badge}`}>
+                      {accessStyle.label}
+                    </Badge>
+                  </div>
+                </TableCell>
+              )}
+              {TEXT_COLUMN_CONFIGS.map(
+                ({ key, accessor }) =>
+                  visibleColumns[key] && (
+                    <TableCell key={`${person.id}-${key}`} className="border border-slate-800/60 p-3">
+                      <p className="text-sm font-medium text-white">{accessor(person)}</p>
+                    </TableCell>
+                  )
+              )}
+              {visibleColumns.status && (
+                <TableCell className="border border-slate-800/60 p-3">
+                  <div className="space-y-1">
+                    <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyle.badge}`}>
+                      {statusStyle.label}
+                    </Badge>
+                  </div>
+                </TableCell>
+              )}
+              {visibleColumns.actions && (
+                <TableCell className="border border-slate-800/60 p-3 text-right">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60"
+                    onClick={() => onManage(person.id)}>
+                    Manage
+                  </Button>
+                </TableCell>
+              )}
             </TableRow>
           );
         })}
@@ -745,8 +1032,8 @@ function AccessDialog({
   activePerson,
   modalRole,
   onRoleChange,
-  modalStaffType,
-  onStaffTypeChange,
+  modalSubteam,
+  onSubteamChange,
   onRevoke,
   onApply,
 }: AccessDialogProps) {
@@ -763,31 +1050,29 @@ function AccessDialog({
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role type</Label>
                 <Tabs value={modalRole} onValueChange={(value) => onRoleChange(value as AccessRole)}>
-                  <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-900/60">
-                    <TabsTrigger
-                      value="staff"
-                      className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                      Staff
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="attendee"
-                      className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                      Attendee
-                    </TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+                    {ROLE_OPTIONS.map((role) => (
+                      <TabsTrigger
+                        key={role}
+                        value={role}
+                        className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </TabsTrigger>
+                    ))}
                   </TabsList>
                 </Tabs>
               </div>
               {modalRole === "staff" && (
                 <div className="space-y-2">
-                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Staff type</Label>
-                  <Select value={modalStaffType} onValueChange={(value) => onStaffTypeChange(value as StaffTypeId)}>
+                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                  <Select value={modalSubteam} onValueChange={(value) => onSubteamChange(value as TeamId)}>
                     <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                      <SelectValue placeholder="Select staff type" />
+                      <SelectValue placeholder="Select subteam" />
                     </SelectTrigger>
                     <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                      {staffTypes.map((staffType) => (
-                        <SelectItem key={staffType.id} value={staffType.id}>
-                          {staffType.label}
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
