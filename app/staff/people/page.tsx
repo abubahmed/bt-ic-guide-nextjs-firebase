@@ -223,44 +223,7 @@ function UploadPanel() {
     });
   };
 
-  const handleRunValidations = () => {
-    if (scope !== "individual") {
-      console.info(`[Validations] ${scope} scope currently relies on external spreadsheet validation.`);
-      return true;
-    }
-
-    const errors: string[] = [];
-    if (!individualForm.fullName.trim()) {
-      errors.push("Full name is required.");
-    }
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(individualForm.email.trim())) {
-      errors.push("A valid email address is required.");
-    }
-    if (!individualForm.phone.trim()) {
-      errors.push("Phone number is required.");
-    }
-    if (!individualForm.grade.trim()) {
-      errors.push("Grade selection is required.");
-    }
-    if (!individualForm.company.trim()) {
-      errors.push("Company is required.");
-    }
-    if (!individualForm.school.trim()) {
-      errors.push("School is required.");
-    }
-    if (individualForm.role === "staff" && !individualForm.subteam) {
-      errors.push("Subteam is required for staff roles.");
-    }
-
-    if (errors.length > 0) {
-      console.warn("Individual upload validation errors:", errors);
-      return false;
-    }
-
-    console.info("Individual upload passed basic validations.");
-    return true;
-  };
+  const handleRunValidations = () => {};
 
   const handleStageUpload = () => {};
 
