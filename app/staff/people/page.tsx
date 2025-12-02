@@ -172,6 +172,30 @@ const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
   actions: true,
 };
 
+async function stageMasterUpload(): Promise<void> {}
+
+async function stageGroupUpload(role: AccessRole, subteam?: TeamId): Promise<void> {}
+
+async function stageIndividualUpload(form: IndividualFormState): Promise<void> {}
+
+async function revokePersonAccess(personId: string): Promise<void> {}
+
+async function applyPersonAccessUpdates(
+  personId: string,
+  updates: {
+    role: AccessRole;
+    subteam?: TeamId;
+  }
+): Promise<void> {}
+
+async function generatePeopleExport(params: {
+  scope: ExportScope;
+  role?: AccessRole;
+  subteam?: TeamId;
+  personId?: string | null;
+  format: ExportFormat;
+}): Promise<void> {}
+
 export default function StaffPeoplePage() {
   return (
     <>
@@ -262,7 +286,17 @@ function UploadPanel() {
     return true;
   };
 
-  const handleStageUpload = () => {};
+  const handleStageUpload = async () => {
+    if (scope === "master") {
+      await stageMasterUpload();
+      return;
+    }
+    if (scope === "group") {
+      await stageGroupUpload(groupRole, groupRole === "staff" ? groupSubteam : undefined);
+      return;
+    }
+    await stageIndividualUpload(individualForm);
+  };
 
   return (
     <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
@@ -565,8 +599,22 @@ function RosterViewer() {
     setGridPage((prev) => Math.min(pageCount - 1, prev + 1));
   };
 
-  const handleRevokeAccess = () => {};
-  const handleApplyUpdates = () => {};
+  const handleRevokeAccess = async () => {
+    if (!activePersonId) {
+      return;
+    }
+    await revokePersonAccess(activePersonId);
+  };
+
+  const handleApplyUpdates = async () => {
+    if (!activePersonId) {
+      return;
+    }
+    await applyPersonAccessUpdates(activePersonId, {
+      role: modalRole,
+      subteam: modalRole === "staff" ? modalSubteam : undefined,
+    });
+  };
   const handleColumnToggle = (column: keyof ColumnVisibility, checked: boolean) => {
     setVisibleColumns((prev) => ({ ...prev, [column]: checked }));
   };
@@ -659,7 +707,28 @@ function ExportPanel() {
     }
   }, [individualPeople, individualPerson]);
 
-  const handleGenerate = () => {};
+  const handleGenerate = async () => {
+    if (scope === "master") {
+      await generatePeopleExport({ scope, format });
+      return;
+    }
+    if (scope === "group") {
+      await generatePeopleExport({
+        scope,
+        role: groupRole,
+        subteam: groupRole === "staff" ? groupSubteam : undefined,
+        format,
+      });
+      return;
+    }
+    await generatePeopleExport({
+      scope,
+      role: individualRole,
+      subteam: individualRole === "staff" ? individualSubteam : undefined,
+      personId: individualPerson,
+      format,
+    });
+  };
 
   return (
     <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
