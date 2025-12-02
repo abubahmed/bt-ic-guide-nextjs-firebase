@@ -546,7 +546,7 @@ function ExportPanel() {
   const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
   const [individualRole, setIndividualRole] = useState<AccessRole>("staff");
   const [individualSubteam, setIndividualSubteam] = useState<TeamId>(DEFAULT_TEAM);
-  const [individualPerson, setIndividualPerson] = useState<string>(DEFAULT_PERSON);
+  const [individualPerson, setIndividualPerson] = useState<string | null>(DEFAULT_PERSON);
   const [format, setFormat] = useState<ExportFormat>("csv");
 
   const individualPeople = useMemo(() => {
@@ -563,7 +563,7 @@ function ExportPanel() {
 
   useEffect(() => {
     if (!individualPeople.some((person) => person.id === individualPerson)) {
-      setIndividualPerson(individualPeople[0]?.id ?? "");
+      setIndividualPerson(individualPeople[0]?.id ?? null);
     }
   }, [individualPeople, individualPerson]);
 
@@ -671,7 +671,7 @@ function ExportPanel() {
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Person</Label>
                     <Select
-                      value={individualPeople.length > 0 ? individualPerson : ""}
+                      value={individualPerson ?? undefined}
                       onValueChange={setIndividualPerson}
                       disabled={individualPeople.length === 0}>
                       <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 disabled:opacity-40">
@@ -685,7 +685,7 @@ function ExportPanel() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>
+                          <SelectItem value="no-people" disabled>
                             No people available
                           </SelectItem>
                         )}
