@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { ShieldBan, UploadCloud, UserMinus2, Users2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -75,6 +76,7 @@ type RosterTableProps = {
   pagedRoster: PersonRecord[];
   onManage: (personId: string) => void;
   visibleColumns: ColumnVisibility;
+  isLocked: boolean;
 };
 
 type PaginationControlsProps = {
@@ -101,6 +103,7 @@ type AccessDialogProps = {
   onApply: () => void;
   revokeLoading: boolean;
   applyLoading: boolean;
+  isLocked: boolean;
 };
 
 type ColumnVisibility = {
@@ -119,6 +122,32 @@ type ColumnVisibility = {
 type ColumnVisibilityControlsProps = {
   visibility: ColumnVisibility;
   onToggle: (column: keyof ColumnVisibility, checked: boolean) => void;
+};
+
+type GlobalLoadingState = {
+  fetch: boolean;
+  upload: boolean;
+  revoke: boolean;
+  apply: boolean;
+  export: boolean;
+};
+
+type UploadPanelProps = {
+  loadingState: GlobalLoadingState;
+  setLoadingState: Dispatch<SetStateAction<GlobalLoadingState>>;
+  isLocked: boolean;
+};
+
+type RosterViewerProps = {
+  loadingState: GlobalLoadingState;
+  setLoadingState: Dispatch<SetStateAction<GlobalLoadingState>>;
+  isLocked: boolean;
+};
+
+type ExportPanelProps = {
+  loadingState: GlobalLoadingState;
+  setLoadingState: Dispatch<SetStateAction<GlobalLoadingState>>;
+  isLocked: boolean;
 };
 
 const TEXT_COLUMN_CONFIGS: Array<{
@@ -232,7 +261,14 @@ async function generatePeopleExport(params: {
 }
 
 export default function StaffPeoplePage() {
-  const [isBootstrapping, setIsBootstrapping] = useState(true);
+  const [loadingState, setLoadingState] = useState<GlobalLoadingState>({
+    fetch: true,
+    upload: false,
+    revoke: false,
+    apply: false,
+    export: false,
+  });
+  const isGlobalLocked = useMemo(() => Object.values(loadingState).some(Boolean), [loadingState]);
 
   useEffect(() => {
     let isMounted = true;
@@ -241,7 +277,7 @@ export default function StaffPeoplePage() {
         await fetchPeopleDataset();
       } finally {
         if (isMounted) {
-          setIsBootstrapping(false);
+          setLoadingState((prev) => ({ ...prev, fetch: false }));
         }
       }
     };
@@ -256,15 +292,15 @@ export default function StaffPeoplePage() {
       <main className="min-h-dvh bg-slate-950 text-slate-100">
         <StaffHeader currentPage="people" />
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-          {isBootstrapping ? (
+          {loadingState.fetch ? (
             <div className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-10 text-center text-sm text-slate-400 shadow-[0px_30px_80px_rgba(2,6,23,0.45)]">
               Loading staff data...
             </div>
           ) : (
             <>
-              <UploadPanel />
-              <RosterViewer />
-              <ExportPanel />
+              <UploadPanel loadingState={loadingState} setLoadingState={setLoadingState} isLocked={isGlobalLocked} />
+              <RosterViewer loadingState={loadingState} setLoadingState={setLoadingState} isLocked={isGlobalLocked} />
+              <ExportPanel loadingState={loadingState} setLoadingState={setLoadingState} isLocked={isGlobalLocked} />
             </>
           )}
         </div>
@@ -274,11 +310,10 @@ export default function StaffPeoplePage() {
   );
 }
 
-function UploadPanel() {
+function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelProps) {
   const [scope, setScope] = useState<UploadScope>("master");
   const [groupRole, setGroupRole] = useState<AccessRole>("staff");
   const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
-  const [isStaging, setIsStaging] = useState(false);
   const [individualForm, setIndividualForm] = useState<IndividualFormState>({
     fullName: "",
     email: "",
@@ -350,10 +385,10 @@ function UploadPanel() {
   };
 
   const handleStageUpload = async () => {
-    if (isStaging) {
+    if (isLocked) {
       return;
     }
-    setIsStaging(true);
+    setLoadingState((prev) => ({ ...prev, upload: true }));
     try {
       if (scope === "master") {
         await stageMasterUpload();
@@ -365,9 +400,10 @@ function UploadPanel() {
       }
       await stageIndividualUpload(individualForm);
     } finally {
-      setIsStaging(false);
+      setLoadingState((prev) => ({ ...prev, upload: false }));
     }
   };
+  const isUploadLoading = loadingState.upload;
 
   return (
     <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
@@ -568,8 +604,8 @@ function UploadPanel() {
           <Button
             className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400 disabled:opacity-60"
             onClick={handleStageUpload}
-            disabled={isStaging}>
-            {isStaging ? "Staging..." : "Stage upload"}
+            disabled={isLocked}>
+            {isUploadLoading ? "Staging..." : "Stage upload"}
           </Button>
         </div>
       </div>
@@ -577,7 +613,7 @@ function UploadPanel() {
   );
 }
 
-function RosterViewer() {
+function RosterViewer({ loadingState, setLoadingState, isLocked }: RosterViewerProps) {
   const [teamFilter, setTeamFilter] = useState<"all" | TeamId>("all");
   const [accessFilter, setAccessFilter] = useState<"all" | AccessRole>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | PersonStatus>("all");
@@ -589,8 +625,8 @@ function RosterViewer() {
   const [modalRole, setModalRole] = useState<AccessRole>("attendee");
   const [modalSubteam, setModalSubteam] = useState<TeamId>(DEFAULT_TEAM);
   const [visibleColumns, setVisibleColumns] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
-  const [revokeLoading, setRevokeLoading] = useState(false);
-  const [applyLoading, setApplyLoading] = useState(false);
+  const revokeLoading = loadingState.revoke;
+  const applyLoading = loadingState.apply;
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
@@ -654,6 +690,9 @@ function RosterViewer() {
   }, [activePerson]);
 
   const handleOpenDialog = (personId: string) => {
+    if (isLocked) {
+      return;
+    }
     setActivePersonId(personId);
     setAccessDialogOpen(true);
   };
@@ -674,29 +713,29 @@ function RosterViewer() {
   };
 
   const handleRevokeAccess = async () => {
-    if (!activePersonId || revokeLoading) {
+    if (!activePersonId || isLocked) {
       return;
     }
-    setRevokeLoading(true);
+    setLoadingState((prev) => ({ ...prev, revoke: true }));
     try {
       await revokePersonAccess(activePersonId);
     } finally {
-      setRevokeLoading(false);
+      setLoadingState((prev) => ({ ...prev, revoke: false }));
     }
   };
 
   const handleApplyUpdates = async () => {
-    if (!activePersonId || applyLoading) {
+    if (!activePersonId || isLocked) {
       return;
     }
-    setApplyLoading(true);
+    setLoadingState((prev) => ({ ...prev, apply: true }));
     try {
       await applyPersonAccessUpdates(activePersonId, {
         role: modalRole,
         subteam: modalRole === "staff" ? modalSubteam : undefined,
       });
     } finally {
-      setApplyLoading(false);
+      setLoadingState((prev) => ({ ...prev, apply: false }));
     }
   };
   const handleColumnToggle = (column: keyof ColumnVisibility, checked: boolean) => {
@@ -728,7 +767,12 @@ function RosterViewer() {
           <ColumnVisibilityControls visibility={visibleColumns} onToggle={handleColumnToggle} />
           <div className="mt-4">
             {pagedRoster.length > 0 ? (
-              <RosterTable pagedRoster={pagedRoster} onManage={handleOpenDialog} visibleColumns={visibleColumns} />
+              <RosterTable
+                pagedRoster={pagedRoster}
+                onManage={handleOpenDialog}
+                visibleColumns={visibleColumns}
+                isLocked={isLocked}
+              />
             ) : (
               <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
                 No people match the applied filters.
@@ -761,12 +805,13 @@ function RosterViewer() {
         onApply={handleApplyUpdates}
         revokeLoading={revokeLoading}
         applyLoading={applyLoading}
+        isLocked={isLocked}
       />
     </>
   );
 }
 
-function ExportPanel() {
+function ExportPanel({ loadingState, setLoadingState, isLocked }: ExportPanelProps) {
   const [scope, setScope] = useState<ExportScope>("master");
   const [groupRole, setGroupRole] = useState<AccessRole>("staff");
   const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
@@ -774,7 +819,6 @@ function ExportPanel() {
   const [individualSubteam, setIndividualSubteam] = useState<TeamId>(DEFAULT_TEAM);
   const [individualPerson, setIndividualPerson] = useState<string | null>(DEFAULT_PERSON);
   const [format, setFormat] = useState<ExportFormat>("csv");
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const individualPeople = useMemo(() => {
     return peopleDirectory.filter((person) => {
@@ -795,10 +839,10 @@ function ExportPanel() {
   }, [individualPeople, individualPerson]);
 
   const handleGenerate = async () => {
-    if (isGenerating) {
+    if (isLocked) {
       return;
     }
-    setIsGenerating(true);
+    setLoadingState((prev) => ({ ...prev, export: true }));
     try {
       if (scope === "master") {
         await generatePeopleExport({ scope, format });
@@ -821,9 +865,10 @@ function ExportPanel() {
         format,
       });
     } finally {
-      setIsGenerating(false);
+      setLoadingState((prev) => ({ ...prev, export: false }));
     }
   };
+  const isExportLoading = loadingState.export;
 
   return (
     <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
@@ -971,8 +1016,8 @@ function ExportPanel() {
           <Button
             className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400 disabled:opacity-60"
             onClick={handleGenerate}
-            disabled={isGenerating || (scope === "individual" && !individualPerson)}>
-            {isGenerating ? "Generating..." : `Generate ${format === "csv" ? "CSV roster" : "XLSX roster"}`}
+            disabled={isLocked || (scope === "individual" && !individualPerson)}>
+            {isExportLoading ? "Generating..." : `Generate ${format === "csv" ? "CSV roster" : "XLSX roster"}`}
           </Button>
         </div>
       </div>
@@ -1056,7 +1101,7 @@ function ColumnVisibilityControls({ visibility, onToggle }: ColumnVisibilityCont
   );
 }
 
-function RosterTable({ pagedRoster, onManage, visibleColumns }: RosterTableProps) {
+function RosterTable({ pagedRoster, onManage, visibleColumns, isLocked }: RosterTableProps) {
   return (
     <Table className="border-collapse text-sm text-slate-200 [&_td]:align-top">
       <TableHeader>
@@ -1138,8 +1183,9 @@ function RosterTable({ pagedRoster, onManage, visibleColumns }: RosterTableProps
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60"
-                    onClick={() => onManage(person.id)}>
+                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60 disabled:opacity-50"
+                    onClick={() => onManage(person.id)}
+                    disabled={isLocked}>
                     Manage
                   </Button>
                 </TableCell>
@@ -1203,6 +1249,7 @@ function AccessDialog({
   onApply,
   revokeLoading,
   applyLoading,
+  isLocked,
 }: AccessDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1265,14 +1312,14 @@ function AccessDialog({
                 variant="outline"
                 className="flex-1 rounded-xl border-rose-500/50 bg-rose-500/10 text-sm font-semibold text-rose-200 hover:border-rose-400 hover:bg-rose-500/20 disabled:opacity-60"
                 onClick={onRevoke}
-                disabled={revokeLoading}>
+                disabled={isLocked}>
                 <ShieldBan className="mr-2 h-4 w-4" />
                 {revokeLoading ? "Revoking..." : "Revoke access"}
               </Button>
               <Button
                 className="flex-1 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400 disabled:opacity-60"
                 onClick={onApply}
-                disabled={applyLoading}>
+                disabled={isLocked}>
                 <UserMinus2 className="mr-2 h-4 w-4" />
                 {applyLoading ? "Applying..." : "Apply updates"}
               </Button>
