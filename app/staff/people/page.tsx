@@ -99,6 +99,8 @@ type AccessDialogProps = {
   onSubteamChange: (team: TeamId) => void;
   onRevoke: () => void;
   onApply: () => void;
+  revokeLoading: boolean;
+  applyLoading: boolean;
 };
 
 type ColumnVisibility = {
@@ -172,18 +174,40 @@ const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
   actions: true,
 };
 
+const API_LATENCY_MS = 700;
+
+const simulateNetworkLatency = () => new Promise((resolve) => setTimeout(resolve, API_LATENCY_MS));
+
 async function fetchPeopleDataset(): Promise<{
   teams: typeof teams;
   people: PersonRecord[];
-}> {}
+}> {
+  await simulateNetworkLatency();
+  return {
+    teams,
+    people: peopleDirectory,
+  };
+}
 
-async function stageMasterUpload(): Promise<void> {}
+async function stageMasterUpload(): Promise<void> {
+  await simulateNetworkLatency();
+  console.info("[Upload] Master dataset staged");
+}
 
-async function stageGroupUpload(role: AccessRole, subteam?: TeamId): Promise<void> {}
+async function stageGroupUpload(role: AccessRole, subteam?: TeamId): Promise<void> {
+  await simulateNetworkLatency();
+  console.info(`[Upload] Group dataset staged for role=${role} subteam=${subteam ?? "n/a"}`);
+}
 
-async function stageIndividualUpload(form: IndividualFormState): Promise<void> {}
+async function stageIndividualUpload(form: IndividualFormState): Promise<void> {
+  await simulateNetworkLatency();
+  console.info("[Upload] Individual staged", form);
+}
 
-async function revokePersonAccess(personId: string): Promise<void> {}
+async function revokePersonAccess(personId: string): Promise<void> {
+  await simulateNetworkLatency();
+  console.info(`[Access] Revoked person=${personId}`);
+}
 
 async function applyPersonAccessUpdates(
   personId: string,
@@ -191,7 +215,10 @@ async function applyPersonAccessUpdates(
     role: AccessRole;
     subteam?: TeamId;
   }
-): Promise<void> {}
+): Promise<void> {
+  await simulateNetworkLatency();
+  console.info("[Access] Updated person", { personId, updates });
+}
 
 async function generatePeopleExport(params: {
   scope: ExportScope;
@@ -199,17 +226,47 @@ async function generatePeopleExport(params: {
   subteam?: TeamId;
   personId?: string | null;
   format: ExportFormat;
-}): Promise<void> {}
+}): Promise<void> {
+  await simulateNetworkLatency();
+  console.info("[Export] Started generation", params);
+}
 
 export default function StaffPeoplePage() {
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const hydrate = async () => {
+      try {
+        await fetchPeopleDataset();
+      } finally {
+        if (isMounted) {
+          setIsBootstrapping(false);
+        }
+      }
+    };
+    hydrate();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <>
       <main className="min-h-dvh bg-slate-950 text-slate-100">
         <StaffHeader currentPage="people" />
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-          <UploadPanel />
-          <RosterViewer />
-          <ExportPanel />
+          {isBootstrapping ? (
+            <div className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-10 text-center text-sm text-slate-400 shadow-[0px_30px_80px_rgba(2,6,23,0.45)]">
+              Loading staff data...
+            </div>
+          ) : (
+            <>
+              <UploadPanel />
+              <RosterViewer />
+              <ExportPanel />
+            </>
+          )}
         </div>
         <StaffFooter />
       </main>
@@ -221,6 +278,7 @@ function UploadPanel() {
   const [scope, setScope] = useState<UploadScope>("master");
   const [groupRole, setGroupRole] = useState<AccessRole>("staff");
   const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
+  const [isStaging, setIsStaging] = useState(false);
   const [individualForm, setIndividualForm] = useState<IndividualFormState>({
     fullName: "",
     email: "",
@@ -292,15 +350,23 @@ function UploadPanel() {
   };
 
   const handleStageUpload = async () => {
-    if (scope === "master") {
-      await stageMasterUpload();
+    if (isStaging) {
       return;
     }
-    if (scope === "group") {
-      await stageGroupUpload(groupRole, groupRole === "staff" ? groupSubteam : undefined);
-      return;
+    setIsStaging(true);
+    try {
+      if (scope === "master") {
+        await stageMasterUpload();
+        return;
+      }
+      if (scope === "group") {
+        await stageGroupUpload(groupRole, groupRole === "staff" ? groupSubteam : undefined);
+        return;
+      }
+      await stageIndividualUpload(individualForm);
+    } finally {
+      setIsStaging(false);
     }
-    await stageIndividualUpload(individualForm);
   };
 
   return (
@@ -500,9 +566,10 @@ function UploadPanel() {
             Run validations
           </Button>
           <Button
-            className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
-            onClick={handleStageUpload}>
-            Stage upload
+            className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400 disabled:opacity-60"
+            onClick={handleStageUpload}
+            disabled={isStaging}>
+            {isStaging ? "Staging..." : "Stage upload"}
           </Button>
         </div>
       </div>
@@ -522,6 +589,8 @@ function RosterViewer() {
   const [modalRole, setModalRole] = useState<AccessRole>("attendee");
   const [modalSubteam, setModalSubteam] = useState<TeamId>(DEFAULT_TEAM);
   const [visibleColumns, setVisibleColumns] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
+  const [revokeLoading, setRevokeLoading] = useState(false);
+  const [applyLoading, setApplyLoading] = useState(false);
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
@@ -605,20 +674,30 @@ function RosterViewer() {
   };
 
   const handleRevokeAccess = async () => {
-    if (!activePersonId) {
+    if (!activePersonId || revokeLoading) {
       return;
     }
-    await revokePersonAccess(activePersonId);
+    setRevokeLoading(true);
+    try {
+      await revokePersonAccess(activePersonId);
+    } finally {
+      setRevokeLoading(false);
+    }
   };
 
   const handleApplyUpdates = async () => {
-    if (!activePersonId) {
+    if (!activePersonId || applyLoading) {
       return;
     }
-    await applyPersonAccessUpdates(activePersonId, {
-      role: modalRole,
-      subteam: modalRole === "staff" ? modalSubteam : undefined,
-    });
+    setApplyLoading(true);
+    try {
+      await applyPersonAccessUpdates(activePersonId, {
+        role: modalRole,
+        subteam: modalRole === "staff" ? modalSubteam : undefined,
+      });
+    } finally {
+      setApplyLoading(false);
+    }
   };
   const handleColumnToggle = (column: keyof ColumnVisibility, checked: boolean) => {
     setVisibleColumns((prev) => ({ ...prev, [column]: checked }));
@@ -680,6 +759,8 @@ function RosterViewer() {
         onSubteamChange={setModalSubteam}
         onRevoke={handleRevokeAccess}
         onApply={handleApplyUpdates}
+        revokeLoading={revokeLoading}
+        applyLoading={applyLoading}
       />
     </>
   );
@@ -693,6 +774,7 @@ function ExportPanel() {
   const [individualSubteam, setIndividualSubteam] = useState<TeamId>(DEFAULT_TEAM);
   const [individualPerson, setIndividualPerson] = useState<string | null>(DEFAULT_PERSON);
   const [format, setFormat] = useState<ExportFormat>("csv");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const individualPeople = useMemo(() => {
     return peopleDirectory.filter((person) => {
@@ -713,26 +795,34 @@ function ExportPanel() {
   }, [individualPeople, individualPerson]);
 
   const handleGenerate = async () => {
-    if (scope === "master") {
-      await generatePeopleExport({ scope, format });
+    if (isGenerating) {
       return;
     }
-    if (scope === "group") {
+    setIsGenerating(true);
+    try {
+      if (scope === "master") {
+        await generatePeopleExport({ scope, format });
+        return;
+      }
+      if (scope === "group") {
+        await generatePeopleExport({
+          scope,
+          role: groupRole,
+          subteam: groupRole === "staff" ? groupSubteam : undefined,
+          format,
+        });
+        return;
+      }
       await generatePeopleExport({
         scope,
-        role: groupRole,
-        subteam: groupRole === "staff" ? groupSubteam : undefined,
+        role: individualRole,
+        subteam: individualRole === "staff" ? individualSubteam : undefined,
+        personId: individualPerson,
         format,
       });
-      return;
+    } finally {
+      setIsGenerating(false);
     }
-    await generatePeopleExport({
-      scope,
-      role: individualRole,
-      subteam: individualRole === "staff" ? individualSubteam : undefined,
-      personId: individualPerson,
-      format,
-    });
   };
 
   return (
@@ -879,9 +969,10 @@ function ExportPanel() {
             </Select>
           </div>
           <Button
-            className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
-            onClick={handleGenerate}>
-            Generate {format === "csv" ? "CSV roster" : "XLSX roster"}
+            className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400 disabled:opacity-60"
+            onClick={handleGenerate}
+            disabled={isGenerating || (scope === "individual" && !individualPerson)}>
+            {isGenerating ? "Generating..." : `Generate ${format === "csv" ? "CSV roster" : "XLSX roster"}`}
           </Button>
         </div>
       </div>
@@ -1110,6 +1201,8 @@ function AccessDialog({
   onSubteamChange,
   onRevoke,
   onApply,
+  revokeLoading,
+  applyLoading,
 }: AccessDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1170,16 +1263,18 @@ function AccessDialog({
             <DialogFooter>
               <Button
                 variant="outline"
-                className="flex-1 rounded-xl border-rose-500/50 bg-rose-500/10 text-sm font-semibold text-rose-200 hover:border-rose-400 hover:bg-rose-500/20"
-                onClick={onRevoke}>
+                className="flex-1 rounded-xl border-rose-500/50 bg-rose-500/10 text-sm font-semibold text-rose-200 hover:border-rose-400 hover:bg-rose-500/20 disabled:opacity-60"
+                onClick={onRevoke}
+                disabled={revokeLoading}>
                 <ShieldBan className="mr-2 h-4 w-4" />
-                Revoke access
+                {revokeLoading ? "Revoking..." : "Revoke access"}
               </Button>
               <Button
-                className="flex-1 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400"
-                onClick={onApply}>
+                className="flex-1 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400 disabled:opacity-60"
+                onClick={onApply}
+                disabled={applyLoading}>
                 <UserMinus2 className="mr-2 h-4 w-4" />
-                Apply updates
+                {applyLoading ? "Applying..." : "Apply updates"}
               </Button>
             </DialogFooter>
           </>
