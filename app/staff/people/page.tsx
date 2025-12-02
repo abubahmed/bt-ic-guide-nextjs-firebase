@@ -172,6 +172,11 @@ const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
   actions: true,
 };
 
+async function fetchPeopleDataset(): Promise<{
+  teams: typeof teams;
+  people: PersonRecord[];
+}> {}
+
 async function stageMasterUpload(): Promise<void> {}
 
 async function stageGroupUpload(role: AccessRole, subteam?: TeamId): Promise<void> {}
