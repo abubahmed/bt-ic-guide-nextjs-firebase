@@ -89,6 +89,8 @@ type AccessDialogProps = {
   activePerson: PersonRecord | null;
   modalRole: AccessRole;
   onRoleChange: (role: AccessRole) => void;
+  modalSubteam: TeamId;
+  onSubteamChange: (team: TeamId) => void;
   onRevoke: () => void;
   onApply: () => void;
 };
@@ -400,6 +402,7 @@ function RosterViewer() {
   const [accessDialogOpen, setAccessDialogOpen] = useState(false);
   const [activePersonId, setActivePersonId] = useState<string | null>(null);
   const [modalRole, setModalRole] = useState<AccessRole>("attendee");
+  const [modalSubteam, setModalSubteam] = useState<TeamId>(DEFAULT_TEAM);
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
@@ -456,6 +459,9 @@ function RosterViewer() {
   useEffect(() => {
     if (activePerson) {
       setModalRole(activePerson.accessRole);
+      if (activePerson.accessRole === "staff") {
+        setModalSubteam(activePerson.team);
+      }
     }
   }, [activePerson]);
 
@@ -533,6 +539,8 @@ function RosterViewer() {
         activePerson={activePerson}
         modalRole={modalRole}
         onRoleChange={setModalRole}
+        modalSubteam={modalSubteam}
+        onSubteamChange={setModalSubteam}
         onRevoke={handleRevokeAccess}
         onApply={handleApplyUpdates}
       />
@@ -881,7 +889,17 @@ function PaginationControls({
   );
 }
 
-function AccessDialog({ open, onOpenChange, activePerson, modalRole, onRoleChange, onRevoke, onApply }: AccessDialogProps) {
+function AccessDialog({
+  open,
+  onOpenChange,
+  activePerson,
+  modalRole,
+  onRoleChange,
+  modalSubteam,
+  onSubteamChange,
+  onRevoke,
+  onApply,
+}: AccessDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-slate-800 bg-slate-950 text-slate-100">
@@ -907,6 +925,23 @@ function AccessDialog({ open, onOpenChange, activePerson, modalRole, onRoleChang
                   </TabsList>
                 </Tabs>
               </div>
+              {modalRole === "staff" && (
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                  <Select value={modalSubteam} onValueChange={(value) => onSubteamChange(value as TeamId)}>
+                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                      <SelectValue placeholder="Select subteam" />
+                    </SelectTrigger>
+                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-4">
                 <p className="text-sm font-semibold text-white">Current status</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
