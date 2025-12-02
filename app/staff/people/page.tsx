@@ -5,6 +5,7 @@ import { ShieldBan, UploadCloud, UserMinus2, Users2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,6 +43,10 @@ type IndividualFormState = {
 };
 type PersonRecord = (typeof peopleDirectory)[number] & {
   staffType?: string;
+  phone?: string;
+  company?: string;
+  school?: string;
+  grade?: string;
 };
 
 const teamLookup = teams.reduce<Record<TeamId, string>>((acc, team) => {
@@ -69,6 +74,7 @@ type RosterFiltersProps = {
 type RosterTableProps = {
   pagedRoster: PersonRecord[];
   onManage: (personId: string) => void;
+  visibleColumns: ColumnVisibility;
 };
 
 type PaginationControlsProps = {
@@ -94,6 +100,45 @@ type AccessDialogProps = {
   onRevoke: () => void;
   onApply: () => void;
 };
+
+type ColumnVisibility = {
+  phone: boolean;
+  company: boolean;
+  school: boolean;
+  grade: boolean;
+};
+
+type ColumnVisibilityControlsProps = {
+  visibility: ColumnVisibility;
+  onToggle: (column: keyof ColumnVisibility, checked: boolean) => void;
+};
+
+const OPTIONAL_COLUMN_CONFIGS: Array<{
+  key: keyof ColumnVisibility;
+  label: string;
+  accessor: (person: PersonRecord) => string;
+}> = [
+  {
+    key: "phone",
+    label: "Phone",
+    accessor: (person) => person.phone ?? "—",
+  },
+  {
+    key: "company",
+    label: "Company",
+    accessor: (person) => person.company ?? "—",
+  },
+  {
+    key: "school",
+    label: "School",
+    accessor: (person) => person.school ?? "—",
+  },
+  {
+    key: "grade",
+    label: "Grade",
+    accessor: (person) => person.grade ?? "—",
+  },
+];
 
 export default function StaffPeoplePage() {
   return (
@@ -403,6 +448,12 @@ function RosterViewer() {
   const [activePersonId, setActivePersonId] = useState<string | null>(null);
   const [modalRole, setModalRole] = useState<AccessRole>("attendee");
   const [modalSubteam, setModalSubteam] = useState<TeamId>(DEFAULT_TEAM);
+  const [visibleColumns, setVisibleColumns] = useState<ColumnVisibility>({
+    phone: false,
+    company: false,
+    school: false,
+    grade: false,
+  });
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
@@ -487,6 +538,9 @@ function RosterViewer() {
 
   const handleRevokeAccess = () => {};
   const handleApplyUpdates = () => {};
+  const handleColumnToggle = (column: keyof ColumnVisibility, checked: boolean) => {
+    setVisibleColumns((prev) => ({ ...prev, [column]: checked }));
+  };
 
   return (
     <>
@@ -510,9 +564,10 @@ function RosterViewer() {
             onStatusChange={setStatusFilter}
             onSearchChange={setSearchQuery}
           />
+          <ColumnVisibilityControls visibility={visibleColumns} onToggle={handleColumnToggle} />
           <div className="mt-4">
             {pagedRoster.length > 0 ? (
-              <RosterTable pagedRoster={pagedRoster} onManage={handleOpenDialog} />
+              <RosterTable pagedRoster={pagedRoster} onManage={handleOpenDialog} visibleColumns={visibleColumns} />
             ) : (
               <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
                 No people match the applied filters.
@@ -788,7 +843,25 @@ function RosterFilters({
   );
 }
 
-function RosterTable({ pagedRoster, onManage }: RosterTableProps) {
+function ColumnVisibilityControls({ visibility, onToggle }: ColumnVisibilityControlsProps) {
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-800/60 bg-slate-950/40 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">Optional fields</p>
+      {OPTIONAL_COLUMN_CONFIGS.map(({ key, label }) => (
+        <label key={key} className="flex items-center gap-2 text-sm text-slate-300">
+          <Checkbox
+            checked={visibility[key]}
+            onCheckedChange={(checked) => onToggle(key, Boolean(checked))}
+            className="border-slate-600 data-[state=checked]:border-sky-500 data-[state=checked]:bg-sky-500"
+          />
+          {label}
+        </label>
+      ))}
+    </div>
+  );
+}
+
+function RosterTable({ pagedRoster, onManage, visibleColumns }: RosterTableProps) {
   return (
     <Table className="border-collapse text-sm text-slate-200 [&_td]:align-top">
       <TableHeader>
@@ -799,6 +872,14 @@ function RosterTable({ pagedRoster, onManage }: RosterTableProps) {
           <TableHead className="border border-slate-800/60 text-slate-400">Email</TableHead>
           <TableHead className="border border-slate-800/60 text-slate-400">Subteam</TableHead>
           <TableHead className="border border-slate-800/60 text-slate-400">Role</TableHead>
+          {OPTIONAL_COLUMN_CONFIGS.map(
+            ({ key, label }) =>
+              visibleColumns[key] && (
+                <TableHead key={key} className="border border-slate-800/60 text-slate-400">
+                  {label}
+                </TableHead>
+              )
+          )}
           <TableHead className="border border-slate-800/60 text-slate-400">Status</TableHead>
           <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
         </TableRow>
@@ -826,6 +907,14 @@ function RosterTable({ pagedRoster, onManage }: RosterTableProps) {
                   </Badge>
                 </div>
               </TableCell>
+              {OPTIONAL_COLUMN_CONFIGS.map(
+                ({ key, accessor }) =>
+                  visibleColumns[key] && (
+                    <TableCell key={`${person.id}-${key}`} className="border border-slate-800/60 p-3">
+                      <p className="text-sm font-medium text-white">{accessor(person)}</p>
+                    </TableCell>
+                  )
+              )}
               <TableCell className="border border-slate-800/60 p-3">
                 <div className="space-y-1">
                   <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyle.badge}`}>
