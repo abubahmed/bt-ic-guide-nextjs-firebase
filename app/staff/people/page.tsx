@@ -733,6 +733,17 @@ function RosterFilters({
 }: RosterFiltersProps) {
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
+      <Select value={accessFilter} onValueChange={(value) => onAccessChange(value as "all" | AccessRole)}>
+        <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+          <SelectValue placeholder="Role filter" />
+        </SelectTrigger>
+        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+          <SelectItem value="all">Admins + Staff + Attendees</SelectItem>
+          <SelectItem value="admin">Admins</SelectItem>
+          <SelectItem value="staff">Staff</SelectItem>
+          <SelectItem value="attendee">Attendees</SelectItem>
+        </SelectContent>
+      </Select>
       {accessFilter === "staff" && (
         <Select value={teamFilter} onValueChange={(value) => onTeamChange(value as "all" | TeamId)}>
           <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
@@ -748,17 +759,6 @@ function RosterFilters({
           </SelectContent>
         </Select>
       )}
-      <Select value={accessFilter} onValueChange={(value) => onAccessChange(value as "all" | AccessRole)}>
-        <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-          <SelectValue placeholder="Role filter" />
-        </SelectTrigger>
-        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-          <SelectItem value="all">Admins + Staff + Attendees</SelectItem>
-          <SelectItem value="admin">Admins</SelectItem>
-          <SelectItem value="staff">Staff</SelectItem>
-          <SelectItem value="attendee">Attendees</SelectItem>
-        </SelectContent>
-      </Select>
       <Select value={statusFilter} onValueChange={(value) => onStatusChange(value as "all" | PersonStatus)}>
         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
           <SelectValue placeholder="Status filter" />
