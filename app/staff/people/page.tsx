@@ -23,20 +23,20 @@ import { teams, staffTypes, peopleDirectory, statusStyles, accessStyles } from "
 import StaffFooter from "../components/footer";
 import StaffHeader from "../components/header";
 
-type UploadScope = "master" | "team" | "person";
-type ExportScope = "all" | "team" | "person";
+type UploadScope = "master" | "group" | "individual";
+type ExportScope = "master" | "group" | "individual";
 type ExportFormat = "csv" | "xlsx";
-type AccessRole = "staff" | "attendee";
+type AccessRole = "admin" | "staff" | "attendee";
 type PersonStatus = "active" | "invited" | "revoked";
 type TeamId = (typeof teams)[number]["id"];
 type StaffTypeId = (typeof staffTypes)[number]["id"];
-type IndividualRole = "staff" | "admin" | "attendee";
+type IndividualRole = AccessRole;
 type IndividualFormState = {
   fullName: string;
   email: string;
   phone: string;
   role: IndividualRole;
-  subteam: string;
+  subteam: TeamId | "";
   grade: string;
   company: string;
   school: string;
@@ -53,7 +53,7 @@ const teamLookup = teams.reduce<Record<TeamId, string>>((acc, team) => {
 const DEFAULT_TEAM: TeamId = teams[0].id;
 const DEFAULT_PERSON = peopleDirectory.find((person) => person.team === DEFAULT_TEAM)?.id ?? peopleDirectory[0].id;
 const PAGE_SIZE = 10;
-const INDIVIDUAL_ROLE_OPTIONS: IndividualRole[] = ["staff", "admin", "attendee"];
+const ROLE_OPTIONS: AccessRole[] = ["admin", "staff", "attendee"];
 const GRADE_OPTIONS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"];
 
 type RosterFiltersProps = {
@@ -114,13 +114,14 @@ export default function StaffPeoplePage() {
 
 function UploadPanel() {
   const [scope, setScope] = useState<UploadScope>("master");
-  const [team, setTeam] = useState<TeamId>(DEFAULT_TEAM);
+  const [groupRole, setGroupRole] = useState<AccessRole>("staff");
+  const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
   const [individualForm, setIndividualForm] = useState<IndividualFormState>({
     fullName: "",
     email: "",
     phone: "",
     role: "staff",
-    subteam: "",
+    subteam: DEFAULT_TEAM,
     grade: GRADE_OPTIONS[0],
     company: "",
     school: "",
@@ -131,7 +132,7 @@ function UploadPanel() {
   };
 
   const handleRunValidations = () => {
-    if (scope !== "person") {
+    if (scope !== "individual") {
       console.info(`[Validations] ${scope} scope currently relies on external spreadsheet validation.`);
       return true;
     }
@@ -156,7 +157,7 @@ function UploadPanel() {
     if (!individualForm.school.trim()) {
       errors.push("School is required.");
     }
-    if (individualForm.role === "staff" && !individualForm.subteam.trim()) {
+    if (individualForm.role === "staff" && !individualForm.subteam) {
       errors.push("Subteam is required for staff roles.");
     }
 
@@ -192,38 +193,55 @@ function UploadPanel() {
                 Master
               </TabsTrigger>
               <TabsTrigger
-                value="team"
+                value="group"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Team
+                Group
               </TabsTrigger>
               <TabsTrigger
-                value="person"
+                value="individual"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                 Individual
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {scope !== "master" && (
+        {scope === "group" && (
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-              <Select value={team} onValueChange={(value) => setTeam(value as TeamId)}>
+              <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
+              <Select value={groupRole} onValueChange={(value) => setGroupRole(value as AccessRole)}>
                 <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                  <SelectValue placeholder="Choose team" />
+                  <SelectValue placeholder="Choose role" />
                 </SelectTrigger>
                 <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                  {teams.map((teamOption) => (
-                    <SelectItem key={teamOption.id} value={teamOption.id}>
-                      {teamOption.label}
+                  {ROLE_OPTIONS.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          )}
-        </div>
-        {scope === "person" ? (
+            {groupRole === "staff" && (
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as TeamId)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Choose subteam" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {teams.map((teamOption) => (
+                      <SelectItem key={teamOption.id} value={teamOption.id}>
+                        {teamOption.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        )}
+        {scope === "individual" ? (
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
@@ -259,12 +277,14 @@ function UploadPanel() {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
-                <Select value={individualForm.role} onValueChange={(value) => handleIndividualFormChange("role", value as IndividualRole)}>
+                <Select
+                  value={individualForm.role}
+                  onValueChange={(value) => handleIndividualFormChange("role", value as IndividualRole)}>
                   <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {INDIVIDUAL_ROLE_OPTIONS.map((role) => (
+                    {ROLE_OPTIONS.map((role) => (
                       <SelectItem key={role} value={role}>
                         {role.charAt(0).toUpperCase() + role.slice(1)}
                       </SelectItem>
@@ -291,12 +311,20 @@ function UploadPanel() {
             {individualForm.role === "staff" && (
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
-                <Input
+                <Select
                   value={individualForm.subteam}
-                  onChange={(event) => handleIndividualFormChange("subteam", event.target.value)}
-                  placeholder="Ops, Hospitality..."
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
-                />
+                  onValueChange={(value) => handleIndividualFormChange("subteam", value as TeamId)}>
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectValue placeholder="Choose subteam" />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    {teams.map((teamOption) => (
+                      <SelectItem key={teamOption.id} value={teamOption.id}>
+                        {teamOption.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
             <div className="grid gap-4 md:grid-cols-2">
@@ -364,8 +392,13 @@ function RosterViewer() {
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
     return peopleDirectory.filter((person) => {
-      if (teamFilter !== "all" && person.team !== teamFilter) {
-        return false;
+      if (teamFilter !== "all") {
+        if (person.accessRole !== "staff") {
+          return false;
+        }
+        if (person.team !== teamFilter) {
+          return false;
+        }
       }
       if (accessFilter !== "all" && person.accessRole !== accessFilter) {
         return false;
@@ -493,17 +526,19 @@ function RosterViewer() {
 }
 
 function ExportPanel() {
-  const [scope, setScope] = useState<ExportScope>("all");
-  const [team, setTeam] = useState<TeamId>(DEFAULT_TEAM);
-  const [personId, setPersonId] = useState<string>(DEFAULT_PERSON);
+  const [scope, setScope] = useState<ExportScope>("master");
+  const [groupRole, setGroupRole] = useState<AccessRole>("staff");
+  const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
+  const [individualTeam, setIndividualTeam] = useState<TeamId>(DEFAULT_TEAM);
+  const [individualPerson, setIndividualPerson] = useState<string>(DEFAULT_PERSON);
   const [format, setFormat] = useState<ExportFormat>("csv");
 
   useEffect(() => {
-    const scopedPeople = peopleDirectory.filter((person) => person.team === team);
-    if (!scopedPeople.some((person) => person.id === personId)) {
-      setPersonId(scopedPeople[0]?.id ?? "");
+    const scopedPeople = peopleDirectory.filter((person) => person.team === individualTeam);
+    if (!scopedPeople.some((person) => person.id === individualPerson)) {
+      setIndividualPerson(scopedPeople[0]?.id ?? "");
     }
-  }, [team, personId]);
+  }, [individualTeam, individualPerson]);
 
   const handleGenerate = () => {};
 
@@ -520,46 +555,65 @@ function ExportPanel() {
           <Tabs value={scope} onValueChange={(value) => setScope(value as ExportScope)}>
             <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
               <TabsTrigger
-                value="all"
+                value="master"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Everyone
+                Master
               </TabsTrigger>
               <TabsTrigger
-                value="team"
+                value="group"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Team
+                Group
               </TabsTrigger>
               <TabsTrigger
-                value="person"
+                value="individual"
                 className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
                 Individual
               </TabsTrigger>
             </TabsList>
             <div className="mt-6 space-y-4">
-              <TabsContent value="team" className="space-y-3">
-                <div className="space-y-2">
-                  <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-                  <Select value={team} onValueChange={(value) => setTeam(value as TeamId)}>
-                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                      <SelectValue placeholder="Choose team" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                      {teams.map((teamOption) => (
-                        <SelectItem key={teamOption.id} value={teamOption.id}>
-                          {teamOption.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </TabsContent>
-              <TabsContent value="person" className="space-y-3">
+              <TabsContent value="group" className="space-y-3">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
-                    <Select value={team} onValueChange={(value) => setTeam(value as TeamId)}>
+                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
+                    <Select value={groupRole} onValueChange={(value) => setGroupRole(value as AccessRole)}>
                       <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                        <SelectValue placeholder="Team" />
+                        <SelectValue placeholder="Choose role" />
+                      </SelectTrigger>
+                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                        {ROLE_OPTIONS.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {groupRole === "staff" && (
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                      <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as TeamId)}>
+                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                          <SelectValue placeholder="Choose subteam" />
+                        </SelectTrigger>
+                        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                          {teams.map((teamOption) => (
+                            <SelectItem key={teamOption.id} value={teamOption.id}>
+                              {teamOption.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+              <TabsContent value="individual" className="space-y-3">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
+                    <Select value={individualTeam} onValueChange={(value) => setIndividualTeam(value as TeamId)}>
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                        <SelectValue placeholder="Subteam" />
                       </SelectTrigger>
                       <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
                         {teams.map((teamOption) => (
@@ -572,13 +626,13 @@ function ExportPanel() {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Person</Label>
-                    <Select value={personId} onValueChange={setPersonId}>
+                    <Select value={individualPerson} onValueChange={setIndividualPerson}>
                       <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                         <SelectValue placeholder="Person" />
                       </SelectTrigger>
                       <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
                         {peopleDirectory
-                          .filter((person) => person.team === team)
+                          .filter((person) => person.team === individualTeam)
                           .map((person) => (
                             <SelectItem key={person.id} value={person.id}>
                               {person.name}
@@ -630,10 +684,10 @@ function RosterFilters({
     <div className="mt-4 flex flex-wrap items-center gap-3">
       <Select value={teamFilter} onValueChange={(value) => onTeamChange(value as "all" | TeamId)}>
         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-          <SelectValue placeholder="Team filter" />
+          <SelectValue placeholder="Subteam filter" />
         </SelectTrigger>
         <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-          <SelectItem value="all">All teams</SelectItem>
+          <SelectItem value="all">All subteams</SelectItem>
           {teams.map((team) => (
             <SelectItem key={team.id} value={team.id}>
               {team.label}
@@ -643,10 +697,11 @@ function RosterFilters({
       </Select>
       <Select value={accessFilter} onValueChange={(value) => onAccessChange(value as "all" | AccessRole)}>
         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
-          <SelectValue placeholder="Access filter" />
+          <SelectValue placeholder="Role filter" />
         </SelectTrigger>
         <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-          <SelectItem value="all">Staff + Attendees</SelectItem>
+          <SelectItem value="all">Admins + Staff + Attendees</SelectItem>
+          <SelectItem value="admin">Admins</SelectItem>
           <SelectItem value="staff">Staff</SelectItem>
           <SelectItem value="attendee">Attendees</SelectItem>
         </SelectContent>
@@ -681,14 +736,15 @@ function RosterTable({ pagedRoster, onManage }: RosterTableProps) {
             Person
           </TableHead>
           <TableHead className="border border-slate-800/60 text-slate-400">Email</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Team</TableHead>
-          <TableHead className="border border-slate-800/60 text-slate-400">Access</TableHead>
+          <TableHead className="border border-slate-800/60 text-slate-400">Subteam</TableHead>
+          <TableHead className="border border-slate-800/60 text-slate-400">Role</TableHead>
           <TableHead className="border border-slate-800/60 text-slate-400">Status</TableHead>
           <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {pagedRoster.map((person) => {
+          const subteamLabel = person.accessRole === "staff" ? teamLookup[person.team] : "—";
           const statusStyle = statusStyles[person.status];
           const accessStyle = accessStyles[person.accessRole];
           return (
@@ -700,7 +756,7 @@ function RosterTable({ pagedRoster, onManage }: RosterTableProps) {
                 <p className="text-sm font-medium text-white">{person.email}</p>
               </TableCell>
               <TableCell className="border border-slate-800/60 p-3">
-                <p className="text-sm font-medium text-white">{teamLookup[person.team]}</p>
+                <p className="text-sm font-medium text-white">{subteamLabel}</p>
               </TableCell>
               <TableCell className="border border-slate-800/60 p-3">
                 <div className="flex flex-wrap gap-2">
@@ -796,17 +852,15 @@ function AccessDialog({
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role type</Label>
                 <Tabs value={modalRole} onValueChange={(value) => onRoleChange(value as AccessRole)}>
-                  <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-900/60">
-                    <TabsTrigger
-                      value="staff"
-                      className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                      Staff
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="attendee"
-                      className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                      Attendee
-                    </TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+                    {ROLE_OPTIONS.map((role) => (
+                      <TabsTrigger
+                        key={role}
+                        value={role}
+                        className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </TabsTrigger>
+                    ))}
                   </TabsList>
                 </Tabs>
               </div>

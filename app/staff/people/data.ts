@@ -197,6 +197,10 @@ const statusStyles = {
 };
 
 const accessStyles = {
+  admin: {
+    label: "Admin",
+    badge: "bg-violet-500/10 text-violet-200 border border-violet-500/40",
+  },
   staff: {
     label: "Staff",
     badge: "bg-sky-500/10 text-sky-300 border border-sky-500/40",
