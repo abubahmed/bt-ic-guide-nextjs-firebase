@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { Loader2, ShieldBan, UploadCloud, UserMinus2, Users2 } from "lucide-react";
+import { ShieldBan, UploadCloud, UserMinus2, Users2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { teams, peopleDirectory, statusStyles, accessStyles } from "@/app/staff/
 
 import StaffFooter from "../components/footer";
 import StaffHeader from "../components/header";
+import { StaffSectionSkeleton } from "../components/section-skeleton";
 
 type UploadScope = "master" | "group" | "individual";
 type ExportScope = "master" | "group" | "individual";
@@ -293,9 +294,30 @@ export default function StaffPeoplePage() {
         <StaffHeader currentPage="people" />
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
           {loadingState.fetch ? (
-            <div className="flex items-center justify-center rounded-[32px] border border-slate-800 bg-slate-900/70 p-10 text-center text-sm text-slate-400 shadow-[0px_30px_80px_rgba(2,6,23,0.45)]">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-            </div>
+            <>
+              <StaffSectionSkeleton
+                blocks={[
+                  { lines: 2, contentHeight: "h-12" },
+                  { lines: 4, contentHeight: "h-56" },
+                ]}
+                footerItems={2}
+              />
+              <StaffSectionSkeleton
+                blocks={[
+                  { lines: 3, contentHeight: "h-16" },
+                  { lines: 2, contentHeight: "h-14" },
+                  { lines: 4, contentHeight: "h-80" },
+                ]}
+              />
+              <StaffSectionSkeleton
+                blocks={[
+                  { lines: 3, contentHeight: "h-36" },
+                  { lines: 2, contentHeight: "h-28" },
+                ]}
+                footerItems={1}
+                className="bg-slate-900/60"
+              />
+            </>
           ) : (
             <>
               <UploadPanel loadingState={loadingState} setLoadingState={setLoadingState} isLocked={isGlobalLocked} />
