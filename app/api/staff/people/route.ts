@@ -2,14 +2,16 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/firebase/server/config";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE_NAME } from "@/constants";
+import { getSessionUser } from "@/actions/session-actions";
+import { getUser } from "@/lib/firebase/server/users";
 
 export async function POST() {
-  const session = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
-  
-  const decoded = await auth.verifySessionCookie(session, false);
-  if (!decoded) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+
 
   const res = NextResponse.json({ ok: true });
   res.cookies.set({
