@@ -36,7 +36,7 @@ export default function StaffDashboardPage() {
           </div>
 
           <div className="mt-6 rounded-[28px] border border-slate-800/70 bg-slate-950/40 overflow-hidden">
-            <div className="grid md:grid-cols-2 auto-rows-fr lg:grid-cols-4">
+            <div className="grid md:grid-cols-2 auto-rows-fr lg:grid-cols-3">
               {quickActions.map((action) => (
                 <div key={action.label} className="h-full w-full">
                   <QuickActionButton action={action} />

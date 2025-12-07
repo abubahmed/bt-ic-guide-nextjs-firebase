@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { ShieldBan, UploadCloud, UserMinus2, Users2 } from "lucide-react";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,112 +19,40 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { teams, peopleDirectory, statusStyles, accessStyles } from "@/app/staff/people/data";
-
-import StaffFooter from "../components/footer";
+import {
+  teams,
+  roles,
+  accessStatuses,
+  grades,
+  peopleDirectory,
+  statusStyles,
+  accessStyles,
+} from "@/app/staff/people/data";
 import StaffHeader from "../components/header";
+import StaffFooter from "../components/footer";
 import { StaffSectionSkeleton } from "../components/skeleton";
+import { AccessStatus, Grade, Role, Subteam, User } from "@/schemas/database";
 
 type UploadScope = "master" | "group" | "individual";
 type ExportScope = "master" | "group" | "individual";
 type ExportFormat = "csv" | "xlsx";
-type AccessRole = "admin" | "staff" | "attendee";
-type PersonStatus = "active" | "invited" | "revoked";
-type TeamId = (typeof teams)[number]["id"];
-type IndividualRole = AccessRole;
+
+type RoleFilter = "all" | Role;
+type SubteamFilter = "all" | Subteam;
+type StatusFilter = "all" | AccessStatus;
+
 type IndividualFormState = {
   fullName: string;
   email: string;
   phone: string;
-  role: IndividualRole;
-  subteam: TeamId | "";
-  grade: string;
+  role: Role;
+  subteam: Subteam | "";
+  grade: Grade | "";
   company: string;
   school: string;
 };
-type PersonRecord = (typeof peopleDirectory)[number] & {
-  staffType?: string;
-  phone?: string;
-  company?: string;
-  school?: string;
-  grade?: string;
-};
 
-const teamLookup = teams.reduce<Record<TeamId, string>>((acc, team) => {
-  acc[team.id] = team.label;
-  return acc;
-}, {} as Record<TeamId, string>);
-
-const DEFAULT_TEAM: TeamId = teams[0].id;
-const DEFAULT_PERSON = peopleDirectory.find((person) => person.team === DEFAULT_TEAM)?.id ?? peopleDirectory[0].id;
-const PAGE_SIZE = 10;
-const ROLE_OPTIONS: AccessRole[] = ["admin", "staff", "attendee"];
-const GRADE_OPTIONS = ["Freshman", "Sophomore", "Junior", "Senior", "Graduate", "Other"];
-
-type RosterFiltersProps = {
-  teamFilter: "all" | TeamId;
-  accessFilter: "all" | AccessRole;
-  statusFilter: "all" | PersonStatus;
-  searchQuery: string;
-  onTeamChange: (value: "all" | TeamId) => void;
-  onAccessChange: (value: "all" | AccessRole) => void;
-  onStatusChange: (value: "all" | PersonStatus) => void;
-  onSearchChange: (value: string) => void;
-};
-
-type RosterTableProps = {
-  pagedRoster: PersonRecord[];
-  onManage: (personId: string) => void;
-  visibleColumns: ColumnVisibility;
-  isLocked: boolean;
-};
-
-type PaginationControlsProps = {
-  pageStart: number;
-  pageEnd: number;
-  totalCount: number;
-  gridPage: number;
-  pageCount: number;
-  canGoPrev: boolean;
-  canGoNext: boolean;
-  onPrev: () => void;
-  onNext: () => void;
-};
-
-type AccessDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  activePerson: PersonRecord | null;
-  modalRole: AccessRole;
-  onRoleChange: (role: AccessRole) => void;
-  modalSubteam: TeamId;
-  onSubteamChange: (team: TeamId) => void;
-  onRevoke: () => void;
-  onApply: () => void;
-  revokeLoading: boolean;
-  applyLoading: boolean;
-  isLocked: boolean;
-};
-
-type ColumnVisibility = {
-  person: boolean;
-  email: boolean;
-  subteam: boolean;
-  role: boolean;
-  phone: boolean;
-  company: boolean;
-  school: boolean;
-  grade: boolean;
-  status: boolean;
-  actions: boolean;
-};
-
-type ColumnVisibilityControlsProps = {
-  visibility: ColumnVisibility;
-  onToggle: (column: keyof ColumnVisibility, checked: boolean) => void;
-};
-
-type GlobalLoadingState = {
+type LoadingState = {
   fetch: boolean;
   upload: boolean;
   revoke: boolean;
@@ -133,33 +60,26 @@ type GlobalLoadingState = {
   export: boolean;
 };
 
-type UploadPanelProps = {
-  loadingState: GlobalLoadingState;
-  setLoadingState: Dispatch<SetStateAction<GlobalLoadingState>>;
-  isLocked: boolean;
-};
+const UPLOAD_SCOPES: UploadScope[] = ["master", "group", "individual"];
+const EXPORT_SCOPES: ExportScope[] = ["master", "group", "individual"];
+const EXPORT_FORMATS: ExportFormat[] = ["csv", "xlsx"];
 
-type RosterViewerProps = {
-  loadingState: GlobalLoadingState;
-  setLoadingState: Dispatch<SetStateAction<GlobalLoadingState>>;
-  isLocked: boolean;
-};
+const DEFAULT_TEAM: Subteam = "logistics";
+const DEFAULT_ROLE: Role = "attendee";
+const DEFAULT_GRADE: Grade = "freshman";
 
-type ExportPanelProps = {
-  loadingState: GlobalLoadingState;
-  setLoadingState: Dispatch<SetStateAction<GlobalLoadingState>>;
-  isLocked: boolean;
-};
+const DEFAULT_PERSON: User | undefined = peopleDirectory.find((person) => person.subteam === DEFAULT_TEAM);
+const PAGE_SIZE = 10;
 
 const TEXT_COLUMN_CONFIGS: Array<{
   key: "phone" | "company" | "school" | "grade";
   label: string;
-  accessor: (person: PersonRecord) => string;
+  accessor: (person: User) => string;
 }> = [
   {
     key: "phone",
     label: "Phone",
-    accessor: (person) => person.phone ?? "—",
+    accessor: (person) => person.phoneNumber ?? "—",
   },
   {
     key: "company",
@@ -178,6 +98,19 @@ const TEXT_COLUMN_CONFIGS: Array<{
   },
 ];
 
+type ColumnVisibility = {
+  person: boolean;
+  email: boolean;
+  subteam: boolean;
+  role: boolean;
+  phone: boolean;
+  company: boolean;
+  school: boolean;
+  grade: boolean;
+  status: boolean;
+  actions: boolean;
+};
+
 const COLUMN_CONTROLS: Array<{ key: keyof ColumnVisibility; label: string }> = [
   { key: "person", label: "Person" },
   { key: "email", label: "Email" },
@@ -191,7 +124,7 @@ const COLUMN_CONTROLS: Array<{ key: keyof ColumnVisibility; label: string }> = [
   { key: "actions", label: "Actions" },
 ];
 
-const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
+const DEFAULT_COLUMN_VISIBILITY = {
   person: true,
   email: true,
   subteam: true,
@@ -210,7 +143,7 @@ const simulateNetworkLatency = () => new Promise((resolve) => setTimeout(resolve
 
 async function fetchPeopleDataset() {
   await simulateNetworkLatency();
-  return peopleDirectory as any;
+  return peopleDirectory;
 }
 
 async function stageMasterUpload(): Promise<void> {
@@ -218,7 +151,7 @@ async function stageMasterUpload(): Promise<void> {
   console.info("[Upload] Master dataset staged");
 }
 
-async function stageGroupUpload(role: AccessRole, subteam?: TeamId): Promise<void> {
+async function stageGroupUpload(role: Role, subteam?: Subteam): Promise<void> {
   await simulateNetworkLatency();
   console.info(`[Upload] Group dataset staged for role=${role} subteam=${subteam ?? "n/a"}`);
 }
@@ -236,8 +169,8 @@ async function revokePersonAccess(personId: string): Promise<void> {
 async function applyPersonAccessUpdates(
   personId: string,
   updates: {
-    role: AccessRole;
-    subteam?: TeamId;
+    role: Role;
+    subteam?: Subteam;
   }
 ): Promise<void> {
   await simulateNetworkLatency();
@@ -246,8 +179,8 @@ async function applyPersonAccessUpdates(
 
 async function generatePeopleExport(params: {
   scope: ExportScope;
-  role?: AccessRole;
-  subteam?: TeamId;
+  role?: Role;
+  subteam?: Subteam;
   personId?: string | null;
   format: ExportFormat;
 }): Promise<void> {
@@ -256,7 +189,7 @@ async function generatePeopleExport(params: {
 }
 
 export default function StaffPeoplePage() {
-  const [loadingState, setLoadingState] = useState<GlobalLoadingState>({
+  const [loadingState, setLoadingState] = useState<LoadingState>({
     fetch: true,
     upload: false,
     revoke: false,
@@ -326,25 +259,36 @@ export default function StaffPeoplePage() {
   );
 }
 
-function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelProps) {
+function UploadPanel({
+  loadingState,
+  setLoadingState,
+  isLocked,
+}: {
+  loadingState: LoadingState;
+  setLoadingState: Dispatch<SetStateAction<LoadingState>>;
+  isLocked: boolean;
+}) {
   const [scope, setScope] = useState<UploadScope>("master");
-  const [groupRole, setGroupRole] = useState<AccessRole>("staff");
-  const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
+  const [groupRole, setGroupRole] = useState<Role>(DEFAULT_ROLE);
+  const [groupSubteam, setGroupSubteam] = useState<Subteam>(DEFAULT_TEAM);
   const [individualForm, setIndividualForm] = useState<IndividualFormState>({
     fullName: "",
     email: "",
     phone: "",
-    role: "staff",
+    role: DEFAULT_ROLE,
     subteam: DEFAULT_TEAM,
-    grade: GRADE_OPTIONS[0],
+    grade: DEFAULT_GRADE,
     company: "",
     school: "",
   });
 
   const handleIndividualFormChange = <K extends keyof IndividualFormState>(field: K, value: IndividualFormState[K]) => {
+    if (isLocked) {
+      return;
+    }
     setIndividualForm((prev) => {
       if (field === "role") {
-        const nextRole = value as IndividualRole;
+        const nextRole = value as Role;
         return {
           ...prev,
           role: nextRole,
@@ -354,7 +298,7 @@ function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelPro
       if (field === "subteam") {
         return {
           ...prev,
-          subteam: value as TeamId,
+          subteam: value as Subteam,
         };
       }
       return { ...prev, [field]: value } as IndividualFormState;
@@ -436,21 +380,14 @@ function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelPro
           <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload scope</p>
           <Tabs value={scope} onValueChange={(value) => setScope(value as UploadScope)}>
             <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60 text-white">
-              <TabsTrigger
-                value="master"
-                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Master
-              </TabsTrigger>
-              <TabsTrigger
-                value="group"
-                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Group
-              </TabsTrigger>
-              <TabsTrigger
-                value="individual"
-                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Individual
-              </TabsTrigger>
+              {UPLOAD_SCOPES.map((scope) => (
+                <TabsTrigger
+                  key={scope}
+                  value={scope}
+                  className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                  {scope}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </Tabs>
         </div>
@@ -458,14 +395,14 @@ function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelPro
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
-              <Select value={groupRole} onValueChange={(value) => setGroupRole(value as AccessRole)}>
+              <Select value={groupRole} onValueChange={(value) => setGroupRole(value as Role)}>
                 <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                   <SelectValue placeholder="Choose role" />
                 </SelectTrigger>
                 <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                  {ROLE_OPTIONS.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                  {Object.keys(roles).map((role) => (
+                    <SelectItem key={role} value={role as Role}>
+                      {roles[role as Role]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -474,14 +411,14 @@ function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelPro
             {groupRole === "staff" && (
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
-                <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as TeamId)}>
+                <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as Subteam)}>
                   <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                     <SelectValue placeholder="Choose subteam" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {teams.map((teamOption) => (
-                      <SelectItem key={teamOption.id} value={teamOption.id}>
-                        {teamOption.label}
+                    {Object.keys(teams).map((teamOption) => (
+                      <SelectItem key={teamOption} value={teamOption as Subteam}>
+                        {teams[teamOption as Subteam]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -528,14 +465,14 @@ function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelPro
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
                 <Select
                   value={individualForm.role}
-                  onValueChange={(value) => handleIndividualFormChange("role", value as IndividualRole)}>
+                  onValueChange={(value) => handleIndividualFormChange("role", value as Role)}>
                   <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {ROLE_OPTIONS.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                    {Object.keys(roles).map((role) => (
+                      <SelectItem key={role} value={role as Role}>
+                        {roles[role as Role]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -545,14 +482,14 @@ function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelPro
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Grade</Label>
                 <Select
                   value={individualForm.grade}
-                  onValueChange={(value) => handleIndividualFormChange("grade", value)}>
+                  onValueChange={(value) => handleIndividualFormChange("grade", value as Grade)}>
                   <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {GRADE_OPTIONS.map((grade) => (
-                      <SelectItem key={grade} value={grade}>
-                        {grade}
+                    {Object.keys(grades).map((grade) => (
+                      <SelectItem key={grade} value={grade as Grade}>
+                        {grades[grade as Grade]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -564,14 +501,14 @@ function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelPro
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
                 <Select
                   value={individualForm.subteam}
-                  onValueChange={(value) => handleIndividualFormChange("subteam", value as TeamId)}>
+                  onValueChange={(value) => handleIndividualFormChange("subteam", value as Subteam)}>
                   <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                     <SelectValue placeholder="Choose subteam" />
                   </SelectTrigger>
                   <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {teams.map((teamOption) => (
-                      <SelectItem key={teamOption.id} value={teamOption.id}>
-                        {teamOption.label}
+                    {Object.keys(teams).map((teamOption) => (
+                      <SelectItem key={teamOption} value={teamOption as Subteam}>
+                        {teams[teamOption as Subteam]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -629,57 +566,66 @@ function UploadPanel({ loadingState, setLoadingState, isLocked }: UploadPanelPro
   );
 }
 
-function RosterViewer({ loadingState, setLoadingState, isLocked }: RosterViewerProps) {
-  const [teamFilter, setTeamFilter] = useState<"all" | TeamId>("all");
-  const [accessFilter, setAccessFilter] = useState<"all" | AccessRole>("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | PersonStatus>("all");
+function RosterViewer({
+  loadingState,
+  setLoadingState,
+  isLocked,
+}: {
+  loadingState: LoadingState;
+  setLoadingState: Dispatch<SetStateAction<LoadingState>>;
+  isLocked: boolean;
+}) {
+  const [subteamFilter, setSubteamFilter] = useState<SubteamFilter>("all");
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
+  const [accessStatusFilter, setAccessStatusFilter] = useState<StatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [gridPage, setGridPage] = useState(0);
 
   const [accessDialogOpen, setAccessDialogOpen] = useState(false);
   const [activePersonId, setActivePersonId] = useState<string | null>(null);
-  const [modalRole, setModalRole] = useState<AccessRole>("attendee");
-  const [modalSubteam, setModalSubteam] = useState<TeamId>(DEFAULT_TEAM);
+  const [modalRole, setModalRole] = useState<Role>("attendee");
+  const [modalSubteam, setModalSubteam] = useState<Subteam>(DEFAULT_TEAM);
   const [visibleColumns, setVisibleColumns] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
+
   const revokeLoading = loadingState.revoke;
   const applyLoading = loadingState.apply;
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
     return peopleDirectory.filter((person) => {
-      if (teamFilter !== "all") {
-        if (person.accessRole !== "staff") {
+      if (subteamFilter !== "all") {
+        if (person.role !== "staff") {
           return false;
         }
-        if (person.team !== teamFilter) {
+        if (person.subteam !== subteamFilter) {
           return false;
         }
       }
-      if (accessFilter !== "all" && person.accessRole !== accessFilter) {
+      if (roleFilter !== "all" && person.role !== roleFilter) {
         return false;
       }
-      if (statusFilter !== "all" && person.status !== statusFilter) {
+      if (accessStatusFilter !== "all" && person.accessStatus !== accessStatusFilter) {
         return false;
       }
       if (normalizedSearch.length > 0) {
-        const haystack = `${person.name} ${person.email}`.toLowerCase();
+        const haystack = `${person.fullName} ${person.email}`.toLowerCase();
         if (!haystack.includes(normalizedSearch)) {
           return false;
         }
       }
       return true;
     });
-  }, [teamFilter, accessFilter, statusFilter, searchQuery]);
+  }, [subteamFilter, roleFilter, accessStatusFilter, searchQuery]);
 
   useEffect(() => {
-    if (accessFilter !== "staff" && teamFilter !== "all") {
-      setTeamFilter("all");
+    if (roleFilter !== "staff" && subteamFilter !== "all") {
+      setSubteamFilter("all");
     }
-  }, [accessFilter, teamFilter]);
+  }, [roleFilter, subteamFilter]);
 
   useEffect(() => {
     setGridPage(0);
-  }, [teamFilter, accessFilter, statusFilter, searchQuery]);
+  }, [subteamFilter, roleFilter, accessStatusFilter, searchQuery]);
 
   useEffect(() => {
     const maxPageIndex = Math.max(0, Math.ceil(filteredRoster.length / PAGE_SIZE) - 1);
@@ -692,15 +638,15 @@ function RosterViewer({ loadingState, setLoadingState, isLocked }: RosterViewerP
   const pageEnd = Math.min(filteredRoster.length, (gridPage + 1) * PAGE_SIZE);
 
   const activePerson = useMemo(
-    () => peopleDirectory.find((person) => person.id === activePersonId) ?? null,
+    () => peopleDirectory.find((person) => person.uid === activePersonId) ?? null,
     [activePersonId]
   );
 
   useEffect(() => {
     if (activePerson) {
-      setModalRole(activePerson.accessRole);
-      if (activePerson.accessRole === "staff") {
-        setModalSubteam(activePerson.team);
+      setModalRole(activePerson.role as Role);
+      if (activePerson.role === "staff") {
+        setModalSubteam(activePerson.subteam as Subteam);
       }
     }
   }, [activePerson]);
@@ -771,13 +717,13 @@ function RosterViewer({ loadingState, setLoadingState, isLocked }: RosterViewerP
         </div>
         <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
           <RosterFilters
-            teamFilter={teamFilter}
-            accessFilter={accessFilter}
-            statusFilter={statusFilter}
+            subteamFilter={subteamFilter}
+            roleFilter={roleFilter}
+            accessStatusFilter={accessStatusFilter}
             searchQuery={searchQuery}
-            onTeamChange={setTeamFilter}
-            onAccessChange={setAccessFilter}
-            onStatusChange={setStatusFilter}
+            onSubteamChange={setSubteamFilter}
+            onRoleChange={setRoleFilter}
+            onAccessStatusChange={setAccessStatusFilter}
             onSearchChange={setSearchQuery}
           />
           <ColumnVisibilityControls visibility={visibleColumns} onToggle={handleColumnToggle} />
@@ -827,21 +773,29 @@ function RosterViewer({ loadingState, setLoadingState, isLocked }: RosterViewerP
   );
 }
 
-function ExportPanel({ loadingState, setLoadingState, isLocked }: ExportPanelProps) {
+function ExportPanel({
+  loadingState,
+  setLoadingState,
+  isLocked,
+}: {
+  loadingState: LoadingState;
+  setLoadingState: Dispatch<SetStateAction<LoadingState>>;
+  isLocked: boolean;
+}) {
   const [scope, setScope] = useState<ExportScope>("master");
-  const [groupRole, setGroupRole] = useState<AccessRole>("staff");
-  const [groupSubteam, setGroupSubteam] = useState<TeamId>(DEFAULT_TEAM);
-  const [individualRole, setIndividualRole] = useState<AccessRole>("staff");
-  const [individualSubteam, setIndividualSubteam] = useState<TeamId>(DEFAULT_TEAM);
-  const [individualPerson, setIndividualPerson] = useState<string | null>(DEFAULT_PERSON);
+  const [groupRole, setGroupRole] = useState<Role>("staff");
+  const [groupSubteam, setGroupSubteam] = useState<Subteam>(DEFAULT_TEAM);
+  const [individualRole, setIndividualRole] = useState<Role>("staff");
+  const [individualSubteam, setIndividualSubteam] = useState<Subteam>(DEFAULT_TEAM);
+  const [individualPerson, setIndividualPerson] = useState<string | null>(DEFAULT_PERSON?.uid ?? null);
   const [format, setFormat] = useState<ExportFormat>("csv");
 
   const individualPeople = useMemo(() => {
     return peopleDirectory.filter((person) => {
-      if (person.accessRole !== individualRole) {
+      if (person.role !== individualRole) {
         return false;
       }
-      if (individualRole === "staff" && person.team !== individualSubteam) {
+      if (individualRole === "staff" && person.subteam !== individualSubteam) {
         return false;
       }
       return true;
@@ -849,8 +803,8 @@ function ExportPanel({ loadingState, setLoadingState, isLocked }: ExportPanelPro
   }, [individualRole, individualSubteam]);
 
   useEffect(() => {
-    if (!individualPeople.some((person) => person.id === individualPerson)) {
-      setIndividualPerson(individualPeople[0]?.id ?? null);
+    if (!individualPeople.some((person) => person.uid === individualPerson)) {
+      setIndividualPerson(individualPeople[0]?.uid ?? null);
     }
   }, [individualPeople, individualPerson]);
 
@@ -919,14 +873,14 @@ function ExportPanel({ loadingState, setLoadingState, isLocked }: ExportPanelPro
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
-                    <Select value={groupRole} onValueChange={(value) => setGroupRole(value as AccessRole)}>
+                    <Select value={groupRole} onValueChange={(value) => setGroupRole(value as Role)}>
                       <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                         <SelectValue placeholder="Choose role" />
                       </SelectTrigger>
                       <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                        {ROLE_OPTIONS.map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                        {Object.keys(roles).map((role) => (
+                          <SelectItem key={role} value={role as Role}>
+                            {roles[role as Role]}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -935,14 +889,14 @@ function ExportPanel({ loadingState, setLoadingState, isLocked }: ExportPanelPro
                   {groupRole === "staff" && (
                     <div className="space-y-2">
                       <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
-                      <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as TeamId)}>
+                      <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as Subteam)}>
                         <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                           <SelectValue placeholder="Choose subteam" />
                         </SelectTrigger>
                         <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                          {teams.map((teamOption) => (
-                            <SelectItem key={teamOption.id} value={teamOption.id}>
-                              {teamOption.label}
+                          {Object.keys(teams).map((teamOption) => (
+                            <SelectItem key={teamOption} value={teamOption as Subteam}>
+                              {teams[teamOption as Subteam]}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -955,14 +909,14 @@ function ExportPanel({ loadingState, setLoadingState, isLocked }: ExportPanelPro
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
-                    <Select value={individualRole} onValueChange={(value) => setIndividualRole(value as AccessRole)}>
+                    <Select value={individualRole} onValueChange={(value) => setIndividualRole(value as Role)}>
                       <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                       <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                        {ROLE_OPTIONS.map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {role.charAt(0).toUpperCase() + role.slice(1)}
+                        {Object.keys(roles).map((role) => (
+                          <SelectItem key={role} value={role as Role}>
+                            {roles[role as Role]}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -973,14 +927,14 @@ function ExportPanel({ loadingState, setLoadingState, isLocked }: ExportPanelPro
                       <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
                       <Select
                         value={individualSubteam}
-                        onValueChange={(value) => setIndividualSubteam(value as TeamId)}>
+                        onValueChange={(value) => setIndividualSubteam(value as Subteam)}>
                         <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                           <SelectValue placeholder="Subteam" />
                         </SelectTrigger>
                         <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                          {teams.map((teamOption) => (
-                            <SelectItem key={teamOption.id} value={teamOption.id}>
-                              {teamOption.label}
+                          {Object.keys(teams).map((teamOption) => (
+                            <SelectItem key={teamOption} value={teamOption as Subteam}>
+                              {teams[teamOption as Subteam]}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -999,8 +953,8 @@ function ExportPanel({ loadingState, setLoadingState, isLocked }: ExportPanelPro
                       <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
                         {individualPeople.length > 0 ? (
                           individualPeople.map((person) => (
-                            <SelectItem key={person.id} value={person.id}>
-                              {person.name}
+                            <SelectItem key={person.uid ?? ""} value={person.uid ?? ""}>
+                              {person.fullName}
                             </SelectItem>
                           ))
                         ) : (
@@ -1042,52 +996,65 @@ function ExportPanel({ loadingState, setLoadingState, isLocked }: ExportPanelPro
 }
 
 function RosterFilters({
-  teamFilter,
-  accessFilter,
-  statusFilter,
+  subteamFilter,
+  roleFilter,
+  accessStatusFilter,
   searchQuery,
-  onTeamChange,
-  onAccessChange,
-  onStatusChange,
+  onSubteamChange,
+  onRoleChange,
+  onAccessStatusChange,
   onSearchChange,
-}: RosterFiltersProps) {
+}: {
+  subteamFilter: "all" | Subteam;
+  roleFilter: "all" | Role;
+  accessStatusFilter: "all" | AccessStatus;
+  searchQuery: string;
+  onSubteamChange: (value: "all" | Subteam) => void;
+  onRoleChange: (value: "all" | Role) => void;
+  onAccessStatusChange: (value: "all" | AccessStatus) => void;
+  onSearchChange: (value: string) => void;
+}) {
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
-      <Select value={accessFilter} onValueChange={(value) => onAccessChange(value as "all" | AccessRole)}>
+      <Select value={roleFilter} onValueChange={(value) => onRoleChange(value as "all" | Role)}>
         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
           <SelectValue placeholder="Role filter" />
         </SelectTrigger>
         <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-          <SelectItem value="all">Admins + Staff + Attendees</SelectItem>
-          <SelectItem value="admin">Admins</SelectItem>
-          <SelectItem value="staff">Staff</SelectItem>
-          <SelectItem value="attendee">Attendees</SelectItem>
+          <SelectItem value="all">All roles</SelectItem>
+          {Object.keys(roles).map((role) => (
+            <SelectItem key={role} value={role as Role}>
+              {roles[role as Role]}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
-      {accessFilter === "staff" && (
-        <Select value={teamFilter} onValueChange={(value) => onTeamChange(value as "all" | TeamId)}>
+      {roleFilter === "staff" && (
+        <Select value={subteamFilter} onValueChange={(value) => onSubteamChange(value as "all" | Subteam)}>
           <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
             <SelectValue placeholder="Subteam filter" />
           </SelectTrigger>
           <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
             <SelectItem value="all">All subteams</SelectItem>
-            {teams.map((team) => (
-              <SelectItem key={team.id} value={team.id}>
-                {team.label}
+            {Object.keys(teams).map((subteam) => (
+              <SelectItem key={subteam} value={subteam as Subteam}>
+                {teams[subteam as Subteam]}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       )}
-      <Select value={statusFilter} onValueChange={(value) => onStatusChange(value as "all" | PersonStatus)}>
+      <Select value={accessStatusFilter} onValueChange={(value) => onAccessStatusChange(value as "all" | AccessStatus)}>
         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
           <SelectValue placeholder="Status filter" />
         </SelectTrigger>
         <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
           <SelectItem value="all">All statuses</SelectItem>
-          <SelectItem value="active">Active</SelectItem>
-          <SelectItem value="invited">Invited</SelectItem>
-          <SelectItem value="revoked">Revoked</SelectItem>
+          {Object.keys(accessStatuses).map((accessStatus) => (
+            <SelectItem key={accessStatus} value={accessStatus as AccessStatus}>
+              {accessStatuses[accessStatus as AccessStatus]}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
       <Input
@@ -1100,7 +1067,13 @@ function RosterFilters({
   );
 }
 
-function ColumnVisibilityControls({ visibility, onToggle }: ColumnVisibilityControlsProps) {
+function ColumnVisibilityControls({
+  visibility,
+  onToggle,
+}: {
+  visibility: ColumnVisibility;
+  onToggle: (column: keyof ColumnVisibility, checked: boolean) => void;
+}) {
   return (
     <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-800/60 bg-slate-950/40 p-4">
       {COLUMN_CONTROLS.map(({ key, label }) => (
@@ -1117,7 +1090,17 @@ function ColumnVisibilityControls({ visibility, onToggle }: ColumnVisibilityCont
   );
 }
 
-function RosterTable({ pagedRoster, onManage, visibleColumns, isLocked }: RosterTableProps) {
+function RosterTable({
+  pagedRoster,
+  onManage,
+  visibleColumns,
+  isLocked,
+}: {
+  pagedRoster: User[];
+  onManage: (uid: string) => void;
+  visibleColumns: ColumnVisibility;
+  isLocked: boolean;
+}) {
   return (
     <Table className="border-collapse text-sm text-slate-200 [&_td]:align-top">
       <TableHeader>
@@ -1134,7 +1117,7 @@ function RosterTable({ pagedRoster, onManage, visibleColumns, isLocked }: Roster
           {visibleColumns.role && <TableHead className="border border-slate-800/60 text-slate-400">Role</TableHead>}
           {TEXT_COLUMN_CONFIGS.map(
             ({ key, label }) =>
-              visibleColumns[key] && (
+              visibleColumns[key as keyof ColumnVisibility] && (
                 <TableHead key={key} className="border border-slate-800/60 text-slate-400">
                   {label}
                 </TableHead>
@@ -1148,14 +1131,14 @@ function RosterTable({ pagedRoster, onManage, visibleColumns, isLocked }: Roster
       </TableHeader>
       <TableBody>
         {pagedRoster.map((person) => {
-          const subteamLabel = person.accessRole === "staff" ? teamLookup[person.team] : "—";
-          const statusStyle = statusStyles[person.status];
-          const accessStyle = accessStyles[person.accessRole];
+          const subteamLabel = person.role === "staff" ? teams[person.subteam as Subteam] : "—";
+          const statusStyle = statusStyles[person.accessStatus as AccessStatus];
+          const accessStyle = accessStyles[person.role as Role];
           return (
-            <TableRow key={person.id} className="border border-slate-800/60">
+            <TableRow key={person.uid ?? ""} className="border border-slate-800/60">
               {visibleColumns.person && (
                 <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
-                  <p className="font-semibold text-white">{person.name}</p>
+                  <p className="font-semibold text-white">{person.fullName}</p>
                 </TableCell>
               )}
               {visibleColumns.email && (
@@ -1179,8 +1162,8 @@ function RosterTable({ pagedRoster, onManage, visibleColumns, isLocked }: Roster
               )}
               {TEXT_COLUMN_CONFIGS.map(
                 ({ key, accessor }) =>
-                  visibleColumns[key] && (
-                    <TableCell key={`${person.id}-${key}`} className="border border-slate-800/60 p-3">
+                  visibleColumns[key as keyof ColumnVisibility] && (
+                    <TableCell key={`${person.uid ?? ""}-${key}`} className="border border-slate-800/60 p-3">
                       <p className="text-sm font-medium text-white">{accessor(person)}</p>
                     </TableCell>
                   )
@@ -1200,7 +1183,7 @@ function RosterTable({ pagedRoster, onManage, visibleColumns, isLocked }: Roster
                     variant="outline"
                     size="sm"
                     className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60 disabled:opacity-50"
-                    onClick={() => onManage(person.id)}
+                    onClick={() => onManage(person.uid ?? "")}
                     disabled={isLocked}>
                     Manage
                   </Button>
@@ -1224,7 +1207,17 @@ function PaginationControls({
   canGoNext,
   onPrev,
   onNext,
-}: PaginationControlsProps) {
+}: {
+  pageStart: number;
+  pageEnd: number;
+  totalCount: number;
+  gridPage: number;
+  pageCount: number;
+  canGoPrev: boolean;
+  canGoNext: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
       <p>{totalCount === 0 ? "No people to display." : `Showing ${pageStart}–${pageEnd} of ${totalCount} people`}</p>
@@ -1266,27 +1259,40 @@ function AccessDialog({
   revokeLoading,
   applyLoading,
   isLocked,
-}: AccessDialogProps) {
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  activePerson: User | null;
+  modalRole: Role;
+  onRoleChange: (role: Role) => void;
+  modalSubteam: Subteam | "";
+  onSubteamChange: (subteam: Subteam) => void;
+  onRevoke: () => void;
+  onApply: () => void;
+  revokeLoading: boolean;
+  applyLoading: boolean;
+  isLocked: boolean;
+}) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-slate-800 bg-slate-950 text-slate-100">
         {activePerson ? (
           <>
             <DialogHeader className="gap-3">
-              <DialogTitle className="text-2xl text-white">{activePerson.name}</DialogTitle>
+              <DialogTitle className="text-2xl text-white">{activePerson.fullName}</DialogTitle>
               <DialogDescription className="text-slate-400">{activePerson.email}</DialogDescription>
             </DialogHeader>
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role type</Label>
-                <Tabs value={modalRole} onValueChange={(value) => onRoleChange(value as AccessRole)}>
+                <Tabs value={modalRole} onValueChange={(value) => onRoleChange(value as Role)}>
                   <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
-                    {ROLE_OPTIONS.map((role) => (
+                    {Object.keys(roles).map((role) => (
                       <TabsTrigger
                         key={role}
                         value={role}
                         className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                        {roles[role as Role]}
                       </TabsTrigger>
                     ))}
                   </TabsList>
@@ -1295,14 +1301,14 @@ function AccessDialog({
               {modalRole === "staff" && (
                 <div className="space-y-2">
                   <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
-                  <Select value={modalSubteam} onValueChange={(value) => onSubteamChange(value as TeamId)}>
+                  <Select value={modalSubteam} onValueChange={(value) => onSubteamChange(value as Subteam)}>
                     <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
                       <SelectValue placeholder="Select subteam" />
                     </SelectTrigger>
                     <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                      {teams.map((team) => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.label}
+                      {Object.keys(teams).map((team) => (
+                        <SelectItem key={team} value={team as Subteam}>
+                          {teams[team as Subteam]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1312,15 +1318,22 @@ function AccessDialog({
               <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-4">
                 <p className="text-sm font-semibold text-white">Current status</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyles[activePerson.status].badge}`}>
-                    {statusStyles[activePerson.status].label}
+                  <Badge
+                    className={`rounded-full px-3 py-1 text-[0.65rem] ${
+                      statusStyles[activePerson.accessStatus as AccessStatus].badge
+                    }`}>
+                    {statusStyles[activePerson.accessStatus as AccessStatus].label}
                   </Badge>
                   <Badge
-                    className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyles[activePerson.accessRole].badge}`}>
-                    {accessStyles[activePerson.accessRole].label}
+                    className={`rounded-full px-3 py-1 text-[0.65rem] ${
+                      accessStyles[activePerson.role as Role].badge
+                    }`}>
+                    {accessStyles[activePerson.role as Role].label}
                   </Badge>
                 </div>
-                <p className="mt-3 text-xs text-slate-400">{statusStyles[activePerson.status].copy}</p>
+                <p className="mt-3 text-xs text-slate-400">
+                  {statusStyles[activePerson.accessStatus as AccessStatus].copy}
+                </p>
               </div>
             </div>
             <DialogFooter>

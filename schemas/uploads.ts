@@ -1,9 +1,8 @@
-export type Role = "attendee" | "staff" | "admin";
+import { Role, Subteam } from "./database";
 
 export interface QRCode {
   fullName?: string;
   email?: string;
-
   url?: string;
 }
 
@@ -18,7 +17,7 @@ export interface RoomAssignment {
 export interface ScheduleEventAssignment {
   email?: string;
   fullName?: string;
-  subteam?: string;
+  subteam?: Subteam;
 
   day?: string;
   startTime?: string;
@@ -38,7 +37,7 @@ export interface Person {
   phone?: string;
 
   role?: Role;
-  subteam?: string;
+  subteam?: Subteam;
 
   school?: string;
   grade?: string;

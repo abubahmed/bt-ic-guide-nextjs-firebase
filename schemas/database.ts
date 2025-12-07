@@ -1,4 +1,6 @@
 export type Role = "attendee" | "staff" | "admin";
+export type AccessStatus = "active" | "invited" | "revoked";
+export type Grade = "freshman" | "sophomore" | "junior" | "senior" | "graduate" | "other";
 
 export type Visibility = "staff" | "attendee" | "shared";
 export type ResourceType = "file" | "url";
@@ -8,6 +10,8 @@ export type HelpRequestPriority = "low" | "medium" | "high";
 export type HelpRequestStatus = "pending" | "resolved" | "failure";
 
 export type AnnouncementChannel = "email" | "website";
+
+export type Subteam = "logistics" | "registration" | "technology" | "security" | "operations" | "finance";
 
 export interface User {
   createdAt?: number;
@@ -22,11 +26,12 @@ export interface User {
   uid?: string;
 
   role?: Role;
+  accessStatus?: AccessStatus;
   fullName?: string;
-  subteam?: Array<string>;
+  subteam?: Subteam;
 
   school?: string;
-  grade?: string;
+  grade?: Grade;
   company?: string;
 
   eventIds?: Array<string>;
@@ -64,7 +69,7 @@ export interface Resource {
   email?: string;
   fullName?: string;
   role?: Role;
-  subteam?: string;
+  subteam?: Subteam;
   uid?: string;
 }
 
@@ -80,7 +85,7 @@ export interface HelpRequest {
   email?: string;
   fullName?: string;
   role?: Role;
-  subteam?: string;
+  subteam?: Subteam;
   uid?: string;
 }
 
@@ -96,6 +101,6 @@ export interface Announcement {
   email?: string;
   fullName?: string;
   role?: Role;
-  subteam?: Array<string>;
+  subteam?: Subteam;
   uid?: string;
 }
