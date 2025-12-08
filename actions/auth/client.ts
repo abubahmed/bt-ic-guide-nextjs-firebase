@@ -11,6 +11,7 @@ import {
   signInWithEmail,
   signUpWithEmail,
   signOut,
+  getCurrentUser,
   sendEmailVerification,
 } from "@/lib/firebase/client/auth";
 import { STAFF_HOME_ROUTE, ATTENDEE_HOME_ROUTE, ATTENDEE_LOGIN_ROUTE } from "@/route-config";
@@ -26,6 +27,11 @@ Perform Google OAuth sign in flow on client side. Checks if user is already sign
 export const signInWithGoogleActionClient = async (router: any) => {
   try {
     // check if user is already signed in
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      console.error("User is already signed in in signInWithGoogleActionClient.");
+      return;
+    }
     const sessionUser = await getSessionUser();
     if (sessionUser) {
       console.error("User is already signed in in signInWithGoogleActionClient.");
@@ -75,6 +81,11 @@ export const signUpWithEmailActionClient = async (
 
   try {
     // check if user is already signed in
+    const currentUser = await getCurrentUser();
+    if (currentUser) {
+      console.error("User is already signed in in signUpWithEmailActionClient.");
+      return;
+    }
     const sessionUser = await getSessionUser();
     if (sessionUser) {
       console.error("User is already signed in in signUpWithEmailActionClient.");
@@ -108,6 +119,11 @@ export const signInWithEmailActionClient = async (
 
   try {
     // check if user is already signed in
+    const currentUser = await getCurrentUser();
+    if (currentUser) {
+      console.error("User is already signed in in signInWithEmailActionClient.");
+      return;
+    }
     const sessionUser = await getSessionUser();
     if (sessionUser) {
       console.error("User is already signed in in signInWithEmailActionClient.");
@@ -149,8 +165,13 @@ Perform sign out flow on client and server side. Signs out and redirects to logi
 */
 export const signOutActionClient = async (router: any) => {
   try {
-    await fetch("/api/logout", { method: "POST", credentials: "include" });
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      console.error("User is not signed in in signOutActionClient.");
+      return;
+    }
     await signOut();
+    await fetch("/api/logout", { method: "POST", credentials: "include" });
     router.push(ATTENDEE_LOGIN_ROUTE);
   } catch (error) {
     console.error("Failed to log out in signOutActionClient:", error);

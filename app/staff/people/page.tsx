@@ -32,6 +32,7 @@ import StaffHeader from "../components/header";
 import StaffFooter from "../components/footer";
 import { StaffSectionSkeleton } from "../components/skeleton";
 import { AccessStatus, Grade, Role, Subteam, User } from "@/schemas/database";
+import { fetchPeopleActionClient } from "@/actions/people/client";
 
 type UploadScope = "master" | "group" | "individual";
 type ExportScope = "master" | "group" | "individual";
@@ -62,15 +63,18 @@ type LoadingState = {
 
 const UPLOAD_SCOPES: UploadScope[] = ["master", "group", "individual"];
 const EXPORT_SCOPES: ExportScope[] = ["master", "group", "individual"];
-const EXPORT_FORMATS: ExportFormat[] = ["csv", "xlsx"];
+const EXPORT_FORMATS: Record<ExportFormat, string> = {
+  csv: "CSV (spreadsheet ready)",
+  xlsx: "Excel spreadsheet (.xlsx)",
+};
 
 const DEFAULT_TEAM: Subteam = "logistics";
 const DEFAULT_ROLE: Role = "attendee";
 const DEFAULT_GRADE: Grade = "freshman";
-
 const DEFAULT_PERSON: User | undefined = peopleDirectory.find((person) => person.subteam === DEFAULT_TEAM);
 const PAGE_SIZE = 10;
 
+const MAX_UPLOAD_SIZE_MB = 10;
 const TEXT_COLUMN_CONFIGS: Array<{
   key: "phone" | "company" | "school" | "grade";
   label: string;
@@ -141,17 +145,11 @@ const API_LATENCY_MS = 3000;
 
 const simulateNetworkLatency = () => new Promise((resolve) => setTimeout(resolve, API_LATENCY_MS));
 
-async function fetchPeopleDataset() {
-  await simulateNetworkLatency();
-  return peopleDirectory;
-}
-
-async function stageMasterUpload(): Promise<void> {
-  await simulateNetworkLatency();
+async function stageMasterUpload(file: File): Promise<void> {
   console.info("[Upload] Master dataset staged");
 }
 
-async function stageGroupUpload(role: Role, subteam?: Subteam): Promise<void> {
+async function stageGroupUpload(role: Role, subteam: Subteam | null, file: File): Promise<void> {
   await simulateNetworkLatency();
   console.info(`[Upload] Group dataset staged for role=${role} subteam=${subteam ?? "n/a"}`);
 }
@@ -196,13 +194,15 @@ export default function StaffPeoplePage() {
     apply: false,
     export: false,
   });
+  const [peopleDataset, setPeopleDataset] = useState<User[]>([]);
   const isGlobalLocked = useMemo(() => Object.values(loadingState).some(Boolean), [loadingState]);
 
   useEffect(() => {
     let isMounted = true;
     const hydrate = async () => {
       try {
-        await fetchPeopleDataset();
+        const people = await fetchPeopleActionClient();
+        setPeopleDataset(people || []);
       } finally {
         if (isMounted) {
           setLoadingState((prev) => ({ ...prev, fetch: false }));
@@ -248,7 +248,12 @@ export default function StaffPeoplePage() {
           ) : (
             <>
               <UploadPanel loadingState={loadingState} setLoadingState={setLoadingState} isLocked={isGlobalLocked} />
-              <RosterViewer loadingState={loadingState} setLoadingState={setLoadingState} isLocked={isGlobalLocked} />
+              <RosterViewer
+                loadingState={loadingState}
+                setLoadingState={setLoadingState}
+                isLocked={isGlobalLocked}
+                peopleDataset={peopleDataset}
+              />
               <ExportPanel loadingState={loadingState} setLoadingState={setLoadingState} isLocked={isGlobalLocked} />
             </>
           )}
@@ -281,6 +286,33 @@ function UploadPanel({
     company: "",
     school: "",
   });
+  const [masterFile, setMasterFile] = useState<File | null>(null);
+  const [groupFile, setGroupFile] = useState<File | null>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (isLocked) return;
+    setLoadingState((prev) => ({ ...prev, upload: true }));
+
+    try {
+      const file = event.target.files?.[0] ?? null;
+      if (!file) {
+        console.error("No file selected");
+        return;
+      } else if (file.size > MAX_UPLOAD_SIZE_MB * 1024 * 1024) {
+        console.error(`File size exceeds ${MAX_UPLOAD_SIZE_MB}MB`);
+        return;
+      }
+      if (scope === "master") {
+        setMasterFile(file);
+      } else if (scope === "group") {
+        setGroupFile(file);
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    } finally {
+      setLoadingState((prev) => ({ ...prev, upload: false }));
+    }
+  };
 
   const handleIndividualFormChange = <K extends keyof IndividualFormState>(field: K, value: IndividualFormState[K]) => {
     if (isLocked) {
@@ -351,11 +383,11 @@ function UploadPanel({
     setLoadingState((prev) => ({ ...prev, upload: true }));
     try {
       if (scope === "master") {
-        await stageMasterUpload();
+        await stageMasterUpload(masterFile);
         return;
       }
       if (scope === "group") {
-        await stageGroupUpload(groupRole, groupRole === "staff" ? groupSubteam : undefined);
+        await stageGroupUpload(groupRole, groupRole === "staff" ? groupSubteam : null, groupFile);
         return;
       }
       await stageIndividualUpload(individualForm);
@@ -544,7 +576,7 @@ function UploadPanel({
             <div>
               <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
             </div>
-            <input id="people-upload" type="file" className="hidden" accept=".csv,.xlsx" />
+            <input id="people-upload" type="file" className="hidden" accept=".csv,.xlsx" onChange={handleFileUpload} />
           </label>
         )}
         <div className="grid gap-3 sm:grid-cols-2">
@@ -570,10 +602,12 @@ function RosterViewer({
   loadingState,
   setLoadingState,
   isLocked,
+  peopleDataset,
 }: {
   loadingState: LoadingState;
   setLoadingState: Dispatch<SetStateAction<LoadingState>>;
   isLocked: boolean;
+  peopleDataset: User[];
 }) {
   const [subteamFilter, setSubteamFilter] = useState<SubteamFilter>("all");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
@@ -592,7 +626,7 @@ function RosterViewer({
 
   const filteredRoster = useMemo(() => {
     const normalizedSearch = searchQuery.trim().toLowerCase();
-    return peopleDirectory.filter((person) => {
+    return peopleDataset.filter((person) => {
       if (subteamFilter !== "all") {
         if (person.role !== "staff") {
           return false;
@@ -852,21 +886,14 @@ function ExportPanel({
         <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
           <Tabs value={scope} onValueChange={(value) => setScope(value as ExportScope)}>
             <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
-              <TabsTrigger
-                value="master"
-                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Master
-              </TabsTrigger>
-              <TabsTrigger
-                value="group"
-                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Group
-              </TabsTrigger>
-              <TabsTrigger
-                value="individual"
-                className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
-                Individual
-              </TabsTrigger>
+              {EXPORT_SCOPES.map((scope) => (
+                <TabsTrigger
+                  key={scope}
+                  value={scope}
+                  className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
+                  {scope}
+                </TabsTrigger>
+              ))}
             </TabsList>
             <div className="mt-6 space-y-4">
               <TabsContent value="group" className="space-y-3">
@@ -978,8 +1005,11 @@ function ExportPanel({
                 <SelectValue placeholder="Choose format" />
               </SelectTrigger>
               <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                <SelectItem value="csv">CSV (spreadsheet ready)</SelectItem>
-                <SelectItem value="xlsx">Excel spreadsheet (.xlsx)</SelectItem>
+                {Object.keys(EXPORT_FORMATS).map((format) => (
+                  <SelectItem key={format} value={format as ExportFormat}>
+                    {EXPORT_FORMATS[format as ExportFormat]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -987,7 +1017,7 @@ function ExportPanel({
             className="w-full rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400 disabled:opacity-60"
             onClick={handleGenerate}
             disabled={isLocked || (scope === "individual" && !individualPerson)}>
-            {isExportLoading ? "Generating..." : `Generate ${format === "csv" ? "CSV roster" : "XLSX roster"}`}
+            {isExportLoading ? "Generating..." : `Generate ${EXPORT_FORMATS[format as ExportFormat]}`}
           </Button>
         </div>
       </div>

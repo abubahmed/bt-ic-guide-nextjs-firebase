@@ -30,7 +30,12 @@ export async function signUpWithEmail(email: string, password: string) {
 }
 
 export function getCurrentUser() {
-  return auth.currentUser;
+  return new Promise((resolve) => {
+    const unsub = auth.onAuthStateChanged((user) => {
+      resolve(user);
+      unsub();
+    });
+  });
 }
 
 export async function signOut() {

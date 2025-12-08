@@ -10,7 +10,7 @@ import { createUserProfile } from "@/lib/firebase/server/users";
 import { getSessionUser } from "@/actions/session-actions";
 import { auth } from "@/lib/firebase/server/config";
 import { cookies } from "next/headers";
-import { SESSION_COOKIE_NAME, SESSION_COOKIE_LIFESPAN, ROLE_COOKIE_NAME } from "@/constants";
+import { SESSION_COOKIE_NAME, SESSION_COOKIE_LIFESPAN } from "@/constants";
 
 /*
 Complete Google OAuth sign in flow on server side. Checks if user is already signed in, creates session cookie and user profile.
@@ -43,17 +43,6 @@ export async function signInWithGoogleActionServer(idToken: string) {
       name: SESSION_COOKIE_NAME,
       value: sessionCookie,
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: SESSION_COOKIE_LIFESPAN / 1000,
-      path: "/",
-    });
-
-    const tempRoleValue = "STAFF";
-    cookieStore.set({
-      name: ROLE_COOKIE_NAME,
-      value: tempRoleValue,
-      httpOnly: false,
       secure: true,
       sameSite: "strict",
       maxAge: SESSION_COOKIE_LIFESPAN / 1000,
@@ -108,17 +97,6 @@ export async function signInWithEmailActionServer(idToken: string) {
       name: SESSION_COOKIE_NAME,
       value: sessionCookie,
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: SESSION_COOKIE_LIFESPAN / 1000,
-      path: "/",
-    });
-
-    const tempRoleValue = "ATTENDEE";
-    cookieStore.set({
-      name: ROLE_COOKIE_NAME,
-      value: tempRoleValue,
-      httpOnly: false,
       secure: true,
       sameSite: "strict",
       maxAge: SESSION_COOKIE_LIFESPAN / 1000,
