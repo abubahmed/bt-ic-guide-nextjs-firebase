@@ -9,6 +9,7 @@
 import { getCurrentUser } from "@/lib/firebase/client/auth";
 import { getSessionUser } from "../session-actions";
 import { Person } from "@/schemas/uploads";
+import { validatePersonFrontend, validatePersonsFrontend } from "@/validators/persons";
 
 const PEOPLE_ROUTE = "/api/staff/people";
 

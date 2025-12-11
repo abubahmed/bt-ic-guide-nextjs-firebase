@@ -39,6 +39,7 @@ import {
 } from "@/actions/people/client";
 import { validatePersonFrontend, validatePersonsFrontend } from "@/validators/persons";
 import { Person } from "@/schemas/uploads";
+import { readFileAsText } from "@/validators/utils/reader.client";
 
 type UploadScope = "spreadsheet" | "individual";
 type ExportScope = "all" | "group" | "individual";
@@ -326,41 +327,36 @@ function UploadPanel({
   };
 
   const handleRunValidations = async () => {
-    if (isLocked) return false;
-
-    if (scope === "individual") {
-      const personErrors = await validatePersonFrontend(individualForm as Person);
-      if (personErrors.length > 0) {
-        console.error(personErrors);
+    if (isLocked) return;
+    try {
+      setLoadingState((prev) => ({ ...prev, validations: true }));
+      const validator = scope === "individual" ? validatePersonFrontend : validatePersonsFrontend;
+      const { errors } = (await validator(file as File, readFileAsText)) as { errors: string[] };
+      if (errors.length > 0) {
+        console.error(errors);
         return false;
       }
-    } else if (scope === "spreadsheet") {
-      const { errors: uploadErrors, people } = await validatePersonsFrontend(file as File);
-      if (uploadErrors.length > 0) {
-        console.error(uploadErrors);
-        return false;
-      }
+      setLoadingState((prev) => ({ ...prev, validations: false }));
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    } finally {
+      setLoadingState((prev) => ({ ...prev, validations: false }));
     }
-
-    return true;
   };
 
   const handleStageUpload = async () => {
     if (isLocked) return;
     setLoadingState((prev) => ({ ...prev, upload: true }));
     try {
-      const isValid = await handleRunValidations();
-      if (!isValid) {
+      if (!(await handleRunValidations())) {
         throw new Error("Validation failed");
       }
 
-      if (scope === "spreadsheet") {
-        await stageFileUploadActionClient(file as File);
-      } else if (scope === "individual") {
-        await stageIndividualUploadActionClient(individualForm as Person);
-      } else {
-        throw new Error("Invalid scope");
-      }
+      const stageAction = scope === "spreadsheet" ? stageFileUploadActionClient : stageIndividualUploadActionClient;
+      const stageData = scope === "spreadsheet" ? (file as File) : (individualForm as Person);
+      await stageAction(stageData as any);
     } catch (error) {
       console.error("Error staging upload:", error);
     } finally {
@@ -539,9 +535,20 @@ function UploadPanel({
         )}
         <div className="grid gap-3 sm:grid-cols-2">
           <Button
+            disabled={isLocked}
             variant="outline"
             className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60"
-            onClick={handleRunValidations}>
+            onClick={async () => {
+              if (isLocked) return;
+              setLoadingState((prev) => ({ ...prev, validations: true }));
+              const validator = scope === "individual" ? validatePersonFrontend : validatePersonsFrontend;
+              const { errors } = (await validator(file as File, readFileAsText)) as { errors: string[] };
+              if (errors.length > 0) {
+                console.error(errors);
+                throw new Error("Validation failed");
+              }
+              setLoadingState((prev) => ({ ...prev, validations: false }));
+            }}>
             Run validations
           </Button>
           <Button

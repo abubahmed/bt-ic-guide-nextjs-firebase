@@ -1,4 +1,4 @@
-// validators/utils.ts
+// validators/utils/utils.ts
 //
 // 1. Read file as text
 // 2. Split text into lines
@@ -12,26 +12,6 @@
 // 10. Validate phone
 
 import Papa from "papaparse";
-
-export async function readFileAsText(file: File): Promise<string> {
-  const isBrowser = typeof window !== "undefined"
-
-  if (isBrowser) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsText(file);
-    });
-  }
-
-  const fs = await import("fs");
-  const filePath = (file as any).path || file.name;
-  if (!filePath) {
-    throw new Error();
-  }
-  return fs.readFileSync(filePath, "utf8");
-}
 
 export function parseCSV(text: string): { headers: string[]; rows: string[][] } {
   const result = Papa.parse<string[]>(text, {
