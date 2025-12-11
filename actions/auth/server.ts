@@ -26,8 +26,7 @@ export async function signInWithGoogleActionServer(idToken: string) {
     }
 
     // check if user is already signed in
-    const sessionUser = await getSessionUser();
-    if (sessionUser) {
+    if (await getSessionUser()) {
       console.error("User is already signed in in signInWithGoogleActionServer.");
       return;
     }
@@ -73,8 +72,7 @@ export async function signInWithEmailActionServer(idToken: string) {
     }
 
     // check if user is already signed in
-    const sessionUser = await getSessionUser();
-    if (sessionUser) {
+    if (await getSessionUser()) {
       console.error("User is already signed in in signInWithEmailActionServer.");
       return;
     }

@@ -27,13 +27,7 @@ Perform Google OAuth sign in flow on client side. Checks if user is already sign
 export const signInWithGoogleActionClient = async (router: any) => {
   try {
     // check if user is already signed in
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      console.error("User is already signed in in signInWithGoogleActionClient.");
-      return;
-    }
-    const sessionUser = await getSessionUser();
-    if (sessionUser) {
+    if (await getCurrentUser() || await getSessionUser()) {
       console.error("User is already signed in in signInWithGoogleActionClient.");
       return;
     }
@@ -81,13 +75,7 @@ export const signUpWithEmailActionClient = async (
 
   try {
     // check if user is already signed in
-    const currentUser = await getCurrentUser();
-    if (currentUser) {
-      console.error("User is already signed in in signUpWithEmailActionClient.");
-      return;
-    }
-    const sessionUser = await getSessionUser();
-    if (sessionUser) {
+    if (await getCurrentUser() || await getSessionUser()) {
       console.error("User is already signed in in signUpWithEmailActionClient.");
       return;
     }
@@ -119,13 +107,7 @@ export const signInWithEmailActionClient = async (
 
   try {
     // check if user is already signed in
-    const currentUser = await getCurrentUser();
-    if (currentUser) {
-      console.error("User is already signed in in signInWithEmailActionClient.");
-      return;
-    }
-    const sessionUser = await getSessionUser();
-    if (sessionUser) {
+    if (await getCurrentUser() || await getSessionUser()) {
       console.error("User is already signed in in signInWithEmailActionClient.");
       return;
     }
@@ -165,8 +147,7 @@ Perform sign out flow on client and server side. Signs out and redirects to logi
 */
 export const signOutActionClient = async (router: any) => {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser) {
+    if (!(await getCurrentUser()) && !(await getSessionUser())) {
       console.error("User is not signed in in signOutActionClient.");
       return;
     }

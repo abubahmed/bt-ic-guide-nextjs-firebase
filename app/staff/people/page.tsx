@@ -32,7 +32,7 @@ import StaffHeader from "../components/header";
 import StaffFooter from "../components/footer";
 import { StaffSectionSkeleton } from "../components/skeleton";
 import { AccessStatus, Grade, Role, Subteam, User } from "@/schemas/database";
-import { fetchPeopleActionClient } from "@/actions/people/client";
+import { fetchPeopleActionClient, stageFileUploadActionClient, stageIndividualUploadActionClient } from "@/actions/people/client";
 
 type UploadScope = "master" | "group" | "individual";
 type ExportScope = "master" | "group" | "individual";
@@ -145,17 +145,13 @@ const API_LATENCY_MS = 3000;
 
 const simulateNetworkLatency = () => new Promise((resolve) => setTimeout(resolve, API_LATENCY_MS));
 
-async function stageMasterUpload(file: File): Promise<void> {
-  console.info("[Upload] Master dataset staged");
-}
-
-async function stageGroupUpload(role: Role, subteam: Subteam | null, file: File): Promise<void> {
-  await simulateNetworkLatency();
-  console.info(`[Upload] Group dataset staged for role=${role} subteam=${subteam ?? "n/a"}`);
+async function stageFileUpload(scope: UploadScope, file: File, role?: Role, subteam?: Subteam): Promise<void> {
+  await stageFileUploadActionClient(scope, file, role, subteam);
+  console.info(`[Upload] ${scope} dataset staged for role=${role} subteam=${subteam ?? "n/a"}`);
 }
 
 async function stageIndividualUpload(form: IndividualFormState): Promise<void> {
-  await simulateNetworkLatency();
+  await stageIndividualUploadActionClient(form);
   console.info("[Upload] Individual staged", form);
 }
 
@@ -286,8 +282,7 @@ function UploadPanel({
     company: "",
     school: "",
   });
-  const [masterFile, setMasterFile] = useState<File | null>(null);
-  const [groupFile, setGroupFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (isLocked) return;
@@ -297,19 +292,20 @@ function UploadPanel({
       const file = event.target.files?.[0] ?? null;
       if (!file) {
         console.error("No file selected");
+        setFile(null);
         return;
       } else if (file.size > MAX_UPLOAD_SIZE_MB * 1024 * 1024) {
         console.error(`File size exceeds ${MAX_UPLOAD_SIZE_MB}MB`);
+        setFile(null);
         return;
       }
-      if (scope === "master") {
-        setMasterFile(file);
-      } else if (scope === "group") {
-        setGroupFile(file);
-      }
+
+      setFile(file);
     } catch (error) {
       console.error("Error uploading file:", error);
+      setFile(null);
     } finally {
+      event.target.value = "";
       setLoadingState((prev) => ({ ...prev, upload: false }));
     }
   };
@@ -337,43 +333,80 @@ function UploadPanel({
     });
   };
 
-  const handleRunValidations = () => {
-    if (scope !== "individual") {
-      console.info(`[Validations] ${scope} scope currently relies on external spreadsheet validation.`);
-      return true;
+  const handleRunValidations = async () => {
+    if (isLocked) return [];
+    let errors: string[] = [];
+
+    if (scope === "individual") {
+      const requiredFields = ["fullName", "email", "role"];
+      for (const field of requiredFields) {
+        const value = individualForm[field as keyof IndividualFormState];
+        if (!value) errors.push(`${field} is required`);
+      }
+
+      if (individualForm.role === "staff" && !individualForm.subteam) {
+        errors.push("Subteam is required");
+      }
+      if (individualForm.email && !individualForm.email.includes("@")) {
+        errors.push("Invalid email address");
+      }
+      if (individualForm.phone && !individualForm.phone.match(/^\d{10}$/)) {
+        errors.push("Invalid phone number");
+      }
+
+      const MAX_FIELD_LENGTH = 255;
+      const boundCheckFields = ["fullName", "email", "phone", "company", "school"];
+      for (const field of boundCheckFields) {
+        const value = individualForm[field as keyof IndividualFormState];
+        if (value && value.length > MAX_FIELD_LENGTH) {
+          errors.push(`${field} must be less than ${MAX_FIELD_LENGTH} characters`);
+        }
+      }
     }
 
-    const errors: string[] = [];
-    if (!individualForm.fullName.trim()) {
-      errors.push("Full name is required.");
-    }
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(individualForm.email.trim())) {
-      errors.push("A valid email address is required.");
-    }
-    if (!individualForm.phone.trim()) {
-      errors.push("Phone number is required.");
-    }
-    if (!individualForm.grade.trim()) {
-      errors.push("Grade selection is required.");
-    }
-    if (!individualForm.company.trim()) {
-      errors.push("Company is required.");
-    }
-    if (!individualForm.school.trim()) {
-      errors.push("School is required.");
-    }
-    if (individualForm.role === "staff" && !individualForm.subteam) {
-      errors.push("Subteam is required for staff roles.");
+    if (scope === "group" || scope === "master") {
+      if (scope === "group" && !groupRole) errors.push("Role is required");
+      if (scope === "group" && groupRole === "staff" && !groupSubteam) errors.push("Subteam is required");
+      if (!file) errors.push("File is required");
+
+      if (file) {
+        const name = file.name.toLowerCase();
+        if (!name.endsWith(".csv")) errors.push("Only .csv files are allowed");
+        if (file.size > MAX_UPLOAD_SIZE_MB * 1024 * 1024) errors.push(`File size exceeds ${MAX_UPLOAD_SIZE_MB}MB`);
+
+        if (errors.length === 0) {
+          const csvText: string = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsText(file);
+          });
+
+          if (!csvText.trim()) {
+            errors.push("CSV file is empty");
+          } else {
+            const lines = csvText.trim().replace(/\r/g, "").split("\n");
+            const headers = lines[0].split(",").map((h) => h.trim());
+            const requiredPersonsHeaders = [
+              "full_name",
+              "email",
+              "phone",
+              "role",
+              "subteam",
+              "school",
+              "grade",
+              "company",
+            ];
+            for (const h of requiredPersonsHeaders) {
+              if (!headers.includes(h)) errors.push(`Missing required column: ${h}`);
+            }
+          }
+        }
+      }
     }
 
-    if (errors.length > 0) {
-      console.warn("Individual upload validation errors:", errors);
-      return false;
-    }
-
-    console.info("Individual upload passed basic validations.");
-    return true;
+    console.log(errors);
+    return errors;
   };
 
   const handleStageUpload = async () => {
@@ -382,12 +415,18 @@ function UploadPanel({
     }
     setLoadingState((prev) => ({ ...prev, upload: true }));
     try {
+      const errors = await handleRunValidations();
+      if (errors.length > 0) {
+        console.error(errors);
+        return;
+      }
+
       if (scope === "master") {
-        await stageMasterUpload(masterFile);
+        await stageFileUpload(scope, file as File);
         return;
       }
       if (scope === "group") {
-        await stageGroupUpload(groupRole, groupRole === "staff" ? groupSubteam : null, groupFile);
+        await stageFileUpload(scope, file as File, groupRole, groupRole === "staff" ? groupSubteam : null);
         return;
       }
       await stageIndividualUpload(individualForm);
@@ -410,7 +449,24 @@ function UploadPanel({
       <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload scope</p>
-          <Tabs value={scope} onValueChange={(value) => setScope(value as UploadScope)}>
+          <Tabs
+            value={scope}
+            onValueChange={(value) => {
+              setScope(value as UploadScope);
+              setFile(null);
+              setIndividualForm({
+                fullName: "",
+                email: "",
+                phone: "",
+                role: DEFAULT_ROLE,
+                subteam: DEFAULT_TEAM,
+                grade: DEFAULT_GRADE,
+                company: "",
+                school: "",
+              });
+              setGroupRole(DEFAULT_ROLE);
+              setGroupSubteam(DEFAULT_TEAM);
+            }}>
             <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60 text-white">
               {UPLOAD_SCOPES.map((scope) => (
                 <TabsTrigger
@@ -573,9 +629,16 @@ function UploadPanel({
             htmlFor="people-upload"
             className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
             <UploadCloud className="h-8 w-8 text-sky-300" />
-            <div>
-              <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
-            </div>
+            {file ? (
+              <div>
+                <p className="text-sm font-semibold text-white">File: {file.name}</p>
+                <p className="text-sm text-slate-400">Size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
+              </div>
+            )}
             <input id="people-upload" type="file" className="hidden" accept=".csv,.xlsx" onChange={handleFileUpload} />
           </label>
         )}

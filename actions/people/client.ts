@@ -8,6 +8,7 @@
 
 import { getCurrentUser } from "@/lib/firebase/client/auth";
 import { getSessionUser } from "../session-actions";
+import type { Role, Subteam } from "@/schemas/database";
 
 const PEOPLE_ROUTE = "/api/staff/people";
 
@@ -17,18 +18,11 @@ Fetch people dataset from server side.
 @returns { User[] | null }
 */
 export const fetchPeopleActionClient = async () => {
-  const currentUser = await getCurrentUser();
-  console.log("currentUser", currentUser);
-  if (!currentUser) {
+  if (!(await getCurrentUser()) || !(await getSessionUser())) {
     console.error("User is not signed in in fetchPeopleActionClient.");
     return;
   }
-  const sessionUser = await getSessionUser();
-  console.log("sessionUser", sessionUser);
-  if (!sessionUser) {
-    console.error("User is not signed in in fetchPeopleActionClient.");
-    return;
-  }
+
   try {
     const response = await fetch(PEOPLE_ROUTE, {
       method: "GET",
@@ -42,6 +36,75 @@ export const fetchPeopleActionClient = async () => {
     return data.people;
   } catch (error) {
     console.error("Error fetching people in fetchPeopleActionClient:", error);
+    return;
+  }
+};
+
+/*
+Upload people dataset from file to server side.
+
+@param scope: string
+@param file: File
+@param role: Role
+@param subteam: Subteam
+@returns { boolean | null }
+*/
+export const stageFileUploadActionClient = async (scope: any, file: File, role?: Role, subteam?: Subteam) => {
+  if (!(await getCurrentUser()) || !(await getSessionUser())) {
+    console.error("User is not signed in in stageFileUploadActionClient.");
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("scope", scope);
+    formData.append("role", role ?? "");
+    formData.append("subteam", subteam ?? "");
+    formData.append("file", file);
+
+    const response = await fetch(PEOPLE_ROUTE, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+    if (!response.ok) {
+      console.error("Failed to upload people dataset in stageFileUploadActionClient:", response.statusText);
+      return;
+    }
+    const data = await response.json();
+    return data.success;
+  } catch (error) {
+    console.error("Error staging file upload in stageFileUploadActionClient:", error);
+    return;
+  }
+};
+
+/*
+Upload individual person to server side.
+
+@param form: any
+@returns { boolean | null }
+*/
+export const stageIndividualUploadActionClient = async (form: any) => {
+  if (!(await getCurrentUser()) || !(await getSessionUser())) {
+    console.error("User is not signed in in stageFileUploadActionClient.");
+    return;
+  }
+
+  try {
+    const response = await fetch(PEOPLE_ROUTE, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify(form),
+    });
+    if (!response.ok) {
+      console.error("Failed to stage individual upload in stageIndividualUploadActionClient:", response.statusText);
+      return;
+    }
+    const data = await response.json();
+    return data.success;
+  } catch (error) {
+    console.error("Error staging individual upload in stageIndividualUploadActionClient:", error);
     return;
   }
 };

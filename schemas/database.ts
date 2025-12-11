@@ -1,19 +1,36 @@
-export type Role = "attendee" | "staff" | "admin";
-export type AccessStatus = "active" | "invited" | "revoked";
-export type Grade = "freshman" | "sophomore" | "junior" | "senior" | "graduate" | "other";
+// schemas/database.ts
 
-export type Visibility = "staff" | "attendee" | "shared";
-export type ResourceType = "file" | "url";
+// ------------------------------------------------------------------- //
+// Types
 
-export type HelpRequestType = "question" | "assistance" | "emergency" | "other";
-export type HelpRequestPriority = "low" | "medium" | "high";
-export type HelpRequestStatus = "pending" | "resolved" | "failure";
+type Role = "attendee" | "staff" | "admin";
+type AccessStatus = "active" | "invited" | "revoked";
+type Grade = "freshman" | "sophomore" | "junior" | "senior" | "graduate" | "other";
 
-export type AnnouncementChannel = "email" | "website";
+type Visibility = "staff" | "attendee" | "shared";
+type ResourceType = "file" | "url";
 
-export type Subteam = "logistics" | "registration" | "technology" | "security" | "operations" | "finance";
+type HelpRequestType = "question" | "assistance" | "emergency" | "other";
+type HelpRequestPriority = "low" | "medium" | "high";
+type HelpRequestStatus = "pending" | "resolved" | "failure";
 
-export interface User {
+type AnnouncementChannel = "email" | "website";
+type Subteam = "logistics" | "registration" | "technology" | "security" | "operations" | "finance";
+
+export type {
+  Role,
+  AccessStatus,
+  Grade,
+  Visibility,
+  ResourceType,
+  HelpRequestType,
+  HelpRequestPriority,
+  HelpRequestStatus,
+  AnnouncementChannel,
+  Subteam,
+};
+
+interface User {
   createdAt?: number;
   updatedAt?: number;
 
@@ -40,7 +57,7 @@ export interface User {
   helpRequests?: Array<string>;
 }
 
-export interface ScheduleEvent {
+interface ScheduleEvent {
   createdAt?: number;
   updatedAt?: number;
   uids?: Array<string>;
@@ -57,7 +74,7 @@ export interface ScheduleEvent {
   speaker?: string;
 }
 
-export interface Resource {
+interface Resource {
   createdAt?: number;
   updatedAt?: number;
 
@@ -73,7 +90,7 @@ export interface Resource {
   uid?: string;
 }
 
-export interface HelpRequest {
+interface HelpRequest {
   createdAt?: number;
   updatedAt?: number;
 
@@ -89,7 +106,7 @@ export interface HelpRequest {
   uid?: string;
 }
 
-export interface Announcement {
+interface Announcement {
   createdAt?: number;
   updatedAt?: number;
 
@@ -104,3 +121,113 @@ export interface Announcement {
   subteam?: Subteam;
   uid?: string;
 }
+
+export type { User, ScheduleEvent, Resource, HelpRequest, Announcement };
+
+// ------------------------------------------------------------------- //
+// Constants
+
+const ROLES: Role[] = ["attendee", "staff", "admin"];
+const ACCESS_STATUSES: AccessStatus[] = ["active", "invited", "revoked"];
+const GRADES: Grade[] = ["freshman", "sophomore", "junior", "senior", "graduate", "other"];
+const VISIBILITIES: Visibility[] = ["staff", "attendee", "shared"];
+const RESOURCE_TYPES: ResourceType[] = ["file", "url"];
+const HELP_REQUEST_TYPES: HelpRequestType[] = ["question", "assistance", "emergency", "other"];
+const HELP_REQUEST_PRIORITIES: HelpRequestPriority[] = ["low", "medium", "high"];
+const HELP_REQUEST_STATUSES: HelpRequestStatus[] = ["pending", "resolved", "failure"];
+const ANNOUNCEMENT_CHANNELS: AnnouncementChannel[] = ["email", "website"];
+const SUBTEAMS: Subteam[] = ["logistics", "registration", "technology", "security", "operations", "finance"];
+
+export {
+  ROLES,
+  ACCESS_STATUSES,
+  GRADES,
+  VISIBILITIES,
+  RESOURCE_TYPES,
+  HELP_REQUEST_TYPES,
+  HELP_REQUEST_PRIORITIES,
+  HELP_REQUEST_STATUSES,
+  ANNOUNCEMENT_CHANNELS,
+  SUBTEAMS,
+};
+
+const USER_OBJECT: User | any = {
+  createdAt: new Date().getTime(),
+  updatedAt: new Date().getTime(),
+  displayName: "",
+  email: "",
+  emailVerified: false,
+  photoURL: "",
+  phoneNumber: "",
+  providerId: "",
+  uid: "",
+  role: null,
+  accessStatus: null,
+  fullName: null,
+  subteam: null,
+  school: null,
+  grade: null,
+  company: null,
+  eventIds: [],
+  roomNumber: null,
+  qrCode: null,
+  helpRequests: [],
+};
+
+const SCHEDULE_EVENT_OBJECT: ScheduleEvent | any = {
+  createdAt: new Date().getTime(),
+  updatedAt: new Date().getTime(),
+  uids: [],
+  day: "",
+  startTime: "",
+  endTime: "",
+  room: "",
+  zoomUrl: "",
+  title: "",
+  description: "",
+  speaker: "",
+};
+
+const RESOURCE_OBJECT: Resource | any = {
+  createdAt: new Date().getTime(),
+  updatedAt: new Date().getTime(),
+  title: "",
+  type: null,
+  url: "",
+  visibility: null,
+  email: "",
+  fullName: "",
+  role: null,
+  subteam: null,
+  uid: "",
+};
+
+const HELP_REQUEST_OBJECT: HelpRequest | any = {
+  createdAt: new Date().getTime(),
+  updatedAt: new Date().getTime(),
+  helpType: null,
+  priority: null,
+  status: null,
+  details: "",
+  email: "",
+  fullName: "",
+  role: null,
+  subteam: null,
+  uid: "",
+};
+
+const ANNOUNCEMENT_OBJECT: Announcement | any = {
+  createdAt: new Date().getTime(),
+  updatedAt: new Date().getTime(),
+  channel: null,
+  visibility: null,
+  title: "",
+  message: "",
+  email: "",
+  fullName: "",
+  role: null,
+  subteam: null,
+  uid: "",
+};
+
+export { USER_OBJECT, SCHEDULE_EVENT_OBJECT, RESOURCE_OBJECT, HELP_REQUEST_OBJECT, ANNOUNCEMENT_OBJECT };
