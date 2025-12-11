@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/actions/session-actions";
 import { getUserProfile, getUserProfiles } from "@/lib/firebase/server/users";
-// import { createPerson } from "@/lib/firebase/server/people";
+import { createPerson, createPersons } from "@/lib/firebase/server/people";
 import { validatePersonBackend, validatePersonsBackend } from "@/validators/persons";
 import { Person } from "@/schemas/uploads";
-import { readFileAsText } from "@/validators/utils/reader.server";
+import { validateUploadedFile } from "@/validators/upload";
 
 export async function GET() {
   try {
@@ -71,18 +71,23 @@ const handleIndividualUpload = async (request: Request) => {
   if (errors.length > 0) {
     return NextResponse.json({ error: errors }, { status: 400 });
   }
-  // const person = await createPerson(person);
-  return NextResponse.json({ success: true });
+  const createdPerson = await createPerson(person);
+  return NextResponse.json({ createdPerson });
 };
 
 const handleSpreadsheetUpload = async (request: Request) => {
   const form = await request.formData();
   const file = form.get("file") as File;
 
-  const { errors, people } = await validatePersonsBackend(file, readFileAsText as any);
-  if (errors.length > 0) {
-    return NextResponse.json({ error: errors }, { status: 400 });
+  const { errors: uploadErrors, parsed } = await validateUploadedFile(file as File);
+  if (uploadErrors.length > 0) {
+    return NextResponse.json({ error: uploadErrors }, { status: 400 });
   }
-  // const people = await createPeople(people);
-  return NextResponse.json({ success: true });
+  const { errors: personsErrors, people } = await validatePersonsBackend(parsed);
+  if (personsErrors.length > 0) {
+    return NextResponse.json({ error: personsErrors }, { status: 400 });
+  }
+
+  const createdPeople = await createPersons(people);
+  return NextResponse.json({ createdPeople });
 };

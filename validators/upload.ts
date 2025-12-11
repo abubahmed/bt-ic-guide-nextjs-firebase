@@ -9,14 +9,13 @@
 // 7. Parse first line as headers (no validation)
 // 8. Parse remaining lines as CSV rows (no validation)
 
-import { parseCSV } from "./utils/utils";
+import { parseCSV } from "./utils";
 
 const EXPECTED_EXTENSIONS: string[] = [".csv"];
 const MAX_UPLOAD_SIZE_MB = 10;
 
 async function validateUploadedFile(
   file: File | null,
-  reader: any
 ): Promise<{
   errors: string[];
   parsed?: {
@@ -25,7 +24,6 @@ async function validateUploadedFile(
     rawText: string;
   };
 }> {
-  console.log("reader", reader);
   let errors: string[] = [];
 
   if (!file) {
@@ -45,7 +43,21 @@ async function validateUploadedFile(
     return { errors };
   }
 
-  const text = await reader(file as File);
+  let text = "";
+  if (typeof window !== "undefined") {
+    await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        text = reader.result as string;
+        resolve(true);
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+  } else {
+    text = await file.text();
+  }
+
   if (!text.trim()) {
     errors.push("CSV file is empty");
     return { errors };

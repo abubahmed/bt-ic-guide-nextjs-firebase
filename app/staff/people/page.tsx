@@ -39,7 +39,7 @@ import {
 } from "@/actions/people/client";
 import { validatePersonFrontend, validatePersonsFrontend } from "@/validators/persons";
 import { Person } from "@/schemas/uploads";
-import { readFileAsText } from "@/validators/utils/reader.client";
+import { validateUploadedFile } from "@/validators/upload";
 
 type UploadScope = "spreadsheet" | "individual";
 type ExportScope = "all" | "group" | "individual";
@@ -338,9 +338,14 @@ function UploadPanel({
           return false;
         }
       } else if (scope === "spreadsheet") {
-        const { errors } = (await validatePersonsFrontend(file as File, readFileAsText)) as { errors: string[] };
-        if (errors.length > 0) {
-          console.error(errors);
+        const { errors: uploadErrors, parsed } = await validateUploadedFile(file as File);
+        if (uploadErrors.length > 0) {
+          console.error(uploadErrors);
+          return false;
+        }
+        const { errors: personsErrors } = await validatePersonsFrontend(parsed);
+        if (personsErrors.length > 0) {
+          console.error(personsErrors);
           return false;
         }
       }

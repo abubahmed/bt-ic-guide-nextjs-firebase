@@ -1,9 +1,8 @@
 // validators/peopleValidator.ts
 
-import { checkRequiredHeaders, checkColumnCount, isValidEmail, isValidPhone } from "./utils/utils";
+import { checkRequiredHeaders, checkColumnCount, isValidEmail, isValidPhone } from "./utils";
 import { ROLES, SUBTEAMS, GRADES, Role, Subteam, Grade } from "@/schemas/database";
 import { Person, PERSON_HEADERS, PERSON_OBJECT } from "@/schemas/uploads";
-import { validateUploadedFile } from "./upload";
 
 const PEOPLE_REQUIRED_HEADERS: string[] = PERSON_HEADERS;
 const ALLOWED_ROLES: Role[] = ROLES.filter((role) => role !== "admin");
@@ -39,15 +38,10 @@ async function validatePersonFrontend(person: Person): Promise<string[]> {
   return errors;
 }
 
-async function validatePersonsFrontend(
-  file: File,
-  reader: (file: File) => Promise<string>
-): Promise<{
+async function validatePersonsFrontend(parsed: any): Promise<{
   errors: string[];
   people: any[];
 }> {
-  const { errors: uploadErrors, parsed } = await validateUploadedFile(file, reader);
-  if (uploadErrors.length > 0 || !parsed) return { errors: uploadErrors, people: [] };
   const errors: string[] = [];
   const people: any[] = [];
 
@@ -98,12 +92,9 @@ async function validatePersonBackend(person: Person): Promise<string[]> {
   return errors;
 }
 
-async function validatePersonsBackend(
-  file: File,
-  reader: (file: File) => Promise<string>
-): Promise<{ errors: string[]; people: any[] }> {
+async function validatePersonsBackend(parsed: any): Promise<{ errors: string[]; people: any[] }> {
   const errors: string[] = [];
-  const { errors: frontendErrors, people } = await validatePersonsFrontend(file, reader);
+  const { errors: frontendErrors, people } = await validatePersonsFrontend(parsed);
   errors.push(...frontendErrors);
   return { errors, people };
 }

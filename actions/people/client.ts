@@ -91,6 +91,9 @@ export const stageIndividualUploadActionClient = async (form: Person) => {
       method: "POST",
       credentials: "include",
       body: JSON.stringify(form),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     if (!response.ok) {
       console.error("Failed to stage individual upload in stageIndividualUploadActionClient:", response.statusText);

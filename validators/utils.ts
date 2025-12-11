@@ -1,4 +1,4 @@
-// validators/utils/utils.ts
+// validators/utils.ts
 //
 // 1. Read file as text
 // 2. Split text into lines
