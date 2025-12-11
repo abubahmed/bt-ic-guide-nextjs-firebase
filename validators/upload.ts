@@ -16,7 +16,7 @@ const MAX_UPLOAD_SIZE_MB = 10;
 
 async function validateUploadedFile(
   file: File | null,
-  reader: (file: File) => Promise<string>
+  reader: any
 ): Promise<{
   errors: string[];
   parsed?: {
@@ -25,6 +25,7 @@ async function validateUploadedFile(
     rawText: string;
   };
 }> {
+  console.log("reader", reader);
   let errors: string[] = [];
 
   if (!file) {
@@ -44,8 +45,7 @@ async function validateUploadedFile(
     return { errors };
   }
 
-  const text = await reader(file);
-
+  const text = await reader(file as File);
   if (!text.trim()) {
     errors.push("CSV file is empty");
     return { errors };

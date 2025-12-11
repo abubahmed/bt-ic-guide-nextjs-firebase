@@ -4,6 +4,7 @@ import { getUserProfile, getUserProfiles } from "@/lib/firebase/server/users";
 // import { createPerson } from "@/lib/firebase/server/people";
 import { validatePersonBackend, validatePersonsBackend } from "@/validators/persons";
 import { Person } from "@/schemas/uploads";
+import { readFileAsText } from "@/validators/utils/reader.server";
 
 export async function GET() {
   try {
@@ -78,7 +79,7 @@ const handleSpreadsheetUpload = async (request: Request) => {
   const form = await request.formData();
   const file = form.get("file") as File;
 
-  const { errors, people } = await validatePersonsBackend(file);
+  const { errors, people } = await validatePersonsBackend(file, readFileAsText as any);
   if (errors.length > 0) {
     return NextResponse.json({ error: errors }, { status: 400 });
   }
