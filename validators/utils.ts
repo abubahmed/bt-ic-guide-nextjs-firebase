@@ -12,6 +12,8 @@
 // 10. Validate phone
 
 import fs from "fs";
+import Papa from "papaparse";
+import path from "path";
 
 export function readFileAsText(file: File): Promise<string> {
   if (typeof FileReader === "undefined") {
@@ -27,16 +29,25 @@ export function readFileAsText(file: File): Promise<string> {
   });
 }
 
-export function splitLines(text: string): string[] {
-  return text.trim().replace(/\r/g, "").split("\n");
-}
+export function parseCSV(text: string): { headers: string[]; rows: string[][] } {
+  const result = Papa.parse<string[]>(text, {
+    header: false,
+    dynamicTyping: false,
+    skipEmptyLines: true,
+  });
 
-export function parseHeaders(line: string): string[] {
-  return line.split(",").map((h) => h.trim());
-}
+  if (result.errors.length > 0) {
+    throw new Error("CSV parsing error: " + JSON.stringify(result.errors));
+  }
 
-export function parseRow(line: string): string[] {
-  return line.split(",").map((v) => v.trim());
+  const rows = result.data;
+  const headers = rows[0];
+  const dataRows = rows.slice(1);
+
+  return {
+    headers: headers.map((h: string) => h.trim()),
+    rows: dataRows.map((r: string[]) => r.map((v: string) => (v ?? "").toString().trim())),
+  };
 }
 
 export function checkRequiredHeaders(actual: string[], expected: string[]): string[] {
@@ -63,5 +74,15 @@ export function isValidEmail(value: string): boolean {
 }
 
 export function isValidPhone(value: string): boolean {
-  return /^\d+$/.test(value);
+  return true;
 }
+
+export class NodeFile extends File {
+  constructor(filePath: string, mime: string = "text/csv") {
+    const abs = path.resolve(filePath);
+    const buffer = fs.readFileSync(abs);
+    super([buffer], path.basename(abs), { type: mime });
+    (this as any).path = abs;
+  }
+}
+

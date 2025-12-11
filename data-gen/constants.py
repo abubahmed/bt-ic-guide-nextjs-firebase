@@ -1,12 +1,3 @@
-DATA_FOLDER = "data"
-PERSONS_FILE = "persons.csv"
-QRCODES_FILE = "qrcodes.csv"
-ROOMS_FILE = "rooms.csv"
-SCHEDULE_EVENTS_FILE = "schedule_events.csv"
-ANNOUNCEMENT_FILE = "announcements.csv"
-RESOURCE_FILE = "resources.csv"
-HELP_REQUEST_FILE = "help-requests.csv"
-
 NUM_PERSONS_GEN = 500
 NUM_ANNOUNCEMENTS_GEN = 50
 NUM_RESOURCES_GEN = 50
@@ -21,20 +12,14 @@ EVENTS_PER_SLOT_VARIATION_GEN = 1
 HIDE_EVENT_EMAILS_COLUMN = True
 
 GRADES = [
-    "ninth grade",
-    "tenth grade",
-    "eleventh grade",
-    "twelfth grade",
     "freshman",
     "sophomore",
     "junior",
     "senior",
-    "masters",
-    "phd",
+    "graduate",
     "other",
 ]
-HIGH_SCHOOL_GRADES = ["ninth grade", "tenth grade", "eleventh grade", "twelfth grade"]
-GENERAL_ROLES = ["attendee", "staff", "admin"]
+ROLES = ["attendee", "staff"]
 SUBTEAMS = [
     "logistics",
     "registration",
@@ -47,7 +32,7 @@ SUBTEAMS = [
 ROWS_PER_PAGE_PERSONS = 50
 ROWS_PER_PAGE_EVENTS = 50
 
-CHANNELS = ["email", "website"]
+ANNOUNCEMENT_CHANNELS = ["email", "website"]
 VISIBILITIES = ["attendee", "staff", "shared"]
 HELP_PRIORITIES = ["low", "medium", "high"]
 HELP_STATUSES = ["pending", "resolved", "failure"]

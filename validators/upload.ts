@@ -9,7 +9,7 @@
 // 7. Parse first line as headers (no validation)
 // 8. Parse remaining lines as CSV rows (no validation)
 
-import { readFileAsText, splitLines, parseHeaders, parseRow } from "./utils";
+import { readFileAsText, parseCSV } from "./utils";
 
 const EXPECTED_EXTENSIONS: string[] = [".csv"];
 const MAX_UPLOAD_SIZE_MB = 10;
@@ -48,14 +48,11 @@ async function validateUploadedFile(file: File | null): Promise<{
     return { errors };
   }
 
-  const lines = splitLines(text);
-  if (lines.length === 0) {
+  const { headers, rows } = parseCSV(text);
+  if (rows.length === 0) {
     errors.push("CSV has no rows");
     return { errors };
   }
-
-  const headers = parseHeaders(lines[0]);
-  const rows = lines.slice(1).map((line) => parseRow(line));
 
   return {
     errors,

@@ -3,7 +3,7 @@
 import { checkRequiredHeaders, checkColumnCount, isValidEmail, isValidPhone } from "./utils";
 import { ROLES, SUBTEAMS, GRADES, Role, Subteam, Grade } from "@/schemas/database";
 import { Person, PERSON_HEADERS, PERSON_OBJECT } from "@/schemas/uploads";
-import { validateUploadedFile } from "./upload-validator";
+import { validateUploadedFile } from "./upload";
 
 const PEOPLE_REQUIRED_HEADERS: string[] = PERSON_HEADERS;
 const ALLOWED_ROLES: Role[] = ROLES.filter((role) => role !== "admin");

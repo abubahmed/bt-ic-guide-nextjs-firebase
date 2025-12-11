@@ -37,16 +37,13 @@ def generate_persons(num_persons):
         phone = fake.phone_number()
 
         role = random.choices(
-            GENERAL_ROLES,
-            weights=[70, 25, 5],
+            ROLES,
+            weights=[70, 30],
             k=1,
         )[0]
 
         grade = random.choice(GRADES)
-        if grade in HIGH_SCHOOL_GRADES:
-            school = fake.city() + " High School"
-        else:
-            school = fake.city() + " University"
+        school = fake.city() + " University"
 
         company = fake.company()
         subteam = random.choice(SUBTEAMS) if role == "staff" else ""
@@ -191,7 +188,7 @@ def generate_announcements(persons, num_announcements):
         rows.append(
             {
                 "created_at": int(datetime.now().timestamp() * 1000),
-                "channel": random.choice(CHANNELS),
+                "channel": random.choice(ANNOUNCEMENT_CHANNELS),
                 "visibility": random.choice(VISIBILITIES),
                 "title": fake.sentence(nb_words=ANNOUNCEMENT_TITLE_LENGTH),
                 "message": fake.sentence(nb_words=ANNOUNCEMENT_CONTENT_LENGTH),
@@ -267,7 +264,7 @@ def main(
     num_help_requests=NUM_HELP_REQUESTS_GEN,
 ):
     timestamp_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    folder = os.path.join(DATA_FOLDER, timestamp_str)
+    folder = os.path.join("data", timestamp_str)
     os.makedirs(folder, exist_ok=True)
 
     persons = generate_persons(num_people)
@@ -287,7 +284,7 @@ def main(
 
     write_csv(
         folder,
-        PERSONS_FILE,
+        "persons.csv",
         persons,
         [
             "full_name",
@@ -300,16 +297,16 @@ def main(
             "company",
         ],
     )
-    write_csv(folder, QRCODES_FILE, qrcodes, ["email", "full_name", "url"])
+    write_csv(folder, "qrcodes.csv", qrcodes, ["email", "full_name", "url"])
     write_csv(
         folder,
-        ROOMS_FILE,
+        "rooms.csv",
         rooms,
         ["email", "full_name", "room_number", "details"],
     )
     write_csv(
         folder,
-        SCHEDULE_EVENTS_FILE,
+        "schedule_events.csv",
         schedule_events,
         [
             "email",
@@ -327,7 +324,7 @@ def main(
     )
     write_csv(
         folder,
-        ANNOUNCEMENT_FILE,
+        "announcements.csv",
         announcements,
         [
             "created_at",
@@ -343,7 +340,7 @@ def main(
     )
     write_csv(
         folder,
-        RESOURCE_FILE,
+        "resources.csv",
         resources,
         [
             "created_at",
@@ -359,7 +356,7 @@ def main(
     )
     write_csv(
         folder,
-        HELP_REQUEST_FILE,
+        "help-requests.csv",
         help_requests,
         [
             "created_at",
