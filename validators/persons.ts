@@ -11,7 +11,35 @@ const ALLOWED_SUBTEAMS: Subteam[] = SUBTEAMS;
 const ALLOWED_GRADES: Grade[] = GRADES;
 const MAX_FIELD_LENGTH = 255;
 
-async function validatePeopleFrontend(file: File): Promise<{
+async function validatePersonFrontend(person: Person): Promise<string[]> {
+  const errors: string[] = [];
+
+  const REQUIRED_FIELDS: string[] = ["fullName", "email", "role"];
+  for (const field of REQUIRED_FIELDS) {
+    if (!person[field as keyof Person]) errors.push(`${field} is required`);
+  }
+  if (person.role === "staff" && !person.subteam) errors.push("Subteam is required");
+  if (errors.length > 0) return errors;
+
+  const BOUND_CHECK_FIELDS: string[] = ["fullName", "email", "phone", "company", "school"];
+  for (const field of BOUND_CHECK_FIELDS) {
+    // @ts-ignore
+    if (person[field as keyof Person] && person[field as keyof Person].length > MAX_FIELD_LENGTH)
+      errors.push(`${field} must be less than ${MAX_FIELD_LENGTH} characters`);
+  }
+  if (errors.length > 0) return errors;
+
+  if (person.email && !isValidEmail(person.email)) errors.push("Invalid email address");
+  if (person.phone && !isValidPhone(person.phone)) errors.push("Invalid phone number");
+  if (person.role && !ALLOWED_ROLES.includes(person.role)) errors.push("Invalid role");
+  if (person.subteam && !ALLOWED_SUBTEAMS.includes(person.subteam)) errors.push("Invalid subteam");
+  if (person.grade && !ALLOWED_GRADES.includes(person.grade as Grade)) errors.push("Invalid grade");
+  if (errors.length > 0) return errors;
+
+  return errors;
+}
+
+async function validatePersonsFrontend(file: File): Promise<{
   errors: string[];
   people: any[];
 }> {
@@ -46,47 +74,32 @@ async function validatePeopleFrontend(file: File): Promise<{
     person.grade = row[6] || "";
     person.company = row[7] || "";
 
-    const REQUIRED_FIELDS: string[] = ["fullName", "email", "role"];
-    for (const field of REQUIRED_FIELDS) {
-      if (!person[field as keyof Person]) rowErrors.push(`${field} is required`);
-    }
-    if (person.role === "staff" && !person.subteam) rowErrors.push("Subteam is required");
-    if (rowErrors.length > 0) {
-      errors.push("errors for row " + (i + 1) + ": " + rowErrors.join(", "));
+    const personErrors = await validatePersonFrontend(person);
+    if (personErrors.length > 0) {
+      errors.push("errors for row " + (i + 1) + ": " + personErrors.join(", "));
       continue;
+    } else {
+      people.push(person);
     }
-
-    const BOUND_CHECK_FIELDS: string[] = ["fullName", "email", "phone", "company", "school"];
-    for (const field of BOUND_CHECK_FIELDS) {
-      if (person[field] && person[field].length > MAX_FIELD_LENGTH)
-        rowErrors.push(`${field} must be less than ${MAX_FIELD_LENGTH} characters`);
-    }
-    if (rowErrors.length > 0) {
-      errors.push("errors for row " + (i + 1) + ": " + rowErrors.join(", "));
-      continue;
-    }
-
-    if (person.email && !isValidEmail(person.email)) rowErrors.push("Invalid email address");
-    if (person.phone && !isValidPhone(person.phone)) rowErrors.push("Invalid phone number");
-    if (person.role && !ALLOWED_ROLES.includes(person.role)) rowErrors.push("Invalid role");
-    if (person.subteam && !ALLOWED_SUBTEAMS.includes(person.subteam)) rowErrors.push("Invalid subteam");
-    if (person.grade && !ALLOWED_GRADES.includes(person.grade as Grade)) rowErrors.push("Invalid grade");
-    if (rowErrors.length > 0) {
-      errors.push("errors for row " + (i + 1) + ": " + rowErrors.join(", "));
-      continue;
-    }
-
-    people.push(person);
   }
 
   return { errors, people };
 }
 
-async function validatePeopleBackend(file: File): Promise<{ errors: string[]; people: any[] }> {
+async function validatePersonBackend(person: Person): Promise<string[]> {
   const errors: string[] = [];
-  const { errors: frontendErrors, people } = await validatePeopleFrontend(file);
+  const personErrors = await validatePersonFrontend(person);
+  if (personErrors.length > 0) {
+    errors.push(...personErrors);
+  }
+  return errors;
+}
+
+async function validatePersonsBackend(file: File): Promise<{ errors: string[]; people: any[] }> {
+  const errors: string[] = [];
+  const { errors: frontendErrors, people } = await validatePersonsFrontend(file);
   errors.push(...frontendErrors);
   return { errors, people };
 }
 
-export { validatePeopleFrontend, validatePeopleBackend };
+export { validatePersonsFrontend, validatePersonsBackend, validatePersonBackend, validatePersonFrontend };

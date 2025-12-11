@@ -15,7 +15,7 @@ type HelpRequestPriority = "low" | "medium" | "high";
 type HelpRequestStatus = "pending" | "resolved" | "failure";
 
 type AnnouncementChannel = "email" | "website";
-type Subteam = "logistics" | "registration" | "technology" | "security" | "operations" | "finance";
+type Subteam = "logistics" | "registration" | "technology" | "security" | "operations" | "finance"
 
 export type {
   Role,

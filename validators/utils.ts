@@ -11,22 +11,26 @@
 // 9. Validate email
 // 10. Validate phone
 
-import fs from "fs";
 import Papa from "papaparse";
-import path from "path";
 
-export function readFileAsText(file: File): Promise<string> {
-  if (typeof FileReader === "undefined") {
-    const filePath = (file as any).path || file.name;
-    return Promise.resolve(fs.readFileSync(filePath, "utf8"));
+export async function readFileAsText(file: File): Promise<string> {
+  const isBrowser = typeof window !== "undefined"
+
+  if (isBrowser) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
   }
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsText(file);
-  });
+  const fs = await import("fs");
+  const filePath = (file as any).path || file.name;
+  if (!filePath) {
+    throw new Error();
+  }
+  return fs.readFileSync(filePath, "utf8");
 }
 
 export function parseCSV(text: string): { headers: string[]; rows: string[][] } {
@@ -76,13 +80,3 @@ export function isValidEmail(value: string): boolean {
 export function isValidPhone(value: string): boolean {
   return true;
 }
-
-export class NodeFile extends File {
-  constructor(filePath: string, mime: string = "text/csv") {
-    const abs = path.resolve(filePath);
-    const buffer = fs.readFileSync(abs);
-    super([buffer], path.basename(abs), { type: mime });
-    (this as any).path = abs;
-  }
-}
-

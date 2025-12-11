@@ -32,10 +32,16 @@ import StaffHeader from "../components/header";
 import StaffFooter from "../components/footer";
 import { StaffSectionSkeleton } from "../components/skeleton";
 import { AccessStatus, Grade, Role, Subteam, User } from "@/schemas/database";
-import { fetchPeopleActionClient, stageFileUploadActionClient, stageIndividualUploadActionClient } from "@/actions/people/client";
+import {
+  fetchPeopleActionClient,
+  stageFileUploadActionClient,
+  stageIndividualUploadActionClient,
+} from "@/actions/people/client";
+import { validatePersonFrontend, validatePersonsFrontend } from "@/validators/persons";
+import { Person } from "@/schemas/uploads";
 
-type UploadScope = "master" | "group" | "individual";
-type ExportScope = "master" | "group" | "individual";
+type UploadScope = "spreadsheet" | "individual";
+type ExportScope = "all" | "group" | "individual";
 type ExportFormat = "csv" | "xlsx";
 
 type RoleFilter = "all" | Role;
@@ -61,8 +67,8 @@ type LoadingState = {
   export: boolean;
 };
 
-const UPLOAD_SCOPES: UploadScope[] = ["master", "group", "individual"];
-const EXPORT_SCOPES: ExportScope[] = ["master", "group", "individual"];
+const UPLOAD_SCOPES: UploadScope[] = ["spreadsheet", "individual"];
+const EXPORT_SCOPES: ExportScope[] = ["all", "group", "individual"];
 const EXPORT_FORMATS: Record<ExportFormat, string> = {
   csv: "CSV (spreadsheet ready)",
   xlsx: "Excel spreadsheet (.xlsx)",
@@ -144,16 +150,6 @@ const DEFAULT_COLUMN_VISIBILITY = {
 const API_LATENCY_MS = 3000;
 
 const simulateNetworkLatency = () => new Promise((resolve) => setTimeout(resolve, API_LATENCY_MS));
-
-async function stageFileUpload(scope: UploadScope, file: File, role?: Role, subteam?: Subteam): Promise<void> {
-  await stageFileUploadActionClient(scope, file, role, subteam);
-  console.info(`[Upload] ${scope} dataset staged for role=${role} subteam=${subteam ?? "n/a"}`);
-}
-
-async function stageIndividualUpload(form: IndividualFormState): Promise<void> {
-  await stageIndividualUploadActionClient(form);
-  console.info("[Upload] Individual staged", form);
-}
 
 async function revokePersonAccess(personId: string): Promise<void> {
   await simulateNetworkLatency();
@@ -269,9 +265,7 @@ function UploadPanel({
   setLoadingState: Dispatch<SetStateAction<LoadingState>>;
   isLocked: boolean;
 }) {
-  const [scope, setScope] = useState<UploadScope>("master");
-  const [groupRole, setGroupRole] = useState<Role>(DEFAULT_ROLE);
-  const [groupSubteam, setGroupSubteam] = useState<Subteam>(DEFAULT_TEAM);
+  const [scope, setScope] = useState<UploadScope>("spreadsheet");
   const [individualForm, setIndividualForm] = useState<IndividualFormState>({
     fullName: "",
     email: "",
@@ -311,9 +305,7 @@ function UploadPanel({
   };
 
   const handleIndividualFormChange = <K extends keyof IndividualFormState>(field: K, value: IndividualFormState[K]) => {
-    if (isLocked) {
-      return;
-    }
+    if (isLocked) return;
     setIndividualForm((prev) => {
       if (field === "role") {
         const nextRole = value as Role;
@@ -334,102 +326,43 @@ function UploadPanel({
   };
 
   const handleRunValidations = async () => {
-    if (isLocked) return [];
-    let errors: string[] = [];
+    if (isLocked) return false;
 
     if (scope === "individual") {
-      const requiredFields = ["fullName", "email", "role"];
-      for (const field of requiredFields) {
-        const value = individualForm[field as keyof IndividualFormState];
-        if (!value) errors.push(`${field} is required`);
+      const personErrors = await validatePersonFrontend(individualForm as Person);
+      if (personErrors.length > 0) {
+        console.error(personErrors);
+        return false;
       }
-
-      if (individualForm.role === "staff" && !individualForm.subteam) {
-        errors.push("Subteam is required");
-      }
-      if (individualForm.email && !individualForm.email.includes("@")) {
-        errors.push("Invalid email address");
-      }
-      if (individualForm.phone && !individualForm.phone.match(/^\d{10}$/)) {
-        errors.push("Invalid phone number");
-      }
-
-      const MAX_FIELD_LENGTH = 255;
-      const boundCheckFields = ["fullName", "email", "phone", "company", "school"];
-      for (const field of boundCheckFields) {
-        const value = individualForm[field as keyof IndividualFormState];
-        if (value && value.length > MAX_FIELD_LENGTH) {
-          errors.push(`${field} must be less than ${MAX_FIELD_LENGTH} characters`);
-        }
+    } else if (scope === "spreadsheet") {
+      const { errors: uploadErrors, people } = await validatePersonsFrontend(file as File);
+      if (uploadErrors.length > 0) {
+        console.error(uploadErrors);
+        return false;
       }
     }
 
-    if (scope === "group" || scope === "master") {
-      if (scope === "group" && !groupRole) errors.push("Role is required");
-      if (scope === "group" && groupRole === "staff" && !groupSubteam) errors.push("Subteam is required");
-      if (!file) errors.push("File is required");
-
-      if (file) {
-        const name = file.name.toLowerCase();
-        if (!name.endsWith(".csv")) errors.push("Only .csv files are allowed");
-        if (file.size > MAX_UPLOAD_SIZE_MB * 1024 * 1024) errors.push(`File size exceeds ${MAX_UPLOAD_SIZE_MB}MB`);
-
-        if (errors.length === 0) {
-          const csvText: string = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = () => reject(reader.error);
-            reader.readAsText(file);
-          });
-
-          if (!csvText.trim()) {
-            errors.push("CSV file is empty");
-          } else {
-            const lines = csvText.trim().replace(/\r/g, "").split("\n");
-            const headers = lines[0].split(",").map((h) => h.trim());
-            const requiredPersonsHeaders = [
-              "full_name",
-              "email",
-              "phone",
-              "role",
-              "subteam",
-              "school",
-              "grade",
-              "company",
-            ];
-            for (const h of requiredPersonsHeaders) {
-              if (!headers.includes(h)) errors.push(`Missing required column: ${h}`);
-            }
-          }
-        }
-      }
-    }
-
-    console.log(errors);
-    return errors;
+    return true;
   };
 
   const handleStageUpload = async () => {
-    if (isLocked) {
-      return;
-    }
+    if (isLocked) return;
     setLoadingState((prev) => ({ ...prev, upload: true }));
     try {
-      const errors = await handleRunValidations();
-      if (errors.length > 0) {
-        console.error(errors);
-        return;
+      const isValid = await handleRunValidations();
+      if (!isValid) {
+        throw new Error("Validation failed");
       }
 
-      if (scope === "master") {
-        await stageFileUpload(scope, file as File);
-        return;
+      if (scope === "spreadsheet") {
+        await stageFileUploadActionClient(file as File);
+      } else if (scope === "individual") {
+        await stageIndividualUploadActionClient(individualForm as Person);
+      } else {
+        throw new Error("Invalid scope");
       }
-      if (scope === "group") {
-        await stageFileUpload(scope, file as File, groupRole, groupRole === "staff" ? groupSubteam : null);
-        return;
-      }
-      await stageIndividualUpload(individualForm);
+    } catch (error) {
+      console.error("Error staging upload:", error);
     } finally {
       setLoadingState((prev) => ({ ...prev, upload: false }));
     }
@@ -464,10 +397,8 @@ function UploadPanel({
                 company: "",
                 school: "",
               });
-              setGroupRole(DEFAULT_ROLE);
-              setGroupSubteam(DEFAULT_TEAM);
             }}>
-            <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60 text-white">
+            <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-900/60 text-white">
               {UPLOAD_SCOPES.map((scope) => (
                 <TabsTrigger
                   key={scope}
@@ -479,42 +410,6 @@ function UploadPanel({
             </TabsList>
           </Tabs>
         </div>
-        {scope === "group" && (
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
-              <Select value={groupRole} onValueChange={(value) => setGroupRole(value as Role)}>
-                <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                  <SelectValue placeholder="Choose role" />
-                </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                  {Object.keys(roles).map((role) => (
-                    <SelectItem key={role} value={role as Role}>
-                      {roles[role as Role]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {groupRole === "staff" && (
-              <div className="space-y-2">
-                <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
-                <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as Subteam)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
-                    <SelectValue placeholder="Choose subteam" />
-                  </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
-                    {Object.keys(teams).map((teamOption) => (
-                      <SelectItem key={teamOption} value={teamOption as Subteam}>
-                        {teams[teamOption as Subteam]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-        )}
         {scope === "individual" ? (
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
@@ -879,7 +774,7 @@ function ExportPanel({
   setLoadingState: Dispatch<SetStateAction<LoadingState>>;
   isLocked: boolean;
 }) {
-  const [scope, setScope] = useState<ExportScope>("master");
+  const [scope, setScope] = useState<ExportScope>("all");
   const [groupRole, setGroupRole] = useState<Role>("staff");
   const [groupSubteam, setGroupSubteam] = useState<Subteam>(DEFAULT_TEAM);
   const [individualRole, setIndividualRole] = useState<Role>("staff");
@@ -911,7 +806,7 @@ function ExportPanel({
     }
     setLoadingState((prev) => ({ ...prev, export: true }));
     try {
-      if (scope === "master") {
+      if (scope === "all") {
         await generatePeopleExport({ scope, format });
         return;
       }

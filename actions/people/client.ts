@@ -8,7 +8,7 @@
 
 import { getCurrentUser } from "@/lib/firebase/client/auth";
 import { getSessionUser } from "../session-actions";
-import type { Role, Subteam } from "@/schemas/database";
+import { Person } from "@/schemas/uploads";
 
 const PEOPLE_ROUTE = "/api/staff/people";
 
@@ -43,13 +43,10 @@ export const fetchPeopleActionClient = async () => {
 /*
 Upload people dataset from file to server side.
 
-@param scope: string
 @param file: File
-@param role: Role
-@param subteam: Subteam
 @returns { boolean | null }
 */
-export const stageFileUploadActionClient = async (scope: any, file: File, role?: Role, subteam?: Subteam) => {
+export const stageFileUploadActionClient = async (file: File) => {
   if (!(await getCurrentUser()) || !(await getSessionUser())) {
     console.error("User is not signed in in stageFileUploadActionClient.");
     return;
@@ -57,9 +54,6 @@ export const stageFileUploadActionClient = async (scope: any, file: File, role?:
 
   try {
     const formData = new FormData();
-    formData.append("scope", scope);
-    formData.append("role", role ?? "");
-    formData.append("subteam", subteam ?? "");
     formData.append("file", file);
 
     const response = await fetch(PEOPLE_ROUTE, {
@@ -85,7 +79,7 @@ Upload individual person to server side.
 @param form: any
 @returns { boolean | null }
 */
-export const stageIndividualUploadActionClient = async (form: any) => {
+export const stageIndividualUploadActionClient = async (form: Person) => {
   if (!(await getCurrentUser()) || !(await getSessionUser())) {
     console.error("User is not signed in in stageFileUploadActionClient.");
     return;
