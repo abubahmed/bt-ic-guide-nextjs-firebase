@@ -8,7 +8,7 @@ interface Stat {
   value: string;
   meta: string;
   icon: React.ElementType;
-  accent: string;
+  accent?: string;
 }
 
 export default function StatCard({ stat }: { stat: Stat }) {

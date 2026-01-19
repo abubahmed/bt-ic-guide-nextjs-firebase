@@ -12,20 +12,23 @@ export default function QuickActionButton({ action }: { action: QuickAction }) {
   const Icon = action.icon;
 
   return (
-    <article className="flex items-center gap-6 border border-slate-700/50 bg-slate-900/30 p-6 h-full">
-      <div className="flex-1">
-        <p className="text-md mb-1 font-medium text-white">{action.label}</p>
+    <Link
+      href={action.href}
+      aria-label={`Open ${action.label}`}
+      target="_blank"
+      className="group relative flex flex-col gap-3  border border-slate-700/60 bg-slate-800/20 p-6 transition-all hover:border-slate-600/80 hover:bg-slate-800/70 hover:shadow-lg h-full">
+      <div className="flex items-start justify-between">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-700/60 bg-slate-900/50 text-sky-400 transition-colors">
+          <Icon className="h-6 w-6" />
+        </div>
+        <ArrowUpRight className="h-5 w-5 text-slate-400 transition-colors" />
+      </div>
+      <div className="flex-1 space-y-1">
+        <h3 className="text-base font-semibold text-white transition-colors group-hover:text-sky-100">
+          {action.label}
+        </h3>
         <p className="text-sm text-slate-400">{action.description}</p>
       </div>
-      <div>
-        <Link
-          href={action.href}
-          aria-label={`Open ${action.label}`}
-          target="_blank"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/60 text-slate-300 transition-colors hover:border-slate-500 hover:text-white focus-visible:border-slate-500 focus-visible:text-white">
-          <ArrowUpRight className="h-4 w-4" />
-        </Link>
-      </div>
-    </article>
+    </Link>
   );
 }

@@ -18,30 +18,25 @@ export default function StaffDashboardPage() {
               Business Today International Conference Admin Staff Dashboard
             </p>
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {stats.map((stat) => {
-              return <StatCard key={stat.label} stat={stat} />;
-            })}
-          </div>
-        </section>
-
-        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.3)] lg:p-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-semibold text-white">Quick workspaces</h2>
-              <p className="text-base text-slate-400">
-                Use redirects to access features of the dashboard.
-              </p>
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold text-white mb-4">Event metrics</h2>
+            <div className="grid gap-4 md:grid-cols-3">
+              {stats.map((stat) => {
+                return <StatCard key={stat.label} stat={stat} />;
+              })}
             </div>
           </div>
 
-          <div className="mt-6 rounded-[28px] border border-slate-700/70 bg-slate-900/50 overflow-hidden">
-            <div className="grid md:grid-cols-2 auto-rows-fr lg:grid-cols-3">
-              {quickActions.map((action) => (
-                <div key={action.label} className="h-full w-full">
-                  <QuickActionButton action={action} />
-                </div>
-              ))}
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold text-white mb-4">Quick action buttons</h2>
+            <div className="rounded-[28px] border border-slate-700/70 bg-slate-900/50 overflow-hidden">
+              <div className="grid md:grid-cols-2 auto-rows-fr lg:grid-cols-3">
+                {quickActions.map((action) => (
+                  <div key={action.label} className="h-full w-full">
+                    <QuickActionButton action={action} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
