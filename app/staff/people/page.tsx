@@ -33,7 +33,6 @@ import StaffFooter from "../components/footer";
 import { StaffSectionSkeleton } from "../components/skeleton";
 import { AccessStatus, Grade, Role, Subteam, User } from "@/schemas/database";
 import {
-  fetchPeopleActionClient,
   stageFileUploadActionClient,
   stageIndividualUploadActionClient,
 } from "@/actions/people/client";
@@ -87,27 +86,27 @@ const TEXT_COLUMN_CONFIGS: Array<{
   label: string;
   accessor: (person: User) => string;
 }> = [
-  {
-    key: "phone",
-    label: "Phone",
-    accessor: (person) => person.phoneNumber ?? "—",
-  },
-  {
-    key: "company",
-    label: "Company",
-    accessor: (person) => person.company ?? "—",
-  },
-  {
-    key: "school",
-    label: "School",
-    accessor: (person) => person.school ?? "—",
-  },
-  {
-    key: "grade",
-    label: "Grade",
-    accessor: (person) => person.grade ?? "—",
-  },
-];
+    {
+      key: "phone",
+      label: "Phone",
+      accessor: (person) => person.phoneNumber ?? "—",
+    },
+    {
+      key: "company",
+      label: "Company",
+      accessor: (person) => person.company ?? "—",
+    },
+    {
+      key: "school",
+      label: "School",
+      accessor: (person) => person.school ?? "—",
+    },
+    {
+      key: "grade",
+      label: "Grade",
+      accessor: (person) => person.grade ?? "—",
+    },
+  ];
 
 type ColumnVisibility = {
   person: boolean;
@@ -181,32 +180,14 @@ async function generatePeopleExport(params: {
 
 export default function StaffPeoplePage() {
   const [loadingState, setLoadingState] = useState<LoadingState>({
-    fetch: true,
+    fetch: false,
     upload: false,
     revoke: false,
     apply: false,
     export: false,
   });
-  const [peopleDataset, setPeopleDataset] = useState<User[]>([]);
+  const [peopleDataset, setPeopleDataset] = useState<User[]>(peopleDirectory);
   const isGlobalLocked = useMemo(() => Object.values(loadingState).some(Boolean), [loadingState]);
-
-  useEffect(() => {
-    let isMounted = true;
-    const hydrate = async () => {
-      try {
-        const people = await fetchPeopleActionClient();
-        setPeopleDataset(people || []);
-      } finally {
-        if (isMounted) {
-          setLoadingState((prev) => ({ ...prev, fetch: false }));
-        }
-      }
-    };
-    hydrate();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   return (
     <>
@@ -1021,7 +1002,7 @@ function RosterFilters({
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
       <Select value={roleFilter} onValueChange={(value) => onRoleChange(value as "all" | Role)}>
-         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
+        <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
           <SelectValue placeholder="Role filter" />
         </SelectTrigger>
         <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
@@ -1065,7 +1046,7 @@ function RosterFilters({
         value={searchQuery}
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder="Search name or email"
-         className="w-full rounded-2xl border-slate-700 bg-slate-900/30 text-slate-100 placeholder:text-slate-500 sm:w-64"
+        className="w-full rounded-2xl border-slate-700 bg-slate-900/30 text-slate-100 placeholder:text-slate-500 sm:w-64"
       />
     </div>
   );
@@ -1079,7 +1060,7 @@ function ColumnVisibilityControls({
   onToggle: (column: keyof ColumnVisibility, checked: boolean) => void;
 }) {
   return (
-     <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4">
+    <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4">
       {COLUMN_CONTROLS.map(({ key, label }) => (
         <label key={key} className="flex items-center gap-2 text-sm text-slate-300">
           <Checkbox
@@ -1108,28 +1089,28 @@ function RosterTable({
   return (
     <Table className="border-collapse text-sm text-slate-200 [&_td]:align-top">
       <TableHeader>
-         <TableRow className="bg-slate-800/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-            {visibleColumns.person && (
-             <TableHead className="min-w-[240px] border border-slate-700/60 bg-slate-900/60 text-slate-400">
+        <TableRow className="bg-slate-800/70 text-xs uppercase tracking-[0.25em] text-slate-500">
+          {visibleColumns.person && (
+            <TableHead className="min-w-[240px] border border-slate-700/60 bg-slate-900/60 text-slate-400">
               Person
             </TableHead>
           )}
-           {visibleColumns.email && <TableHead className="border border-slate-700/60 text-slate-400">Email</TableHead>}
-            {visibleColumns.subteam && (
-             <TableHead className="border border-slate-700/60 text-slate-400">Subteam</TableHead>
-            )}
-           {visibleColumns.role && <TableHead className="border border-slate-700/60 text-slate-400">Role</TableHead>}
-            {TEXT_COLUMN_CONFIGS.map(
-              ({ key, label }) =>
-                visibleColumns[key as keyof ColumnVisibility] && (
-                 <TableHead key={key} className="border border-slate-700/60 text-slate-400">
+          {visibleColumns.email && <TableHead className="border border-slate-700/60 text-slate-400">Email</TableHead>}
+          {visibleColumns.subteam && (
+            <TableHead className="border border-slate-700/60 text-slate-400">Subteam</TableHead>
+          )}
+          {visibleColumns.role && <TableHead className="border border-slate-700/60 text-slate-400">Role</TableHead>}
+          {TEXT_COLUMN_CONFIGS.map(
+            ({ key, label }) =>
+              visibleColumns[key as keyof ColumnVisibility] && (
+                <TableHead key={key} className="border border-slate-700/60 text-slate-400">
                   {label}
                 </TableHead>
               )
           )}
-           {visibleColumns.status && <TableHead className="border border-slate-700/60 text-slate-400">Status</TableHead>}
-            {visibleColumns.actions && (
-             <TableHead className="border border-slate-700/60 text-right text-slate-400">Actions</TableHead>
+          {visibleColumns.status && <TableHead className="border border-slate-700/60 text-slate-400">Status</TableHead>}
+          {visibleColumns.actions && (
+            <TableHead className="border border-slate-700/60 text-right text-slate-400">Actions</TableHead>
           )}
         </TableRow>
       </TableHeader>
@@ -1139,24 +1120,24 @@ function RosterTable({
           const statusStyle = statusStyles[person.accessStatus as AccessStatus];
           const accessStyle = accessStyles[person.role as Role];
           return (
-             <TableRow key={person.uid ?? ""} className="border border-slate-700/60">
-                {visibleColumns.person && (
-                 <TableCell className="border border-slate-700/60 bg-slate-900/40 p-3">
+            <TableRow key={person.uid ?? ""} className="border border-slate-700/60">
+              {visibleColumns.person && (
+                <TableCell className="border border-slate-700/60 bg-slate-900/40 p-3">
                   <p className="font-semibold text-white">{person.fullName}</p>
                 </TableCell>
               )}
-                {visibleColumns.email && (
-                 <TableCell className="border border-slate-700/60 p-3">
+              {visibleColumns.email && (
+                <TableCell className="border border-slate-700/60 p-3">
                   <p className="text-sm font-medium text-white">{person.email}</p>
-                 </TableCell>
-                )}
-                {visibleColumns.subteam && (
-                 <TableCell className="border border-slate-700/60 p-3">
+                </TableCell>
+              )}
+              {visibleColumns.subteam && (
+                <TableCell className="border border-slate-700/60 p-3">
                   <p className="text-sm font-medium text-white">{subteamLabel}</p>
-                 </TableCell>
-                )}
-                {visibleColumns.role && (
-                 <TableCell className="border border-slate-700/60 p-3">
+                </TableCell>
+              )}
+              {visibleColumns.role && (
+                <TableCell className="border border-slate-700/60 p-3">
                   <div className="flex flex-wrap gap-2">
                     <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyle.badge}`}>
                       {accessStyle.label}
@@ -1165,15 +1146,15 @@ function RosterTable({
                 </TableCell>
               )}
               {TEXT_COLUMN_CONFIGS.map(
-                    ({ key, accessor }) =>
-                    visibleColumns[key as keyof ColumnVisibility] && (
-                     <TableCell key={`${person.uid ?? ""}-${key}`} className="border border-slate-700/60 p-3">
+                ({ key, accessor }) =>
+                  visibleColumns[key as keyof ColumnVisibility] && (
+                    <TableCell key={`${person.uid ?? ""}-${key}`} className="border border-slate-700/60 p-3">
                       <p className="text-sm font-medium text-white">{accessor(person)}</p>
                     </TableCell>
                   )
               )}
-                {visibleColumns.status && (
-                 <TableCell className="border border-slate-700/60 p-3">
+              {visibleColumns.status && (
+                <TableCell className="border border-slate-700/60 p-3">
                   <div className="space-y-1">
                     <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyle.badge}`}>
                       {statusStyle.label}
@@ -1181,12 +1162,12 @@ function RosterTable({
                   </div>
                 </TableCell>
               )}
-                {visibleColumns.actions && (
-                 <TableCell className="border border-slate-700/60 p-3 text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                     className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60 disabled:opacity-50"
+              {visibleColumns.actions && (
+                <TableCell className="border border-slate-700/60 p-3 text-right">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60 disabled:opacity-50"
                     onClick={() => onManage(person.uid ?? "")}
                     disabled={isLocked}>
                     Manage
@@ -1230,7 +1211,7 @@ function PaginationControls({
           variant="outline"
           size="sm"
           disabled={!canGoPrev}
-           className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+          className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
           onClick={onPrev}>
           Previous
         </Button>
@@ -1241,7 +1222,7 @@ function PaginationControls({
           variant="outline"
           size="sm"
           disabled={!canGoNext}
-           className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+          className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
           onClick={onNext}>
           Next
         </Button>
@@ -1279,7 +1260,7 @@ function AccessDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-       <DialogContent className="border-slate-700 bg-slate-900 text-slate-100">
+      <DialogContent className="border-slate-700 bg-slate-900 text-slate-100">
         {activePerson ? (
           <>
             <DialogHeader className="gap-3">
@@ -1290,7 +1271,7 @@ function AccessDialog({
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role type</Label>
                 <Tabs value={modalRole} onValueChange={(value) => onRoleChange(value as Role)}>
-                   <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-800/60">
+                  <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-800/60">
                     {Object.keys(roles).map((role) => (
                       <TabsTrigger
                         key={role}
@@ -1319,19 +1300,17 @@ function AccessDialog({
                   </Select>
                 </div>
               )}
-               <div className="rounded-2xl border border-slate-700/70 bg-slate-900/40 p-4">
+              <div className="rounded-2xl border border-slate-700/70 bg-slate-900/40 p-4">
                 <p className="text-sm font-semibold text-white">Current status</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Badge
-                    className={`rounded-full px-3 py-1 text-[0.65rem] ${
-                      statusStyles[activePerson.accessStatus as AccessStatus].badge
-                    }`}>
+                    className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyles[activePerson.accessStatus as AccessStatus].badge
+                      }`}>
                     {statusStyles[activePerson.accessStatus as AccessStatus].label}
                   </Badge>
                   <Badge
-                    className={`rounded-full px-3 py-1 text-[0.65rem] ${
-                      accessStyles[activePerson.role as Role].badge
-                    }`}>
+                    className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyles[activePerson.role as Role].badge
+                      }`}>
                     {accessStyles[activePerson.role as Role].label}
                   </Badge>
                 </div>

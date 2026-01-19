@@ -45,7 +45,7 @@ const qrAssets = people.reduce<
   return acc;
 }, {});
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export default function StaffQrCodesPage() {
   const [uploadScope, setUploadScope] = useState<UploadScope>("master");
