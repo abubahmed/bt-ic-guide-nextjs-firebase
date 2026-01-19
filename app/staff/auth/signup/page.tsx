@@ -21,14 +21,14 @@ export default function StaffSignUpPage() {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-svh flex-col bg-slate-950">
+    <div className="flex min-h-svh flex-col bg-slate-900">
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
         <div className="relative w-full max-w-3xl">
-          <div className="absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] bg-gradient-to-br from-slate-900 via-slate-800/80 to-slate-900 blur-3xl" />
-          <div className="relative grid gap-8 rounded-[32px] border border-slate-800/80 bg-slate-900/95 p-6 text-slate-100 shadow-[0_25px_90px_rgba(2,6,23,0.8)] backdrop-blur-xl sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] bg-slate-800/80 blur-3xl" />
+          <div className="relative grid gap-8 rounded-[32px] border border-slate-700/80 bg-slate-800/95 p-6 text-slate-100 shadow-[0_25px_90px_rgba(2,6,23,0.8)] backdrop-blur-xl sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
             <section className="space-y-6">
               <header className="space-y-3">
-                <Badge className="rounded-full bg-slate-800 text-[0.6rem] uppercase tracking-[0.4em] text-sky-300">
+                <Badge className="rounded-full bg-slate-700 text-[0.6rem] uppercase tracking-[0.4em] text-sky-300">
                   Staff
                 </Badge>
                 <div className="space-y-2">
@@ -110,10 +110,10 @@ export default function StaffSignUpPage() {
               </div>
             </section>
 
-            <aside className="space-y-5 rounded-[24px] border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-900/70 p-6 text-sm text-slate-100">
+            <aside className="space-y-5 rounded-[24px] border border-slate-700 bg-slate-800/70 p-6 text-sm text-slate-100">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Need help?</p>
               <div className="space-y-3">
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/80 px-4 py-3">
                   <p className="font-semibold text-white">Attendee portal</p>
                   <p>
                     Registering as a participant instead? Switch over to the{" "}
@@ -123,7 +123,7 @@ export default function StaffSignUpPage() {
                     experience.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/80 px-4 py-3">
                   <p className="font-semibold text-white">Already approved</p>
                   <p>
                     When your account is confirmed, continue straight to{" "}

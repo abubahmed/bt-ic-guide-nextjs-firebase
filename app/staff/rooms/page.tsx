@@ -101,10 +101,10 @@ export default function StaffRoomsPage() {
   const pageEnd = Math.min(visiblePeople.length, (gridPage + 1) * PAGE_SIZE);
 
   return (
-    <main className="min-h-dvh bg-slate-950 text-slate-100">
+    <main className="min-h-dvh bg-slate-900 text-slate-100">
       <StaffHeader currentPage="rooms" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
@@ -116,11 +116,11 @@ export default function StaffRoomsPage() {
               </div>
             </div>
           </div>
-          <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
+          <div className="mt-6 space-y-5 rounded-2xl border border-slate-700/70 bg-slate-900/50 p-5">
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload scope</p>
               <Tabs value={uploadScope} onValueChange={(value) => setUploadScope(value as UploadScope)}>
-                <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+                <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-800/60">
                   <TabsTrigger
                     value="master"
                     className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
@@ -144,10 +144,10 @@ export default function StaffRoomsPage() {
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
                 <Select value={uploadTeam} onValueChange={(value) => setUploadTeam(value as any)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                     <SelectValue placeholder="Choose team" />
                   </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                  <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                     {teams.map((team) => (
                       <SelectItem key={team.id} value={team.id}>
                         {team.label}
@@ -161,10 +161,10 @@ export default function StaffRoomsPage() {
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Staffer</Label>
                 <Select value={uploadPerson} onValueChange={setUploadPerson}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                     <SelectValue placeholder="Select person" />
                   </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                  <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                     {staff
                       .filter((person) => person.team === uploadTeam)
                       .map((person) => (
@@ -179,7 +179,7 @@ export default function StaffRoomsPage() {
             </div>
             <label
               htmlFor="rooms-upload"
-              className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
+              className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-900/30 p-6 text-center transition hover:border-sky-500/60">
               <UploadCloud className="h-8 w-8 text-sky-300" />
               <div>
                 <p className="text-sm font-semibold text-white">Upload CSV/XLSX file</p>
@@ -189,7 +189,7 @@ export default function StaffRoomsPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <Button
                 variant="outline"
-                className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+                className="rounded-2xl border-slate-700 bg-slate-900/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
                 Run validations
               </Button>
               <Button className="rounded-2xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400">
@@ -199,7 +199,7 @@ export default function StaffRoomsPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
@@ -210,13 +210,13 @@ export default function StaffRoomsPage() {
               </div>
             </div>
           </div>
-          <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
+          <div className="mt-6 rounded-[28px] border border-slate-700/80 bg-slate-900/50 p-4">
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Select value={filterTeam} onValueChange={setFilterTeam}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
                   <SelectValue placeholder="Team filter" />
                 </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                   <SelectItem value="all">All teams</SelectItem>
                   {teams.map((team) => (
                     <SelectItem key={team.id} value={team.id}>
@@ -226,10 +226,10 @@ export default function StaffRoomsPage() {
                 </SelectContent>
               </Select>
               <Select value={filterPerson} onValueChange={setFilterPerson}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-56">
+                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-56">
                   <SelectValue placeholder="Individual filter" />
                 </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                   <SelectItem value="all">All staffers</SelectItem>
                   {filteredPeople.map((person) => (
                     <SelectItem key={person.id} value={person.id}>
@@ -243,29 +243,29 @@ export default function StaffRoomsPage() {
               {pagedPeople.length > 0 ? (
                 <Table className="text-sm text-slate-200 border-collapse [&_td]:align-top">
                   <TableHeader>
-                    <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-                      <TableHead className="min-w-[220px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
+                    <TableRow className="bg-slate-800/70 text-xs uppercase tracking-[0.25em] text-slate-500">
+                      <TableHead className="min-w-[220px] border border-slate-700/60 bg-slate-800/60 text-slate-400">
                         Staffer · Team
                       </TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Room</TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Details</TableHead>
+                      <TableHead className="border border-slate-700/60 text-slate-400">Room</TableHead>
+                      <TableHead className="border border-slate-700/60 text-slate-400">Details</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {pagedPeople.map((person) => {
                       const slot = roomAssignments[person.id];
                       return (
-                        <TableRow key={person.id} className="border border-slate-800/60">
-                          <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
+                        <TableRow key={person.id} className="border border-slate-700/60">
+                          <TableCell className="border border-slate-700/60 bg-slate-900/40 p-3">
                             <p className="font-semibold text-white">{person.name}</p>
                             <p className="text-xs text-slate-500">
                               {teamLookup[person.team]} • {person.role}
                             </p>
                           </TableCell>
-                          <TableCell className="border border-slate-800/60 p-3">
+                          <TableCell className="border border-slate-700/60 p-3">
                             <p className="font-mono text-base tracking-wide text-slate-100">{slot.room}</p>
                           </TableCell>
-                          <TableCell className="border border-slate-800/60 p-3">
+                          <TableCell className="border border-slate-700/60 p-3">
                             <p className="text-sm font-medium text-white">{slot.type}</p>
                           </TableCell>
                         </TableRow>
@@ -274,7 +274,7 @@ export default function StaffRoomsPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="rounded-2xl border border-slate-800/60 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
+                <div className="rounded-2xl border border-slate-700/60 bg-slate-900/40 p-6 text-center text-sm text-slate-400">
                   No room assignments match the applied filters.
                 </div>
               )}
@@ -289,7 +289,7 @@ export default function StaffRoomsPage() {
                     variant="outline"
                     size="sm"
                     disabled={gridPage === 0}
-                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                    className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
                     onClick={() => setGridPage((prev) => Math.max(0, prev - 1))}>
                     Previous
                   </Button>
@@ -300,7 +300,7 @@ export default function StaffRoomsPage() {
                     variant="outline"
                     size="sm"
                     disabled={gridPage >= pageCount - 1 || visiblePeople.length === 0}
-                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                    className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
                     onClick={() => setGridPage((prev) => Math.min(pageCount - 1, prev + 1))}>
                     Next
                   </Button>
@@ -310,7 +310,7 @@ export default function StaffRoomsPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <h2 className="mt-2 text-2xl font-semibold text-white">Export room assignments</h2>
@@ -318,9 +318,9 @@ export default function StaffRoomsPage() {
             </div>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/50 p-4">
               <Tabs value={exportScope} onValueChange={(value) => setExportScope(value as ExportScope)}>
-                <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+                <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-800/60">
                   <TabsTrigger
                     value="all"
                     className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
@@ -342,10 +342,10 @@ export default function StaffRoomsPage() {
                     <div className="space-y-2">
                       <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
                       <Select value={exportTeam} onValueChange={(value) => setExportTeam(value as any)}>
-                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                           <SelectValue placeholder="Choose team" />
                         </SelectTrigger>
-                        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                        <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                           {teams.map((team) => (
                             <SelectItem key={team.id} value={team.id}>
                               {team.label}
@@ -360,10 +360,10 @@ export default function StaffRoomsPage() {
                       <div className="space-y-2">
                         <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
                         <Select value={exportTeam} onValueChange={(value) => setExportTeam(value as any)}>
-                          <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                          <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                             <SelectValue placeholder="Choose team" />
                           </SelectTrigger>
-                          <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                          <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                             {teams.map((team) => (
                               <SelectItem key={team.id} value={team.id}>
                                 {team.label}
@@ -375,10 +375,10 @@ export default function StaffRoomsPage() {
                       <div className="space-y-2">
                         <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Staffer</Label>
                         <Select value={exportPerson} onValueChange={setExportPerson}>
-                          <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                          <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                             <SelectValue placeholder="Select person" />
                           </SelectTrigger>
-                          <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                          <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                             {staff
                               .filter((person) => person.team === exportTeam)
                               .map((person) => (
@@ -394,14 +394,14 @@ export default function StaffRoomsPage() {
                 </div>
               </Tabs>
             </div>
-            <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+            <div className="space-y-4 rounded-2xl border border-slate-700 bg-slate-900/50 p-4">
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Format</Label>
                 <Select value={exportFormat} onValueChange={(value) => setExportFormat(value as ExportFormat)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                     <SelectValue placeholder="Choose format" />
                   </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                  <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                     <SelectItem value="csv">CSV (spreadsheet ready)</SelectItem>
                     <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
                   </SelectContent>

@@ -117,10 +117,10 @@ export default function StaffResourcesPage() {
   };
 
   return (
-    <main className="min-h-dvh bg-slate-950 text-slate-100">
+    <main className="min-h-dvh bg-slate-900 text-slate-100">
       <StaffHeader currentPage="resources" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
@@ -131,7 +131,7 @@ export default function StaffResourcesPage() {
               </div>
             </div>
           </div>
-          <div className="mt-6 rounded-[28px] border border-slate-800/70 bg-slate-950/50 p-6">
+          <div className="mt-6 rounded-[28px] border border-slate-700/70 bg-slate-900/50 p-6">
             <div className="mt-4 grid gap-6 lg:grid-cols-2">
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -140,13 +140,13 @@ export default function StaffResourcesPage() {
                     value={formTitle}
                     onChange={(event) => setFormTitle(event.target.value)}
                     placeholder="e.g., Incident escalation form"
-                    className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 placeholder:text-slate-500"
+                    className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 placeholder:text-slate-500"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Resource</Label>
                   <Tabs value={uploadMode} onValueChange={(value) => resetUploadFields(value as SourceType)}>
-                    <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-900/60">
+                    <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-800/60">
                       <TabsTrigger
                         value="link"
                         className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
@@ -164,12 +164,12 @@ export default function StaffResourcesPage() {
                       value={formLink}
                       onChange={(event) => setFormLink(event.target.value)}
                       placeholder="https://drive.google.com/..."
-                      className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 placeholder:text-slate-500"
+                      className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 placeholder:text-slate-500"
                     />
                   ) : (
                     <label
                       htmlFor="resource-file"
-                      className="flex cursor-pointer flex-col gap-2 rounded-2xl border border-dashed border-slate-700 bg-slate-950/20 px-4 py-5 text-center text-sm text-slate-300">
+                       className="flex cursor-pointer flex-col gap-2 rounded-2xl border border-dashed border-slate-700 bg-slate-900/20 px-4 py-5 text-center text-sm text-slate-300">
                       <span className="font-semibold text-white">
                         {formFile ? formFile.name : "Attach file from device"}
                       </span>
@@ -185,7 +185,7 @@ export default function StaffResourcesPage() {
                 <div className="space-y-2">
                   <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Visibility</Label>
                   <Tabs value={formVisibility} onValueChange={(value) => setFormVisibility(value as Visibility)}>
-                    <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+                    <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-800/60">
                       <TabsTrigger
                         value="staff"
                         className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
@@ -217,7 +217,7 @@ export default function StaffResourcesPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
@@ -228,15 +228,15 @@ export default function StaffResourcesPage() {
               </div>
             </div>
           </div>
-          <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
+          <div className="mt-6 rounded-[28px] border border-slate-700/80 bg-slate-900/50 p-4">
             <div className="flex flex-wrap items-center gap-3">
               <Select
                 value={visibilityFilter}
                 onValueChange={(value) => setVisibilityFilter(value as "all" | Visibility)}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+                 <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
                   <SelectValue placeholder="Visibility filter" />
                 </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                   <SelectItem value="all">Staff + Attendee</SelectItem>
                   <SelectItem value="staff">Staff only</SelectItem>
                   <SelectItem value="attendees">Attendee facing</SelectItem>
@@ -244,10 +244,10 @@ export default function StaffResourcesPage() {
                 </SelectContent>
               </Select>
               <Select value={sourceFilter} onValueChange={(value) => setSourceFilter(value as "all" | SourceType)}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
                   <SelectValue placeholder="Source type" />
                 </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                   <SelectItem value="all">Link + File</SelectItem>
                   <SelectItem value="link">Links</SelectItem>
                   <SelectItem value="file">Files</SelectItem>
@@ -257,31 +257,31 @@ export default function StaffResourcesPage() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search title, owner, or note"
-                className="w-full rounded-2xl border-slate-700 bg-slate-950/30 text-slate-100 placeholder:text-slate-500 sm:w-64"
+                 className="w-full rounded-2xl border-slate-700 bg-slate-900/30 text-slate-100 placeholder:text-slate-500 sm:w-64"
               />
             </div>
             <div className="mt-4">
               {pagedEntries.length > 0 ? (
                 <Table className="text-sm text-slate-200 border-collapse [&_td]:align-top">
                   <TableHeader>
-                    <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-                      <TableHead className="border border-slate-800/60 text-slate-400">Title</TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Owner</TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Visibility · Updated</TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Source</TableHead>
-                      <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
+                     <TableRow className="bg-slate-800/70 text-xs uppercase tracking-[0.25em] text-slate-500">
+                      <TableHead className="border border-slate-700/60 text-slate-400">Title</TableHead>
+                      <TableHead className="border border-slate-700/60 text-slate-400">Owner</TableHead>
+                      <TableHead className="border border-slate-700/60 text-slate-400">Visibility · Updated</TableHead>
+                      <TableHead className="border border-slate-700/60 text-slate-400">Source</TableHead>
+                      <TableHead className="border border-slate-700/60 text-right text-slate-400">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {pagedEntries.map((entry) => (
-                      <TableRow key={entry.id} className="border border-slate-800/60">
-                        <TableCell className="border border-slate-800/60 p-3">
+                       <TableRow key={entry.id} className="border border-slate-700/60">
+                        <TableCell className="border border-slate-700/60 p-3">
                           <p className="font-medium text-white">{entry.title}</p>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-3 min-w-[250px]">
+                        <TableCell className="border border-slate-700/60 p-3 min-w-[250px]">
                           <p className="text-sm font-medium text-white">{entry.owner}</p>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-3">
+                        <TableCell className="border border-slate-700/60 p-3">
                           <div className="flex flex-wrap gap-2">
                             <Badge
                               className={`rounded-full px-3 py-1 text-[0.65rem] ${
@@ -292,7 +292,7 @@ export default function StaffResourcesPage() {
                           </div>
                           <p className="text-xs text-slate-400">{entry.updated}</p>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-3">
+                        <TableCell className="border border-slate-700/60 p-3">
                           <div className="flex flex-wrap gap-2">
                             <Badge
                               className={`rounded-full px-3 py-1 text-[0.65rem] ${
@@ -313,11 +313,11 @@ export default function StaffResourcesPage() {
                             <p className="text-xs text-slate-300">{entry.reference}</p>
                           )}
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-3 text-right">
+                        <TableCell className="border border-slate-700/60 p-3 text-right">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-rose-500/60"
+                            className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-rose-500/60"
                             onClick={() => handleDelete(entry.id)}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -328,7 +328,7 @@ export default function StaffResourcesPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
+                 <div className="rounded-2xl border border-slate-700/70 bg-slate-900/40 p-6 text-center text-sm text-slate-400">
                   No resources match the current filters.
                 </div>
               )}
@@ -344,7 +344,7 @@ export default function StaffResourcesPage() {
                   variant="outline"
                   size="sm"
                   disabled={gridPage === 0}
-                  className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                   className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
                   onClick={() => setGridPage((prev) => Math.max(0, prev - 1))}>
                   Previous
                 </Button>
@@ -356,7 +356,7 @@ export default function StaffResourcesPage() {
                   variant="outline"
                   size="sm"
                   disabled={gridPage >= pageCount - 1 || filteredEntries.length === 0}
-                  className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                   className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
                   onClick={() => setGridPage((prev) => Math.min(pageCount - 1, prev + 1))}>
                   Next
                 </Button>

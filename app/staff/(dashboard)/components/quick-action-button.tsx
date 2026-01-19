@@ -12,7 +12,7 @@ export default function QuickActionButton({ action }: { action: QuickAction }) {
   const Icon = action.icon;
 
   return (
-    <article className="flex items-center gap-6 border border-slate-800/50 bg-slate-900/30 p-6 h-full">
+    <article className="flex items-center gap-6 border border-slate-700/50 bg-slate-900/30 p-6 h-full">
       <div className="flex-1">
         <p className="text-md mb-1 font-medium text-white">{action.label}</p>
         <p className="text-sm text-slate-400">{action.description}</p>
@@ -22,7 +22,7 @@ export default function QuickActionButton({ action }: { action: QuickAction }) {
           href={action.href}
           aria-label={`Open ${action.label}`}
           target="_blank"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800/60 text-slate-300 transition-colors hover:border-slate-600 hover:text-white focus-visible:border-slate-600 focus-visible:text-white">
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/60 text-slate-300 transition-colors hover:border-slate-500 hover:text-white focus-visible:border-slate-500 focus-visible:text-white">
           <ArrowUpRight className="h-4 w-4" />
         </Link>
       </div>

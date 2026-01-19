@@ -27,17 +27,17 @@ export function StaffSectionSkeleton({
   return (
     <section
       className={cn(
-        "rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8",
+        "rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8",
         "animate-pulse",
         className
       )}>
       <div className="space-y-3">
-        <div className="h-6 w-52 rounded-full bg-slate-800/80" />
-        <div className="h-4 w-3/4 rounded-full bg-slate-900/80" />
+        <div className="h-6 w-52 rounded-full bg-slate-700/80" />
+        <div className="h-4 w-3/4 rounded-full bg-slate-800/80" />
       </div>
       <div className="mt-6 space-y-5">
         {blocks.map((block, index) => (
-          <div key={`skeleton-block-${index}`} className="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-4">
+           <div key={`skeleton-block-${index}`} className="rounded-2xl border border-slate-700/60 bg-slate-900/45 p-4">
             <div className="space-y-2">
               {Array.from({ length: block.lines ?? 3 }).map((_, lineIdx) => (
                 <div
@@ -50,7 +50,7 @@ export function StaffSectionSkeleton({
               ))}
             </div>
             {block.contentHeight && (
-              <div className={cn("mt-4 rounded-2xl bg-slate-900/60", block.contentHeight, block.contentClassName)} />
+               <div className={cn("mt-4 rounded-2xl bg-slate-800/60", block.contentHeight, block.contentClassName)} />
             )}
           </div>
         ))}
@@ -58,7 +58,7 @@ export function StaffSectionSkeleton({
       {footerItems > 0 && (
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           {Array.from({ length: footerItems }).map((_, idx) => (
-            <div key={`skeleton-footer-${idx}`} className="h-11 rounded-2xl bg-slate-900/80" />
+             <div key={`skeleton-footer-${idx}`} className="h-11 rounded-2xl bg-slate-800/80" />
           ))}
         </div>
       )}

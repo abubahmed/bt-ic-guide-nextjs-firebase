@@ -111,10 +111,10 @@ export default function StaffHelpPage() {
   };
 
   return (
-    <main className="min-h-dvh bg-slate-950 text-slate-100">
+    <main className="min-h-dvh bg-slate-900 text-slate-100">
       <StaffHeader currentPage="help" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
@@ -126,13 +126,13 @@ export default function StaffHelpPage() {
               </div>
             </div>
           </div>
-          <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
+          <div className="mt-6 rounded-[28px] border border-slate-700/80 bg-slate-900/50 p-4">
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Select value={teamFilter} onValueChange={setTeamFilter}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
                   <SelectValue placeholder="Team filter" />
                 </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                   <SelectItem value="all">All teams</SelectItem>
                   {teams.map((team) => (
                     <SelectItem key={team.id} value={team.id}>
@@ -142,10 +142,10 @@ export default function StaffHelpPage() {
                 </SelectContent>
               </Select>
               <Select value={requesterFilter} onValueChange={setRequesterFilter}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-56">
+                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-56">
                   <SelectValue placeholder="Individual filter" />
                 </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                   <SelectItem value="all">All requesters</SelectItem>
                   {visibleRequesters.map((requester) => (
                     <SelectItem key={requester.id} value={requester.id}>
@@ -155,10 +155,10 @@ export default function StaffHelpPage() {
                 </SelectContent>
               </Select>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-56">
+                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-56">
                   <SelectValue placeholder="Help type" />
                 </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                   <SelectItem value="all">All request types</SelectItem>
                   {helpTypes.map((type) => (
                     <SelectItem key={type.id} value={type.id}>
@@ -172,46 +172,46 @@ export default function StaffHelpPage() {
               {paginatedRequests.length > 0 ? (
                 <Table className="text-sm text-slate-200 border-collapse [&_td]:align-top">
                   <TableHeader>
-                    <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-                      <TableHead className="min-w-[220px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
+                     <TableRow className="bg-slate-800/70 text-xs uppercase tracking-[0.25em] text-slate-500">
+                      <TableHead className="min-w-[220px] border border-slate-700/60 bg-slate-900/60 text-slate-400">
                         Requester · Channel
                       </TableHead>
-                      <TableHead className="border border-slate-800/60 bg-slate-950/60 text-slate-400">Team</TableHead>
-                      <TableHead className="border border-slate-800/60 bg-slate-950/60 text-slate-400">
+                      <TableHead className="border border-slate-700/60 bg-slate-900/60 text-slate-400">Team</TableHead>
+                      <TableHead className="border border-slate-700/60 bg-slate-900/60 text-slate-400">
                         Help type
                       </TableHead>
-                      <TableHead className="border border-slate-800/60 bg-slate-950/60 text-center text-slate-400">
+                      <TableHead className="border border-slate-700/60 bg-slate-900/60 text-center text-slate-400">
                         Priority
                       </TableHead>
-                      <TableHead className="border border-slate-800/60 bg-slate-950/60 text-center text-slate-400">
+                      <TableHead className="border border-slate-700/60 bg-slate-900/60 text-center text-slate-400">
                         Status
                       </TableHead>
-                      <TableHead className="border border-slate-800/60 bg-slate-950/60 text-slate-400">
+                      <TableHead className="border border-slate-700/60 bg-slate-900/60 text-slate-400">
                         Details
                       </TableHead>
-                      <TableHead className="border border-slate-800/60 bg-slate-950/60" />
+                      <TableHead className="border border-slate-700/60 bg-slate-900/60" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedRequests.map((request) => (
                       <TableRow
                         key={request.id}
-                        className="border border-slate-800/60 transition hover:bg-slate-900/60"
+                        className="border border-slate-700/60 transition hover:bg-slate-800/60"
                         onClick={() => handleOpenRequest(request as any)}>
-                        <TableCell className="border border-slate-800/60 bg-slate-950/40 p-4">
+                        <TableCell className="border border-slate-700/60 bg-slate-900/40 p-4">
                           <div className="space-y-1">
                             <p className="font-semibold text-white">{request.requesterName}</p>
                             <p className="text-xs text-slate-500">{request.requesterRole}</p>
                             <p className="text-xs text-slate-500">{request.channel}</p>
                           </div>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-4 text-slate-300">
+                        <TableCell className="border border-slate-700/60 p-4 text-slate-300">
                           {teams.find((team) => team.id === request.ownerTeam)?.label ?? "—"}
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-4 text-slate-300">
+                        <TableCell className="border border-slate-700/60 p-4 text-slate-300">
                           {helpTypes.find((type) => type.id === request.requestType)?.label ?? "—"}
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-4 text-center">
+                        <TableCell className="border border-slate-700/60 p-4 text-center">
                           <Badge
                             className={`rounded-full border px-3 py-1 text-xs ${
                               priorityStyles[request.priority as keyof typeof priorityStyles].badge
@@ -219,7 +219,7 @@ export default function StaffHelpPage() {
                             {priorityStyles[request.priority as keyof typeof priorityStyles].label}
                           </Badge>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-4 text-center">
+                        <TableCell className="border border-slate-700/60 p-4 text-center">
                           <Badge
                             className={`rounded-full border px-3 py-1 text-xs ${
                               statusStyles[request.status as keyof typeof statusStyles].badge
@@ -227,14 +227,14 @@ export default function StaffHelpPage() {
                             {statusStyles[request.status as keyof typeof statusStyles].label}
                           </Badge>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-4">
+                        <TableCell className="border border-slate-700/60 p-4">
                           <p className="font-medium text-white">{request.summary}</p>
                           <p className="text-xs text-slate-500">{request.submittedAt}</p>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-4">
+                        <TableCell className="border border-slate-700/60 p-4">
                           <Button
                             variant="outline"
-                            className="w-full rounded-xl border-slate-700 bg-slate-950/40 text-slate-100">
+                            className="w-full rounded-xl border-slate-700 bg-slate-900/40 text-slate-100">
                             View
                           </Button>
                         </TableCell>
@@ -243,7 +243,7 @@ export default function StaffHelpPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="mt-8 rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
+                 <div className="mt-8 rounded-2xl border border-slate-700/70 bg-slate-900/40 p-6 text-center text-sm text-slate-400">
                   No help requests match the current filters.
                 </div>
               )}
@@ -258,7 +258,7 @@ export default function StaffHelpPage() {
                     variant="outline"
                     size="sm"
                     disabled={page === 0}
-                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                     className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
                     onClick={() => setPage((prev) => Math.max(0, prev - 1))}>
                     Previous
                   </Button>
@@ -270,7 +270,7 @@ export default function StaffHelpPage() {
                     variant="outline"
                     size="sm"
                     disabled={page >= pageCount - 1 || filteredRequests.length === 0}
-                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                     className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
                     onClick={() => setPage((prev) => Math.min(pageCount - 1, prev + 1))}>
                     Next
                   </Button>
@@ -283,7 +283,7 @@ export default function StaffHelpPage() {
       <StaffFooter />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border border-slate-800 bg-slate-950 text-slate-100 sm:max-w-lg">
+         <DialogContent className="border border-slate-700 bg-slate-900 text-slate-100 sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-white">
               {activeRequest ? activeRequest.summary : "Help request"}
@@ -305,13 +305,13 @@ export default function StaffHelpPage() {
                   Status · {statusStyles[statusDraft].label}
                 </Badge>
               </div>
-              <div className="space-y-2 rounded-2xl border border-slate-800/60 bg-slate-950/60 p-4">
+               <div className="space-y-2 rounded-2xl border border-slate-700/60 bg-slate-900/60 p-4">
                 <p className="text-sm font-semibold text-white">Requester</p>
                 <p className="text-sm text-slate-300">{activeRequest.requesterName}</p>
                 <p className="text-xs text-slate-500">{activeRequest.requesterRole}</p>
                 <p className="text-xs text-slate-500">{activeRequest.channel}</p>
               </div>
-              <div className="space-y-2 rounded-2xl border border-slate-800/60 bg-slate-950/60 p-4">
+               <div className="space-y-2 rounded-2xl border border-slate-700/60 bg-slate-900/60 p-4">
                 <p className="text-sm font-semibold text-white">Details</p>
                 <p className="text-sm text-slate-300">{activeRequest.detail}</p>
               </div>
@@ -319,10 +319,10 @@ export default function StaffHelpPage() {
                 <div className="space-y-2">
                   <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Status</Label>
                   <Select value={statusDraft} onValueChange={(value) => setStatusDraft(value as HelpRequestStatus)}>
-                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                     <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                       {Object.entries(statusStyles).map(([id, meta]) => (
                         <SelectItem key={id} value={id}>
                           {meta.label}
@@ -334,7 +334,7 @@ export default function StaffHelpPage() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3 rounded-2xl border border-dashed border-slate-800/60 bg-slate-950/40 px-4 py-6 text-sm text-slate-400">
+             <div className="flex items-center gap-3 rounded-2xl border border-dashed border-slate-700/60 bg-slate-900/40 px-4 py-6 text-sm text-slate-400">
               <AlertCircle className="h-5 w-5 text-slate-500" />
               Select a help request from the grid to preview it here.
             </div>

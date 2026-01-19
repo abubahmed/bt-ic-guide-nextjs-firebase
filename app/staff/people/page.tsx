@@ -210,7 +210,7 @@ export default function StaffPeoplePage() {
 
   return (
     <>
-      <main className="min-h-dvh bg-slate-950 text-slate-100">
+      <main className="min-h-dvh bg-slate-900 text-slate-100">
         <StaffHeader currentPage="people" />
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
           {loadingState.fetch ? (
@@ -235,7 +235,7 @@ export default function StaffPeoplePage() {
                   { lines: 2, contentHeight: "h-28" },
                 ]}
                 footerItems={1}
-                className="bg-slate-900/60"
+                className="bg-slate-800/60"
               />
             </>
           ) : (
@@ -385,7 +385,7 @@ function UploadPanel({
   const isUploadLoading = loadingState.upload;
 
   return (
-    <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+    <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
       <div className="space-y-3">
         <div>
           <h1 className="text-3xl font-semibold text-white">Upload people data</h1>
@@ -394,7 +394,7 @@ function UploadPanel({
           </p>
         </div>
       </div>
-      <div className="mt-6 space-y-5 rounded-2xl border border-slate-800/70 bg-slate-950/50 p-5">
+      <div className="mt-6 space-y-5 rounded-2xl border border-slate-700/70 bg-slate-900/50 p-5">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Upload scope</p>
           <Tabs
@@ -413,7 +413,7 @@ function UploadPanel({
                 school: "",
               });
             }}>
-            <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-900/60 text-white">
+            <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-800/60 text-white">
               {UPLOAD_SCOPES.map((scope) => (
                 <TabsTrigger
                   key={scope}
@@ -434,7 +434,7 @@ function UploadPanel({
                   value={individualForm.fullName}
                   onChange={(event) => handleIndividualFormChange("fullName", event.target.value)}
                   placeholder="Jane Doe"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                  className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100"
                 />
               </div>
               <div className="space-y-2">
@@ -444,7 +444,7 @@ function UploadPanel({
                   value={individualForm.email}
                   onChange={(event) => handleIndividualFormChange("email", event.target.value)}
                   placeholder="jane@example.com"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                  className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100"
                 />
               </div>
             </div>
@@ -456,7 +456,7 @@ function UploadPanel({
                   value={individualForm.phone}
                   onChange={(event) => handleIndividualFormChange("phone", event.target.value)}
                   placeholder="+1 (555) 123-4567"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                  className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100"
                 />
               </div>
               <div className="space-y-2">
@@ -464,10 +464,10 @@ function UploadPanel({
                 <Select
                   value={individualForm.role}
                   onValueChange={(value) => handleIndividualFormChange("role", value as Role)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                  <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                     {Object.keys(roles).map((role) => (
                       <SelectItem key={role} value={role as Role}>
                         {roles[role as Role]}
@@ -481,10 +481,10 @@ function UploadPanel({
                 <Select
                   value={individualForm.grade}
                   onValueChange={(value) => handleIndividualFormChange("grade", value as Grade)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                  <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                     {Object.keys(grades).map((grade) => (
                       <SelectItem key={grade} value={grade as Grade}>
                         {grades[grade as Grade]}
@@ -500,10 +500,10 @@ function UploadPanel({
                 <Select
                   value={individualForm.subteam}
                   onValueChange={(value) => handleIndividualFormChange("subteam", value as Subteam)}>
-                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                  <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                     <SelectValue placeholder="Choose subteam" />
                   </SelectTrigger>
-                  <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                  <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                     {Object.keys(teams).map((teamOption) => (
                       <SelectItem key={teamOption} value={teamOption as Subteam}>
                         {teams[teamOption as Subteam]}
@@ -520,7 +520,7 @@ function UploadPanel({
                   value={individualForm.company}
                   onChange={(event) => handleIndividualFormChange("company", event.target.value)}
                   placeholder="Company name"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                  className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100"
                 />
               </div>
               <div className="space-y-2">
@@ -529,7 +529,7 @@ function UploadPanel({
                   value={individualForm.school}
                   onChange={(event) => handleIndividualFormChange("school", event.target.value)}
                   placeholder="School name"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100"
+                  className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100"
                 />
               </div>
             </div>
@@ -537,7 +537,7 @@ function UploadPanel({
         ) : (
           <label
             htmlFor="people-upload"
-            className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-950/30 p-6 text-center transition hover:border-sky-500/60">
+            className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-700 bg-slate-900/30 p-6 text-center transition hover:border-sky-500/60">
             <UploadCloud className="h-8 w-8 text-sky-300" />
             {file ? (
               <div>
@@ -556,7 +556,7 @@ function UploadPanel({
           <Button
             disabled={isLocked}
             variant="outline"
-            className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60"
+            className="rounded-2xl border-slate-700 bg-slate-900/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60"
             onClick={handleRunValidations}>
             Run validations
           </Button>
@@ -714,7 +714,7 @@ function RosterViewer({
 
   return (
     <>
-      <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+      <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
         <div className="space-y-3">
           <div>
             <h2 className="text-3xl font-semibold text-white">People viewer</h2>
@@ -723,7 +723,7 @@ function RosterViewer({
             </p>
           </div>
         </div>
-        <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
+        <div className="mt-6 rounded-[28px] border border-slate-700/80 bg-slate-900/50 p-4">
           <RosterFilters
             subteamFilter={subteamFilter}
             roleFilter={roleFilter}
@@ -744,7 +744,7 @@ function RosterViewer({
                 isLocked={isLocked}
               />
             ) : (
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
+              <div className="rounded-2xl border border-slate-700/70 bg-slate-900/40 p-6 text-center text-sm text-slate-400">
                 No people match the applied filters.
               </div>
             )}
@@ -849,7 +849,7 @@ function ExportPanel({
   const isExportLoading = loadingState.export;
 
   return (
-    <section className="rounded-[32px] border border-slate-800 bg-slate-900/60 p-6 shadow-[0px_30px_60px_rgba(2,6,23,0.45)] lg:p-8">
+    <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="mt-2 text-2xl font-semibold text-white">Export people data</h2>
@@ -857,9 +857,9 @@ function ExportPanel({
         </div>
       </div>
       <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+        <div className="rounded-2xl border border-slate-700 bg-slate-900/50 p-4">
           <Tabs value={scope} onValueChange={(value) => setScope(value as ExportScope)}>
-            <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+            <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-800/60">
               {EXPORT_SCOPES.map((scope) => (
                 <TabsTrigger
                   key={scope}
@@ -875,10 +875,10 @@ function ExportPanel({
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
                     <Select value={groupRole} onValueChange={(value) => setGroupRole(value as Role)}>
-                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                         <SelectValue placeholder="Choose role" />
                       </SelectTrigger>
-                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                      <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                         {Object.keys(roles).map((role) => (
                           <SelectItem key={role} value={role as Role}>
                             {roles[role as Role]}
@@ -891,10 +891,10 @@ function ExportPanel({
                     <div className="space-y-2">
                       <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
                       <Select value={groupSubteam} onValueChange={(value) => setGroupSubteam(value as Subteam)}>
-                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                           <SelectValue placeholder="Choose subteam" />
                         </SelectTrigger>
-                        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                        <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                           {Object.keys(teams).map((teamOption) => (
                             <SelectItem key={teamOption} value={teamOption as Subteam}>
                               {teams[teamOption as Subteam]}
@@ -911,10 +911,10 @@ function ExportPanel({
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role</Label>
                     <Select value={individualRole} onValueChange={(value) => setIndividualRole(value as Role)}>
-                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
-                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                      <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                         {Object.keys(roles).map((role) => (
                           <SelectItem key={role} value={role as Role}>
                             {roles[role as Role]}
@@ -929,10 +929,10 @@ function ExportPanel({
                       <Select
                         value={individualSubteam}
                         onValueChange={(value) => setIndividualSubteam(value as Subteam)}>
-                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                        <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                           <SelectValue placeholder="Subteam" />
                         </SelectTrigger>
-                        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                        <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                           {Object.keys(teams).map((teamOption) => (
                             <SelectItem key={teamOption} value={teamOption as Subteam}>
                               {teams[teamOption as Subteam]}
@@ -948,10 +948,10 @@ function ExportPanel({
                       value={individualPerson ?? undefined}
                       onValueChange={setIndividualPerson}
                       disabled={individualPeople.length === 0}>
-                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 disabled:opacity-40">
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 disabled:opacity-40">
                         <SelectValue placeholder="Person" />
                       </SelectTrigger>
-                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                      <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                         {individualPeople.length > 0 ? (
                           individualPeople.map((person) => (
                             <SelectItem key={person.uid ?? ""} value={person.uid ?? ""}>
@@ -971,14 +971,14 @@ function ExportPanel({
             </div>
           </Tabs>
         </div>
-        <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
+        <div className="space-y-4 rounded-2xl border border-slate-700 bg-slate-900/50 p-4">
           <div className="space-y-2">
             <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Format</Label>
             <Select value={format} onValueChange={(value) => setFormat(value as ExportFormat)}>
-              <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+              <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                 <SelectValue placeholder="Choose format" />
               </SelectTrigger>
-              <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+              <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                 {Object.keys(EXPORT_FORMATS).map((format) => (
                   <SelectItem key={format} value={format as ExportFormat}>
                     {EXPORT_FORMATS[format as ExportFormat]}
@@ -1021,10 +1021,10 @@ function RosterFilters({
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
       <Select value={roleFilter} onValueChange={(value) => onRoleChange(value as "all" | Role)}>
-        <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+         <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
           <SelectValue placeholder="Role filter" />
         </SelectTrigger>
-        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+        <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
           <SelectItem value="all">All roles</SelectItem>
           {Object.keys(roles).map((role) => (
             <SelectItem key={role} value={role as Role}>
@@ -1035,10 +1035,10 @@ function RosterFilters({
       </Select>
       {roleFilter === "staff" && (
         <Select value={subteamFilter} onValueChange={(value) => onSubteamChange(value as "all" | Subteam)}>
-          <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+          <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
             <SelectValue placeholder="Subteam filter" />
           </SelectTrigger>
-          <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+          <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
             <SelectItem value="all">All subteams</SelectItem>
             {Object.keys(teams).map((subteam) => (
               <SelectItem key={subteam} value={subteam as Subteam}>
@@ -1049,10 +1049,10 @@ function RosterFilters({
         </Select>
       )}
       <Select value={accessStatusFilter} onValueChange={(value) => onAccessStatusChange(value as "all" | AccessStatus)}>
-        <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+        <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
           <SelectValue placeholder="Status filter" />
         </SelectTrigger>
-        <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+        <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
           <SelectItem value="all">All statuses</SelectItem>
           {Object.keys(accessStatuses).map((accessStatus) => (
             <SelectItem key={accessStatus} value={accessStatus as AccessStatus}>
@@ -1065,7 +1065,7 @@ function RosterFilters({
         value={searchQuery}
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder="Search name or email"
-        className="w-full rounded-2xl border-slate-700 bg-slate-950/30 text-slate-100 placeholder:text-slate-500 sm:w-64"
+         className="w-full rounded-2xl border-slate-700 bg-slate-900/30 text-slate-100 placeholder:text-slate-500 sm:w-64"
       />
     </div>
   );
@@ -1079,7 +1079,7 @@ function ColumnVisibilityControls({
   onToggle: (column: keyof ColumnVisibility, checked: boolean) => void;
 }) {
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-800/60 bg-slate-950/40 p-4">
+     <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-700/60 bg-slate-900/40 p-4">
       {COLUMN_CONTROLS.map(({ key, label }) => (
         <label key={key} className="flex items-center gap-2 text-sm text-slate-300">
           <Checkbox
@@ -1108,28 +1108,28 @@ function RosterTable({
   return (
     <Table className="border-collapse text-sm text-slate-200 [&_td]:align-top">
       <TableHeader>
-        <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-          {visibleColumns.person && (
-            <TableHead className="min-w-[240px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
+         <TableRow className="bg-slate-800/70 text-xs uppercase tracking-[0.25em] text-slate-500">
+            {visibleColumns.person && (
+             <TableHead className="min-w-[240px] border border-slate-700/60 bg-slate-900/60 text-slate-400">
               Person
             </TableHead>
           )}
-          {visibleColumns.email && <TableHead className="border border-slate-800/60 text-slate-400">Email</TableHead>}
-          {visibleColumns.subteam && (
-            <TableHead className="border border-slate-800/60 text-slate-400">Subteam</TableHead>
-          )}
-          {visibleColumns.role && <TableHead className="border border-slate-800/60 text-slate-400">Role</TableHead>}
-          {TEXT_COLUMN_CONFIGS.map(
-            ({ key, label }) =>
-              visibleColumns[key as keyof ColumnVisibility] && (
-                <TableHead key={key} className="border border-slate-800/60 text-slate-400">
+           {visibleColumns.email && <TableHead className="border border-slate-700/60 text-slate-400">Email</TableHead>}
+            {visibleColumns.subteam && (
+             <TableHead className="border border-slate-700/60 text-slate-400">Subteam</TableHead>
+            )}
+           {visibleColumns.role && <TableHead className="border border-slate-700/60 text-slate-400">Role</TableHead>}
+            {TEXT_COLUMN_CONFIGS.map(
+              ({ key, label }) =>
+                visibleColumns[key as keyof ColumnVisibility] && (
+                 <TableHead key={key} className="border border-slate-700/60 text-slate-400">
                   {label}
                 </TableHead>
               )
           )}
-          {visibleColumns.status && <TableHead className="border border-slate-800/60 text-slate-400">Status</TableHead>}
-          {visibleColumns.actions && (
-            <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
+           {visibleColumns.status && <TableHead className="border border-slate-700/60 text-slate-400">Status</TableHead>}
+            {visibleColumns.actions && (
+             <TableHead className="border border-slate-700/60 text-right text-slate-400">Actions</TableHead>
           )}
         </TableRow>
       </TableHeader>
@@ -1139,24 +1139,24 @@ function RosterTable({
           const statusStyle = statusStyles[person.accessStatus as AccessStatus];
           const accessStyle = accessStyles[person.role as Role];
           return (
-            <TableRow key={person.uid ?? ""} className="border border-slate-800/60">
-              {visibleColumns.person && (
-                <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
+             <TableRow key={person.uid ?? ""} className="border border-slate-700/60">
+                {visibleColumns.person && (
+                 <TableCell className="border border-slate-700/60 bg-slate-900/40 p-3">
                   <p className="font-semibold text-white">{person.fullName}</p>
                 </TableCell>
               )}
-              {visibleColumns.email && (
-                <TableCell className="border border-slate-800/60 p-3">
+                {visibleColumns.email && (
+                 <TableCell className="border border-slate-700/60 p-3">
                   <p className="text-sm font-medium text-white">{person.email}</p>
-                </TableCell>
-              )}
-              {visibleColumns.subteam && (
-                <TableCell className="border border-slate-800/60 p-3">
+                 </TableCell>
+                )}
+                {visibleColumns.subteam && (
+                 <TableCell className="border border-slate-700/60 p-3">
                   <p className="text-sm font-medium text-white">{subteamLabel}</p>
-                </TableCell>
-              )}
-              {visibleColumns.role && (
-                <TableCell className="border border-slate-800/60 p-3">
+                 </TableCell>
+                )}
+                {visibleColumns.role && (
+                 <TableCell className="border border-slate-700/60 p-3">
                   <div className="flex flex-wrap gap-2">
                     <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${accessStyle.badge}`}>
                       {accessStyle.label}
@@ -1165,15 +1165,15 @@ function RosterTable({
                 </TableCell>
               )}
               {TEXT_COLUMN_CONFIGS.map(
-                ({ key, accessor }) =>
-                  visibleColumns[key as keyof ColumnVisibility] && (
-                    <TableCell key={`${person.uid ?? ""}-${key}`} className="border border-slate-800/60 p-3">
+                    ({ key, accessor }) =>
+                    visibleColumns[key as keyof ColumnVisibility] && (
+                     <TableCell key={`${person.uid ?? ""}-${key}`} className="border border-slate-700/60 p-3">
                       <p className="text-sm font-medium text-white">{accessor(person)}</p>
                     </TableCell>
                   )
               )}
-              {visibleColumns.status && (
-                <TableCell className="border border-slate-800/60 p-3">
+                {visibleColumns.status && (
+                 <TableCell className="border border-slate-700/60 p-3">
                   <div className="space-y-1">
                     <Badge className={`rounded-full px-3 py-1 text-[0.65rem] ${statusStyle.badge}`}>
                       {statusStyle.label}
@@ -1181,12 +1181,12 @@ function RosterTable({
                   </div>
                 </TableCell>
               )}
-              {visibleColumns.actions && (
-                <TableCell className="border border-slate-800/60 p-3 text-right">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60 disabled:opacity-50"
+                {visibleColumns.actions && (
+                 <TableCell className="border border-slate-700/60 p-3 text-right">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                     className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-sky-500/60 disabled:opacity-50"
                     onClick={() => onManage(person.uid ?? "")}
                     disabled={isLocked}>
                     Manage
@@ -1230,7 +1230,7 @@ function PaginationControls({
           variant="outline"
           size="sm"
           disabled={!canGoPrev}
-          className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+           className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
           onClick={onPrev}>
           Previous
         </Button>
@@ -1241,7 +1241,7 @@ function PaginationControls({
           variant="outline"
           size="sm"
           disabled={!canGoNext}
-          className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+           className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
           onClick={onNext}>
           Next
         </Button>
@@ -1279,7 +1279,7 @@ function AccessDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-slate-800 bg-slate-950 text-slate-100">
+       <DialogContent className="border-slate-700 bg-slate-900 text-slate-100">
         {activePerson ? (
           <>
             <DialogHeader className="gap-3">
@@ -1290,7 +1290,7 @@ function AccessDialog({
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Role type</Label>
                 <Tabs value={modalRole} onValueChange={(value) => onRoleChange(value as Role)}>
-                  <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-900/60">
+                   <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-slate-800/60">
                     {Object.keys(roles).map((role) => (
                       <TabsTrigger
                         key={role}
@@ -1306,10 +1306,10 @@ function AccessDialog({
                 <div className="space-y-2">
                   <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Subteam</Label>
                   <Select value={modalSubteam} onValueChange={(value) => onSubteamChange(value as Subteam)}>
-                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                       <SelectValue placeholder="Select subteam" />
                     </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                       {Object.keys(teams).map((team) => (
                         <SelectItem key={team} value={team as Subteam}>
                           {teams[team as Subteam]}
@@ -1319,7 +1319,7 @@ function AccessDialog({
                   </Select>
                 </div>
               )}
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-4">
+               <div className="rounded-2xl border border-slate-700/70 bg-slate-900/40 p-4">
                 <p className="text-sm font-semibold text-white">Current status</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Badge

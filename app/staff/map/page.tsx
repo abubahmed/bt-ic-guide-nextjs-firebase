@@ -106,10 +106,10 @@ export default function StaffMapPage() {
   const hasStagedUpload = Boolean(stagedFile && stagedPreview && stagedMeta);
 
   return (
-    <main className="min-h-dvh bg-slate-950 text-slate-100">
+    <main className="min-h-dvh bg-slate-900 text-slate-100">
       <StaffHeader currentPage="map" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
@@ -121,7 +121,7 @@ export default function StaffMapPage() {
             </div>
           </div>
           <div className="mt-6 grid gap-6">
-            <div className="space-y-5 rounded-[28px] border border-slate-800/70 bg-slate-950/50 p-5">
+            <div className="space-y-5 rounded-[28px] border border-slate-700/70 bg-slate-900/50 p-5">
               <div className="space-y-3">
                 <label
                   htmlFor="map-file-upload"
@@ -142,7 +142,7 @@ export default function StaffMapPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <Button
                   variant="outline"
-                  className="rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60"
+                  className="rounded-2xl border-slate-700 bg-slate-900/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60"
                   onClick={handleDownload}
                   disabled={!liveMap}>
                   <DownloadCloud className="mr-2 h-4 w-4" />
@@ -174,7 +174,7 @@ export default function StaffMapPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="space-y-3">
               <div>
@@ -186,7 +186,7 @@ export default function StaffMapPage() {
             </div>
           </div>
           <div className="mt-6 grid gap-6 lg:grid-cols-[3fr_1fr]">
-            <div className="relative min-h-[420px] rounded-[32px] border border-slate-800/70 bg-slate-950/50">
+            <div className="relative min-h-[420px] rounded-[32px] border border-slate-700/70 bg-slate-900/50">
               {liveMap ? (
                 <Image
                   src={liveMap}
@@ -206,10 +206,10 @@ export default function StaffMapPage() {
                 </div>
               )}
             </div>
-            <div className="space-y-4 rounded-[28px] border border-slate-800/70 bg-slate-950/40 p-5">
+            <div className="space-y-4 rounded-[28px] border border-slate-700/70 bg-slate-900/40 p-5">
               <Button
                 variant="outline"
-                className="w-full rounded-2xl border-rose-500/60 bg-transparent text-sm font-semibold text-rose-100 hover:bg-rose-500/10 disabled:border-slate-700 disabled:text-slate-500"
+                 className="w-full rounded-2xl border-rose-500/60 bg-transparent text-sm font-semibold text-rose-100 hover:bg-rose-500/10 disabled:border-slate-600 disabled:text-slate-500"
                 onClick={handleDelete}
                 disabled={!liveMap}>
                 <Trash2 className="mr-2 h-4 w-4" />

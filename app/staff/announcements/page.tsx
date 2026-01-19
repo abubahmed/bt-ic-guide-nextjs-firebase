@@ -111,10 +111,10 @@ export default function StaffAnnouncementsPage() {
   };
 
   return (
-    <main className="min-h-dvh bg-slate-950 text-slate-100">
+    <main className="min-h-dvh bg-slate-900 text-slate-100">
       <StaffHeader currentPage="announcements" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
@@ -125,16 +125,16 @@ export default function StaffAnnouncementsPage() {
               </div>
             </div>
           </div>
-          <div className="mt-6 rounded-[28px] border border-slate-800/70 bg-slate-950/50 p-6">
+          <div className="mt-6 rounded-[28px] border border-slate-700/70 bg-slate-900/50 p-6">
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Channel</Label>
                   <Select value={formChannel} onValueChange={(value) => setFormChannel(value as ChannelId)}>
-                    <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                     <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                       <SelectValue placeholder="Choose channel" />
                     </SelectTrigger>
-                    <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                    <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                       {channels.map((channel) => (
                         <SelectItem key={channel.id} value={channel.id}>
                           {channel.label}
@@ -146,7 +146,7 @@ export default function StaffAnnouncementsPage() {
                 <div className="space-y-2">
                   <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Audience scope</Label>
                   <Tabs value={formScope} onValueChange={(value) => setFormScope(value as AudienceScope)}>
-                    <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-900/60">
+                    <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-slate-800/60">
                       <TabsTrigger
                         value="all"
                         className="rounded-xl text-xs uppercase tracking-[0.2em] text-white data-[state=active]:text-black">
@@ -164,10 +164,10 @@ export default function StaffAnnouncementsPage() {
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-[0.35em] text-slate-500">Team</Label>
                     <Select value={formTeam} onValueChange={(value) => setFormTeam(value as TeamId)}>
-                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100">
+                      <SelectTrigger className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100">
                         <SelectValue placeholder="Select team" />
                       </SelectTrigger>
-                      <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                      <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                         {teams.map((team) => (
                           <SelectItem key={team.id} value={team.id}>
                             {team.label}
@@ -185,7 +185,7 @@ export default function StaffAnnouncementsPage() {
                     value={formTitle}
                     onChange={(event) => setFormTitle(event.target.value)}
                     placeholder="e.g., Door rotations begin in 15"
-                    className="rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 placeholder:text-slate-500"
+                     className="rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 placeholder:text-slate-500"
                   />
                 </div>
                 <div className="space-y-2">
@@ -194,7 +194,7 @@ export default function StaffAnnouncementsPage() {
                     value={formMessage}
                     onChange={(event) => setFormMessage(event.target.value)}
                     placeholder="Share logistics, links, or next steps..."
-                    className="min-h-[120px] rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 placeholder:text-slate-500"
+                    className="min-h-[120px] rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 placeholder:text-slate-500"
                   />
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function StaffAnnouncementsPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Button
                 variant="outline"
-                className="flex-1 rounded-2xl border-slate-700 bg-slate-950/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
+                 className="flex-1 rounded-2xl border-slate-700 bg-slate-900/40 text-sm font-semibold text-slate-100 hover:border-sky-500/60">
                 Preview message
               </Button>
               <Button
@@ -215,7 +215,7 @@ export default function StaffAnnouncementsPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
@@ -226,13 +226,13 @@ export default function StaffAnnouncementsPage() {
               </div>
             </div>
           </div>
-          <div className="mt-6 rounded-[28px] border border-slate-800/80 bg-slate-950/50 p-4">
+          <div className="mt-6 rounded-[28px] border border-slate-700/80 bg-slate-900/50 p-4">
             <div className="flex flex-wrap items-center gap-3">
               <Select value={channelFilter} onValueChange={(value) => setChannelFilter(value as "all" | ChannelId)}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+                 <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
                   <SelectValue placeholder="Channel filter" />
                 </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                   <SelectItem value="all">All channels</SelectItem>
                   {channels.map((channel) => (
                     <SelectItem key={channel.id} value={channel.id}>
@@ -242,10 +242,10 @@ export default function StaffAnnouncementsPage() {
                 </SelectContent>
               </Select>
               <Select value={scopeFilter} onValueChange={(value) => setScopeFilter(value as ScopeFilter)}>
-                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-950/40 text-slate-100 sm:w-48">
+                <SelectTrigger className="w-full rounded-2xl border-slate-700 bg-slate-900/40 text-slate-100 sm:w-48">
                   <SelectValue placeholder="Scope filter" />
                 </SelectTrigger>
-                <SelectContent className="border-slate-800 bg-slate-950/90 text-slate-100">
+                <SelectContent className="border-slate-700 bg-slate-900/90 text-slate-100">
                   <SelectItem value="all">All scopes</SelectItem>
                   <SelectItem value="everyone">Everyone</SelectItem>
                   <SelectItem value="team">Team-targeted</SelectItem>
@@ -255,36 +255,36 @@ export default function StaffAnnouncementsPage() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search title, message, author"
-                className="w-full rounded-2xl border-slate-700 bg-slate-950/30 text-slate-100 placeholder:text-slate-500 sm:w-64"
+                 className="w-full rounded-2xl border-slate-700 bg-slate-900/30 text-slate-100 placeholder:text-slate-500 sm:w-64"
               />
             </div>
             <div className="mt-4">
               {pagedEntries.length > 0 ? (
                 <Table className="text-sm text-slate-200 border-collapse [&_td]:align-top">
                   <TableHeader>
-                    <TableRow className="bg-slate-900/70 text-xs uppercase tracking-[0.25em] text-slate-500">
-                      <TableHead className="min-w-[220px] border border-slate-800/60 bg-slate-950/60 text-slate-400">
+                     <TableRow className="bg-slate-800/70 text-xs uppercase tracking-[0.25em] text-slate-500">
+                      <TableHead className="min-w-[220px] border border-slate-700/60 bg-slate-900/60 text-slate-400">
                         Title · Message
                       </TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Channel</TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Audience</TableHead>
-                      <TableHead className="border border-slate-800/60 text-slate-400">Author</TableHead>
-                      <TableHead className="border border-slate-800/60 text-right text-slate-400">Actions</TableHead>
+                      <TableHead className="border border-slate-700/60 text-slate-400">Channel</TableHead>
+                      <TableHead className="border border-slate-700/60 text-slate-400">Audience</TableHead>
+                      <TableHead className="border border-slate-700/60 text-slate-400">Author</TableHead>
+                      <TableHead className="border border-slate-700/60 text-right text-slate-400">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {pagedEntries.map((entry) => (
-                      <TableRow key={entry.id} className="border border-slate-800/60">
-                        <TableCell className="border border-slate-800/60 bg-slate-950/40 p-3">
+                       <TableRow key={entry.id} className="border border-slate-700/60">
+                        <TableCell className="border border-slate-700/60 bg-slate-900/40 p-3">
                           <p className="font-semibold text-white">{entry.title}</p>
                           <p className="text-xs text-slate-500">{entry.message}</p>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-3">
-                          <Badge className="rounded-full border border-slate-700 bg-slate-950/60 text-[0.65rem] text-slate-200">
+                        <TableCell className="border border-slate-700/60 p-3">
+                          <Badge className="rounded-full border border-slate-700 bg-slate-900/60 text-[0.65rem] text-slate-200">
                             {channelLookup[entry.channel]}
                           </Badge>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-3">
+                        <TableCell className="border border-slate-700/60 p-3">
                           {entry.scope === "all" ? (
                             <p className="text-sm font-medium text-white">Everyone</p>
                           ) : (
@@ -293,15 +293,15 @@ export default function StaffAnnouncementsPage() {
                             </>
                           )}
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-3">
+                        <TableCell className="border border-slate-700/60 p-3">
                           <p className="text-sm font-medium text-white">{entry.author}</p>
                           <p className="text-xs text-slate-400">{entry.timestamp}</p>
                         </TableCell>
-                        <TableCell className="border border-slate-800/60 p-3 text-right">
+                        <TableCell className="border border-slate-700/60 p-3 text-right">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-rose-500/60"
+                            className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 hover:border-rose-500/60"
                             onClick={() => handleDelete(entry.id)}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -312,7 +312,7 @@ export default function StaffAnnouncementsPage() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
+                 <div className="rounded-2xl border border-slate-700/70 bg-slate-900/40 p-6 text-center text-sm text-slate-400">
                   No announcements match the current filters.
                 </div>
               )}
@@ -328,7 +328,7 @@ export default function StaffAnnouncementsPage() {
                   variant="outline"
                   size="sm"
                   disabled={gridPage === 0}
-                  className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                   className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
                   onClick={() => setGridPage((prev) => Math.max(0, prev - 1))}>
                   Previous
                 </Button>
@@ -340,7 +340,7 @@ export default function StaffAnnouncementsPage() {
                   variant="outline"
                   size="sm"
                   disabled={gridPage >= pageCount - 1 || filteredEntries.length === 0}
-                  className="rounded-xl border-slate-700 bg-slate-950/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
+                   className="rounded-xl border-slate-700 bg-slate-900/50 text-[0.65rem] uppercase tracking-[0.3em] text-slate-100 disabled:opacity-30"
                   onClick={() => setGridPage((prev) => Math.min(pageCount - 1, prev + 1))}>
                   Next
                 </Button>
