@@ -385,7 +385,7 @@ function UploadPanel({
   const isUploadLoading = loadingState.upload;
 
   return (
-    <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+    <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.3)] lg:p-8">
       <div className="space-y-3">
         <div>
           <h1 className="text-3xl font-semibold text-white">Upload people data</h1>
@@ -714,7 +714,7 @@ function RosterViewer({
 
   return (
     <>
-      <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+      <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.3)] lg:p-8">
         <div className="space-y-3">
           <div>
             <h2 className="text-3xl font-semibold text-white">People viewer</h2>
@@ -849,7 +849,7 @@ function ExportPanel({
   const isExportLoading = loadingState.export;
 
   return (
-    <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+    <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.3)] lg:p-8">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="mt-2 text-2xl font-semibold text-white">Export people data</h2>

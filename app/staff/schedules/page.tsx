@@ -125,7 +125,7 @@ export default function StaffSchedulesPage() {
     <main className="min-h-dvh bg-slate-900 text-slate-100">
       <StaffHeader currentPage="schedules" />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 lg:px-0">
-        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.3)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>
@@ -220,7 +220,7 @@ export default function StaffSchedulesPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8">
+        <section className="rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.3)] lg:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
               <div>

@@ -27,7 +27,7 @@ export function StaffSectionSkeleton({
   return (
     <section
       className={cn(
-        "rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.45)] lg:p-8",
+        "rounded-[32px] border border-slate-700 bg-slate-800/70 p-6 shadow-[0px_30px_80px_rgba(2,6,23,0.3)] lg:p-8",
         "animate-pulse",
         className
       )}>
