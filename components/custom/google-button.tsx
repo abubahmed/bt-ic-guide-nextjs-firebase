@@ -18,7 +18,7 @@ export default function GoogleButton({
     <Button
       type="button"
       variant="outline"
-      className="h-11 w-full rounded-xl border border-sky-100 text-sm font-semibold text-black hover:bg-sky-50"
+      className="h-11 w-full rounded-xl border border-sky-100 text-sm font-semibold text-sky-500 hover:text-sky-400 hover:bg-sky-50"
       onClick={async (e) => {
         e.preventDefault();
         setLoading(true);

@@ -25,7 +25,7 @@ export default function StaffSignUpPage() {
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
         <div className="relative w-full max-w-3xl">
           <div className="absolute inset-0 -translate-x-6 translate-y-6 rounded-[40px] bg-slate-800/80 blur-3xl" />
-          <div className="relative grid gap-8 rounded-[32px] border border-slate-700/80 bg-slate-800/95 p-6 text-slate-100 shadow-[0_25px_90px_rgba(2,6,23,0.8)] backdrop-blur-xl sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="relative grid gap-8 rounded-[32px] border border-slate-700/80 bg-slate-800/95 p-6 text-slate-100 shadow-[0px_30px_80px_rgba(2,6,23,0.3)] backdrop-blur-xl sm:p-10 lg:grid-cols-[1.1fr_0.9fr]">
             <section className="space-y-6">
               <header className="space-y-3">
                 <Badge className="rounded-full bg-slate-700 text-[0.6rem] uppercase tracking-[0.4em] text-sky-300">
@@ -34,8 +34,7 @@ export default function StaffSignUpPage() {
                 <div className="space-y-2">
                   <h1 className="text-3xl font-semibold text-white">Join the staff portal</h1>
                   <p className="text-sm text-slate-300">
-                    Register with your staff email to unlock admin scheduling tools, comms dashboards, and live
-                    programming updates.
+                    Register with your staff email to access the staff portal.
                   </p>
                 </div>
               </header>
@@ -113,24 +112,24 @@ export default function StaffSignUpPage() {
             <aside className="space-y-5 rounded-[24px] border border-slate-700 bg-slate-800/70 p-6 text-sm text-slate-100">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Need help?</p>
               <div className="space-y-3">
-                <div className="rounded-2xl border border-slate-700 bg-slate-800/80 px-4 py-3">
-                  <p className="font-semibold text-white">Attendee portal</p>
-                  <p>
-                    Registering as a participant instead? Switch over to the{" "}
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/80 px-4 py-3 space-y-1">
+                  <p className="font-semibold text-white">Attendee portal?</p>
+                  <p className="text-slate-300">
+                    Looking for the attendee portal? Hop over to the{" "}
                     <Link href="/auth/login" className="font-semibold text-sky-300 hover:text-white">
                       attendee login
                     </Link>{" "}
-                    experience.
+                    instead.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-700 bg-slate-800/80 px-4 py-3">
-                  <p className="font-semibold text-white">Already approved</p>
-                  <p>
-                    When your account is confirmed, continue straight to{" "}
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/80 px-4 py-3 space-y-1">
+                  <p className="font-semibold text-white">Staff login?</p>
+                  <p className="text-slate-300">
+                    Looking for the staff login? Hop over to the{" "}
                     <Link href="/staff/auth/login" className="font-semibold text-sky-300 hover:text-white">
                       staff login
                     </Link>{" "}
-                    and pick up where you left off.
+                    instead.
                   </p>
                 </div>
               </div>
